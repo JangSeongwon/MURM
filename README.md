@@ -15,7 +15,7 @@ Make settings for mujoco and pytorch
 23
 conda env create -f setup/conda.yml
 24
-conda activate lookcloser
+conda activate murm
 25
 ```
 
