@@ -2,7 +2,7 @@
 
 -------------
 
-During Rl run,
+During Training RL,
 nvidia-smi -q (Check GPU temperature)
 
 ------
