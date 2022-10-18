@@ -12,7 +12,7 @@ nvidia-smi -q (Check GPU temperature)
 Used simulator : mujoco  
 Make settings for mujoco and pytorch
 ```
-conda env create -f setup/conda.yml
+conda env create -f setup/murm.yml
 conda activate murm
 ```
 
