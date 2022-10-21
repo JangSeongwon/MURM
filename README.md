@@ -1,19 +1,27 @@
 # MURM
 
--------------
+--------------------------
 
 During Training RL,
 nvidia-smi -q (Check GPU temperature)
 
-------
+--------------------------
 
 ## Installation
 
-Used simulator : mujoco  
-Make settings for mujoco and pytorch
+Used simulator : PyBullet, PyRep, CoppeliaSim
+Pytorch
+StableBaseline3
+
 ```
-conda env create -f setup/murm.yaml
+python = 3.8 version
+conda env create -f setup/murm.yml
 conda activate murm
+
 ```
+
+--------------------------
+
+Panda Robot with RGB-D Camera 
 
 
