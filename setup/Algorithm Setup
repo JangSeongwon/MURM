@@ -1,0 +1,6 @@
+
+1. Make new conda env: 
+conda create -n (env name) python=3.8
+
+
+
