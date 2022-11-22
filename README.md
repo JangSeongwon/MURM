@@ -9,7 +9,7 @@ nvidia-smi -q (Check GPU temperature)
 
 ## Installation
 
-Used : PyBullet, PyRep, CoppeliaSim, Pytorch, StableBaseline3
+Used : PyBullet, PyRep, CoppeliaSim, Pytorch
 
 ```
 python = 3.8 version
@@ -20,6 +20,6 @@ conda activate murm
 
 --------------------------
 
-Panda Robot with RGB-D Camera 
+Sawyer Robot env settings(Berkeley) with RGB-D Camera 
 
 
