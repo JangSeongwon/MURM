@@ -22,13 +22,3 @@ in the root directory of this repo. ( From : https://github.com/avisingh599/robo
 python scripts/collect_data.py --gui True
 
 
-
-
-
-
-
-
-
-
-
-
