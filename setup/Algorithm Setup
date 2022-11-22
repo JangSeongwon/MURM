@@ -1,6 +1,13 @@
 
-1. Make new conda env: 
-conda create -n (env name) python=3.8
-
-
-
+1. Needed Modules List
+  -  pip install joblib 
+  -  pip install python-dateutil
+  -  pip install gtimer
+  -  pip install boto3
+  -  
+  -  
+  
+  
+  
+  
+  
