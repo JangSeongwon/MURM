@@ -11,10 +11,13 @@ libsmpeg-dev python-numpy subversion libportmidi-dev ffmpeg libswscale-dev libav
 2. Download codes from github and: 
 pip install -r requirements.txt
 
+3. Install roboverse package:
+When using this repository with other projects, run 
+'  pip install -e .  '
+in the root directory of this repo. ( From : https://github.com/avisingh599/roboverse )
 
-
-
-
+4. Quick Start: 
+python scripts/collect_data.py --gui True
 
 
 
