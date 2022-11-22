@@ -22,4 +22,4 @@ conda activate murm1
 
 Sawyer Robot env settings(Berkeley)
 
-<img src="/Downloads/Pictures/PybulletBerkeley env2.gif" alt="Alt text" title="Optional title">
+<img src="/Home/Downloads/Pictures/Pybullet Berkeley env2.gif" alt="Alt text" title="Optional title">
