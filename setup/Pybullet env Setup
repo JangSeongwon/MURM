@@ -4,6 +4,9 @@ PyBullet Environment setup
 From:
 https://github.com/anair13/bullet-manipulation-affordances
 
+Make new conda env: 
+conda create -n murm1 python=3.8
+
 ----------------------------------------------------------------------------------------------------------------------------------
 
 1. Install followings: 
