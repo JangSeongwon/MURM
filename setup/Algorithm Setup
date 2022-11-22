@@ -1,13 +1,16 @@
 
+
+
+--------------------------------------------------------------------------------------------------------------
+
 1. Needed Modules List
   -  pip install joblib 
   -  pip install python-dateutil
   -  pip install gtimer
   -  pip install boto3
-  -  
-  -  
+  -  pip3 install -U 'mujoco-py<2.2,>=2.1'  
+  - 
   
   
-  
-  
+2.  
   
