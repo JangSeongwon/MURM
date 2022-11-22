@@ -11,8 +11,7 @@ libsmpeg-dev python-numpy subversion libportmidi-dev ffmpeg libswscale-dev libav
 2. Download codes from github and: 
 pip install -r requirements.txt
 
-3. Make new conda env: 
-conda create -n (env name) python=3.8
+
 
 
 
