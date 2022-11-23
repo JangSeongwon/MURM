@@ -1,12 +1,25 @@
 
+---------------------------------------------------------------------------------------------------------
+For Single-view task
+
+1. Path
+Dataset path:
+  /home/jang/data/data_collection/dataset/
+Goal collection path:
+  /home/jang/data/data_collection/presampled_goals/
+
+2. 
+
+
+
+
+
+
 
 
 
 ---------------------------------------------------------------------------------------------------------
-
-
-
-
+For Multi-view task
 
 
 
@@ -23,5 +36,6 @@
 + Path Settings:
   /home/jang/~
               data/~
-
++ Needed modules
+  - pip install tqdm              
 
