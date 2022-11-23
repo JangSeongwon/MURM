@@ -1,5 +1,4 @@
-
-
+Offline RL Process 
 
 --------------------------------------------------------------------------------------------------------------
 
@@ -9,8 +8,19 @@
   -  pip install gtimer
   -  pip install boto3
   -  pip3 install -U 'mujoco-py<2.2,>=2.1'  
-  - 
+  -  pip install scikit-video (import skvideo)
   
-  
-2.  
-  
+---------------------------------------------------------------------------------------------------------------
+
+2. Download multiworld from: 
+   https://github.com/vitchyr/multiworld
+   - Need some directory changes
+   
+---------------------------------------------------------------------------------------------------------------
+
+3. May use bullet-objects from:
+   https://github.com/avisingh599/roboverse/tree/master/roboverse/assets/bullet-objects
+
+
+
+
