@@ -4,3 +4,18 @@ No module named 'pyrep.backend._sim_cffi'
 Directory Problem. Move directory from PyRep at Top Directory
 
 -----------------------------------------------------------------------------
+wandb downgrade error:
+'TypeError: Descriptors cannot not be created directly.' (_pb2.py file)
+
+pip install protobuf==3.20.*
+
+
+-----------------------------------------------------------------------------
+
+
+
+-----------------------------------------------------------------------------
+
+
+
+
