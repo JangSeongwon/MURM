@@ -1,4 +1,7 @@
 
+* May use ShapeNet data: https://shapenet.org/ 
+
+
 ---------------------------------------------------------------------------------------------------------
 For Single-view task
 
@@ -8,28 +11,14 @@ Dataset path:
 Goal collection path:
   /home/jang/data/data_collection/presampled_goals/
 
-2. 
-
-
-
-
-
-
-
+2. Environment Class: singleen-v0
 
 
 ---------------------------------------------------------------------------------------------------------
 For Multi-view task
+1. Environment Class: multienv-v0
 
-
-
-
-
-
-
-
-
-
+2.
 
 
 ---------------------------------------------------------------------------------------------------------
