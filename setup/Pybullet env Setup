@@ -24,3 +24,10 @@ in the root directory of this repo. ( From : https://github.com/avisingh599/robo
 4. Quick Start: 
 python scripts/collect_data.py --gui True
 
+
+----------------------------------------------------------------------------------------------------------------------------------
+5. dmc2gym module: ??
+pip install git+git://github.com/denisyarats/dmc2gym.git
+
+
+
