@@ -22,4 +22,18 @@ conda activate murm1
 
 Sawyer Robot env settings(Berkeley)
 
-<img src="/home/Downloads/Pictures/PybulletBerkeleyenv2.gif">
+Env1: Single-view task with detail needed to solve
+    
+
+
+Env2: Multi-view task (100%)
+
+
+
+--------------------------
+
+
+
+
+
+
