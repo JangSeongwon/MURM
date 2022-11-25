@@ -3,28 +3,34 @@
 
 
 ---------------------------------------------------------------------------------------------------------
-For Single-view task
+Data Demo collection
 
-1. Path
-Dataset path:
-  /home/jang/data/data_collection/dataset/
-Goal collection path:
-  /home/jang/data/data_collection/presampled_goals/
-
-2. Environment Class: singleen-v0
+1. Path Settings:
+  Dataset Colleting:
+    /home/jang/data/test/
+  Goal data Collecting:
+    /home/jang/data/test/goals
+    
+2. Collecting Dataset 
+    Data1: observations, next observation, action, rewards
+           Type: .pkl and .npy
+    
+    Data2: obs, obj, env
+           Type: .pkl
 
 
 ---------------------------------------------------------------------------------------------------------
-For Multi-view task
-1. Environment Class: multienv-v0
 
-2.
 
 
 ---------------------------------------------------------------------------------------------------------
 + Path Settings:
-  /home/jang/~
-              data/~
+  /home/jang/data/~
+  
+  For testing:            
+  /home/jang/data/test/            
+              
+              
 + Needed modules
   - pip install tqdm              
 
