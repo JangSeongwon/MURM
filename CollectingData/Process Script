@@ -1,6 +1,6 @@
 
 * May use ShapeNet data: https://shapenet.org/ 
-
+* Needed modules - pip install tqdm      
 
 ---------------------------------------------------------------------------------------------------------
 Data Demo collection
@@ -31,6 +31,5 @@ Data Demo collection
   /home/jang/data/test/            
               
               
-+ Needed modules
-  - pip install tqdm              
+        
 
