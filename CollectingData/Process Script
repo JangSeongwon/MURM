@@ -14,8 +14,8 @@ Data Demo collection
 2. Collecting Dataset 
     Data collector: 1. 'observations', 'next_observations', 'actions', 'rewards', 'terminals', 'agent_infos', 'env_infos', 'object_name'
                     2. 'observations', 'object', 'env'
-           Type: 1. .pkl 
-                 2. .npy
+           Type: 1. jang_collection.pkl 
+                 2. jang_images.npy
     
     Goals: 'initial_latent_state', 'latent_desired_goal', 'state_desired_goal', 'image_desired_goal', 'initial_image_observation'
            Type: .pkl
