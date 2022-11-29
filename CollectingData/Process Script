@@ -7,9 +7,9 @@ Data Demo collection
 
 1. Path Settings:
   Dataset Colleting:
-    /home/jang/data/test/
+    /home/jang/data/data_collection/dataset
   Goal data Collecting:
-    /home/jang/data/test/goals
+    /home/jang/data/data_collection/presampled_goals
     
 2. Collecting Dataset 
     Data collector: 1. 'observations', 'next_observations', 'actions', 'rewards', 'terminals', 'agent_infos', 'env_infos', 'object_name'
@@ -19,7 +19,6 @@ Data Demo collection
     
     Goals: 'initial_latent_state', 'latent_desired_goal', 'state_desired_goal', 'image_desired_goal', 'initial_image_observation'
            Type: .pkl
-
 
 ---------------------------------------------------------------------------------------------------------
 
