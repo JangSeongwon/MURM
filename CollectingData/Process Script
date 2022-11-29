@@ -30,6 +30,6 @@ Data Demo collection
   For testing:            
   /home/jang/data/test/            
               
-              
++ import pickle as pkl: pickle type = 'wb' and 'rb'              
         
 
