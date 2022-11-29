@@ -9,7 +9,7 @@ nvidia-smi -q (Check GPU temperature)
 
 ## Installation
 
-Used : PyBullet, PyRep, CoppeliaSim, Pytorch
+Used : PyBullet, CoppeliaSim, Pytorch
 
 ```
 python = 3.8 version
