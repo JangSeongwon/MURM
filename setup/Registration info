@@ -1,6 +1,6 @@
 
-1. Env ID: MURMENV-v0
-   Env entry point: 'roboverse.envs.murm_env'
+1.   'id': 'MURMENV-v0',
+     'entry_point': ('roboverse.envs.murm_env:MURMENV'),
 
 -------------------------------------------------------------------------------------------------------------------
 
