@@ -1,9 +1,10 @@
-For Running
+Before Training
+
 Need  1. data_collection.pkl
       2. image trained.npy
       3. image for test.npy
       4. sampled goals.pkl
-      5. VAE.pt
+      5. VAE.pt (Optional)
 
 -------------------------------------------------------------------------------------------------------------
 VAEs and Goals Training
