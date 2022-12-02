@@ -5,36 +5,36 @@ Assuming usage of D435 (fov: 69)
 ######################################## "RENDERDING" ########################################
 ##############################################################################################
 
-    def render_obs(self):
-        img, depth, segmentation = bullet.render(
-            self.obs_img_dim, self.obs_img_dim, self._view_matrix_obs,
-            self._projection_matrix_obs, shadow=0, gaussian_width=5)
-        if self._transpose_image:
-            img = np.transpose(img, (2, 0, 1))
-        return img
+def render_obs(self):
+    img, depth, segmentation = bullet.render(
+        self.obs_img_dim, self.obs_img_dim, self._view_matrix_obs,
+        self._projection_matrix_obs, shadow=0, gaussian_width=5)
+    if self._transpose_image:
+        img = np.transpose(img, (2, 0, 1))
+    return img
 
-    def render_obs_active(self):
-        eef_pos_for_active_camera = self.get_end_effector_pos()
-        eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.15),float(eef_pos_for_active_camera[1]),float(eef_pos_for_active_camera[2])]
-        eef_theta_for_active_camera = self.get_end_effector_theta()
-        #print(eef_pos_for_active_camera)
-        #print('Total',eef_theta_for_active_camera)
-        # print('x',eef_theta_for_active_camera[0])
-        # print('y',eef_theta_for_active_camera[1])
-        # print('z',eef_theta_for_active_camera[2])
+def render_obs_active(self):
+    eef_pos_for_active_camera = self.get_end_effector_pos()
+    eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.15),float(eef_pos_for_active_camera[1]),float(eef_pos_for_active_camera[2])]
+    eef_theta_for_active_camera = self.get_end_effector_theta()
+    #print(eef_pos_for_active_camera)
+    #print('Total',eef_theta_for_active_camera)
+    # print('x',eef_theta_for_active_camera[0])
+    # print('y',eef_theta_for_active_camera[1])
+    # print('z',eef_theta_for_active_camera[2])
 
-        view_matrix_obs_active = bullet.get_view_matrix(
-            target_pos=eef_pos_for_active_camera, distance=0.35,
-            yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
-        projection_matrix_obs_active = bullet.get_projection_matrix(
-            self.obs_img_dim_active, self.obs_img_dim_active)
+    view_matrix_obs_active = bullet.get_view_matrix(
+        target_pos=eef_pos_for_active_camera, distance=0.35,
+        yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
+    projection_matrix_obs_active = bullet.get_projection_matrix(
+        self.obs_img_dim_active, self.obs_img_dim_active)
 
-        img_active, depth, segmentation = bullet.render(
-            self.obs_img_dim_active, self.obs_img_dim_active, view_matrix_obs_active,
-            projection_matrix_obs_active, shadow=0, gaussian_width=0)
-        if self._transpose_image:
-            img_active = np.transpose(img_active, (2, 0, 1))
-        return img_active
+    img_active, depth, segmentation = bullet.render(
+        self.obs_img_dim_active, self.obs_img_dim_active, view_matrix_obs_active,
+        projection_matrix_obs_active, shadow=0, gaussian_width=0)
+    if self._transpose_image:
+        img_active = np.transpose(img_active, (2, 0, 1))
+    return img_active
 
 
 ######################################## "RENDERDING" ########################################
