@@ -1,3 +1,6 @@
+Assuming usage of D435 (fov: 69)
+
+---------------------------------------------------------------------------------------------------------------------------------------
 def render_obs_active(self):
     eef_pos_for_active_camera = self.get_end_effector_pos()
     eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.15),float(eef_pos_for_active_camera[1]),float(eef_pos_for_active_camera[2])]
@@ -20,3 +23,5 @@ def render_obs_active(self):
     if self._transpose_image:
         img_active = np.transpose(img_active, (2, 0, 1))
     return img_active
+
+
