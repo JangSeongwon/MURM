@@ -9,7 +9,7 @@ nvidia-smi -q (Check GPU temperature)
 
 ## Installation
 
-Used : PyBullet, CoppeliaSim, Pytorch
+Used : PyBullet, Pytorch
 
 ```
 python = 3.8 version
@@ -20,7 +20,7 @@ conda activate murm1
 
 --------------------------
 
-Sawyer Robot env settings(Berkeley)
+Panda Robot env settings
 
 Env1: Single-view task with detail needed to solve
     
