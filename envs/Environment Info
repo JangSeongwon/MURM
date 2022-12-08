@@ -2,24 +2,17 @@ With cube:
 
 Coordinate Z on Table: 1.024
 
-Coordinate Z of shelf floor 1: 1.09
-Coordinate Z of shelf floor 2: 1.28
-Coordinate Z of shelf floor 3: 1.49
+Coordinate Z on box 1: 1.4
 
 ------------------------------------------------------------------------------------------------------------------------------
 
-Coordinate X of left shelf: 0 (+-0.2)
-Coordinate y of left shelf: -0.8
-
-------------------------------------------------------------------------------------------------------------------------------
-
-Coordinate X of right shelf: 0 (+-0.2)
-Coordinate y of right shelf: 0.8
+Coordinate X of box center: 0 (+-0.25)
+Coordinate y of box center: -0.8
 
 ------------------------------------------------------------------------------------------------------------------------------
 
 Coordinate X of center shelf: 0.8
-Coordinate y of center shelf: 0 (+-0.2)
+Coordinate y of center shelf: 0 (+-0.25)
 
 ------------------------------------------------------------------------------------------------------------------------------
 
