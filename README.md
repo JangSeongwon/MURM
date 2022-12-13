@@ -36,9 +36,10 @@ Env2: Multi-view task (100%)
 Diversity of objects in task since Offline RL  
   
 For online RL, only adding Exploration  part as a theme  
+  
+Replay Buffer (CCVAE참조로 z bar)  
 
-
-
+결국 action diversity 문제는 dataset 크기 문제로 보임  
 
 --------------------------
 
