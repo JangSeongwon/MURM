@@ -29,16 +29,13 @@ Panda Robot env settings
 --------------------------
 Env1: Single-view task with detail needed to solve
     
-
-
 Env2: Multi-view task (100%)
-
-
 
 --------------------------
 
-
-
+Diversity of objects in task since Offline RL  
+  
+For online RL, only adding Exploration  part as a theme  
 
 
 
