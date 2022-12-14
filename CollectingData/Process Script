@@ -12,8 +12,8 @@ Data Demo collection
     /home/jang/data/data_collection/presampled_goals
     
 2. Collecting Dataset 
-    Data collector: 1. 'observations', 'next_observations', 'actions', 'rewards', 'terminals', 'agent_infos', 'env_infos', 'object_name'
-                    2. 'observations', 'object', 'env'
+    Data collector: 1.Demo Trajectories: 'observations', 'next_observations', 'actions', 'rewards', 'terminals', 'agent_infos', 'env_infos', 'object_name'
+                    2.Images for training: 'observations', 'object', 'env'
            Type: 1. jang_collection.pkl 
                  2. jang_images.npy
     
@@ -22,11 +22,9 @@ Data Demo collection
 
 ---------------------------------------------------------------------------------------------------------
 
-Use demo_action:
-  1. Reach and grab an cube(random color)
-  2. Place the cube in shelf(1,2,3)
-  3. step out and observe?
-
+Plan demo_action:
+  1. Reach and grab an cube and random objects (random color)
+  2. Place the cube in box
 
 ---------------------------------------------------------------------------------------------------------
 + Path Settings:
