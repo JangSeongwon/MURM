@@ -282,21 +282,6 @@ class PandaBaseEnv(gym.Env, Serializable):
                 )
                 raise RuntimeError(message)
 
-    # def get_constructor(self):
-    #     return lambda: self.__class__(*self.args_, **self.kwargs_)
-
-    # def _set_spaces(self):
-    #     act_dim = 4
-    #     act_bound = 1
-    #     act_high = np.ones(act_dim) * act_bound
-    #     self.action_space = gym.spaces.Box(-act_high, act_high)
-    #
-    #     obs = self.reset()
-    #     observation_dim = len(obs)
-    #     obs_bound = 100
-    #     obs_high = np.ones(observation_dim) * obs_bound
-    #     self.observation_space = gym.spaces.Box(-obs_high, obs_high)
-
     def reset(self):
 
         bullet.reset()
@@ -311,15 +296,6 @@ class PandaBaseEnv(gym.Env, Serializable):
         for _ in range(3):
             self.step([0.,0.,0.,-1])
         return self.get_observation()
-
-    # def set_reset_hook(self, fn=lambda env: None):
-    #     self._reset_hook = fn
-
-    def open_gripper(self, act_repeat=10):
-        delta_pos = [0,0,0]
-        gripper = 0
-        for _ in range(act_repeat):
-            self.step(delta_pos, gripper)
 
     def get_body(self, name):
         if name == 'panda':
@@ -347,7 +323,6 @@ class PandaBaseEnv(gym.Env, Serializable):
         self._end_effector = bullet.get_index_by_attribute(
             self._panda, 'link_name', 'gripper_site')
 
-
     def _format_state_query(self):
         ## position and orientation of body root
         bodies = [v for k,v in self._objects.items() if not bullet.has_fixed_root(v)]
@@ -357,33 +332,9 @@ class PandaBaseEnv(gym.Env, Serializable):
         joints = [(self._panda, None)]
         self._state_query = bullet.format_sim_query(bodies, links, joints)
 
-    def _format_action(self, *action):
-        if len(action) == 1:
-            delta_pos, gripper = action[0][:-1], action[0][-1]
-        elif len(action) == 2:
-            delta_pos, gripper = action[0], action[1]
-        else:
-            raise RuntimeError('Unrecognized action: {}'.format(action))
-        return np.array(delta_pos), gripper
-
     def get_observation(self):
         observation = bullet.get_sim_state(*self._state_query)
         return observation
-
-    def step(self, *action):
-        delta_pos, gripper = self._format_action(*action)
-        pos = bullet.get_link_state(self._panda, self._end_effector, 'pos')
-        pos += delta_pos * self._action_scale
-        pos = np.clip(pos, self._pos_low, self._pos_high)
-
-        self._simulate(pos, self.theta, gripper)
-        if self._visualize: self.visualize_targets(pos)
-
-        observation = self.get_observation()
-        reward = self.get_reward(observation)
-        done = self.get_termination(observation)
-        self._prev_pos = bullet.get_link_state(self._panda, self._end_effector, 'pos')
-        return observation, reward, done, {}
 
     def _simulate(self, pos, theta, gripper):
         for _ in range(self._action_repeat):
@@ -418,10 +369,6 @@ class PandaBaseEnv(gym.Env, Serializable):
         obs = self.get_observation()
         return obs
 
-    '''
-        prevents always needing a gym adapter in softlearning
-        @TODO : remove need for this method
-    '''
     def convert_to_active_observation(self, obs):
         return obs
 
