@@ -46,7 +46,7 @@ Replay Buffer (CCVAE참조로 z bar)
 12/14 Analysis  
 1. Pretrain VAE or not  
     -> in awac_rig.py
-
+    VAE Training: from rlkit.torch.grill.common import train_vae
 
 --------------------------
 
