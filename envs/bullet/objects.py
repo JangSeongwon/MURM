@@ -1,6 +1,7 @@
 import os
 import pybullet_data as pdata
 
+
 from roboverse.bullet.misc import (
   load_urdf,
   load_urdf_randomize_color,
@@ -55,27 +56,64 @@ marble_floor = loader_fixed(ASSET_PATH_ORI, 'floor/plane.urdf',
                scale=1)
 
 table = loader_fixed(ASSET_PATH, 'table/table.urdf',
-               pos=[0.2, 0, -0.57],
+               pos=[-0.2, 0, -0.57],
                quat=[0, 0, 0.707107, 0.707107],
                scale=2.5)
 
-shelf1 = loader_fixed(ASSET_PATH, 'shelf/shelf1/shelf.urdf',
-               pos=[0, -0.85, 0.98],
-               quat=[0, 1, 1, 0],
-               scale=0.35)
+#Shelf
+# shelf1 = loader_fixed(ASSET_PATH, 'shelf/shelf1/shelf.urdf',
+#                pos=[0, -1.1, 1.2],
+#                quat=[1, 1, 1, 1], #center 1001
+#                scale=0.13)
+#
+# shelf2 = loader_fixed(ASSET_PATH, 'shelf/shelf2/shelf.urdf',
+#                pos=[-1.1, 0, 1.2],
+#                quat=[1, 0, 0, 1],
+#                scale=0.13)
 
-shelf2 = loader_fixed(ASSET_PATH, 'shelf/shelf2/shelf.urdf',
-               pos=[0, 0.85, 0.98],
-               quat=[1, 0, 0, 1],
-               scale=0.35)
+# shelf3 = loader_fixed(ASSET_PATH, 'shelf/shelf3/shelf.urdf',
+#                pos=[-1.1, 0, 0.98],
+#                quat=[1, 1, 1, 1],
+#                scale=0.55)
 
-shelf3 = loader_fixed(ASSET_PATH, 'shelf/shelf3/shelf.urdf',
-               pos=[-0.85, 0, 0.98],
+# BOX Center
+# box = loader_fixed(ASSET_PATH, 'box/box.urdf',
+#                pos=[-0.9, 0, 1.1],
+#                quat=[1, 0, 0, 1],
+#                scale=0.4)
+#
+# box1 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+#                pos=[-0.75, 0, 1.37],
+#                scale=0.25)
+# box2 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+#                pos=[-0.75, 0.25, 1.37],
+#                scale=0.25)
+# box3 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+#                pos=[-0.75, -0.25, 1.37],
+#                scale=0.25)
+
+#BOX LEFT
+box = loader_fixed(ASSET_PATH, 'box/box.urdf',
+               pos=[0, -0.9, 1.1],
                quat=[1, 1, 1, 1],
-               scale=0.35)
+               scale=0.4)
 
-cube = loader_randomize_color(ASSET_PATH, os.path.join("cube", "cube.urdf"),
-              pos=[.75, -.4, 1.0],
+box1 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+               pos=[0, -0.75, 1.37],
+               scale=0.25)
+box2 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+               pos=[0.25, -0.75, 1.37],
+               scale=0.25)
+box3 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+               pos=[-0.25, -0.75, 1.37],
+               scale=0.25)
+
+cube = loader(ASSET_PATH, os.path.join("cube", "cube.urdf"),
+              #On a table
+              pos=[ 0.45, 0, 1.038 ],
+              # Goal example on box center
+              #pos=[-0.75, 0, 1.4],
+              #
               quat=[0, 0, 0, 1],
-              scale=0.05) #0.05
+              scale=0.065) #0.05
 
