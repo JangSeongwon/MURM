@@ -34,8 +34,9 @@ Env2: Multi-view task
       - Similar to Env1 but global-view is hindered with an obstacle close to boxes of goals
 
 --------------------------
+Key Points Considered  
 
-Diversity of objects in task since Offline RL  
+Diversity in shpes and colors of objects  
   
 For online RL, only adding Exploration  part as a theme  
   
