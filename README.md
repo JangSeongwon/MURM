@@ -27,9 +27,11 @@ Panda Robot env settings
 -RL: Give action with POS  
 
 --------------------------
-Env1: Single-view task with detail needed to solve
+Env1: Single-view task with details needed to solved
+      - 9 Boxes as goals 
     
-Env2: Multi-view task (100%)
+Env2: Multi-view task 
+      - Similar to Env1 but global-view is hindered with an obstacle close to boxes of goals
 
 --------------------------
 
