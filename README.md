@@ -34,7 +34,7 @@ Env2: Multi-view task
       - Similar to Env1 but global-view is hindered with an obstacle close to boxes of goals
 
 --------------------------
-Key Points Considered  
+# Key Points Considered  
 
 Diversity in shpes and colors of objects  
   
