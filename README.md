@@ -22,10 +22,12 @@ conda activate murm1
 # Environment Settings
 
 Panda Robot env settings  
+  
 -Control with end-effector's XYZ coordinate  
 -Gripper Control with Distance and Robot finger's Contact  
 -RL: Give action with POS  
 
+  
 Env1: Single-view task with details needed to solved
       - 9 Boxes as goals 
     
