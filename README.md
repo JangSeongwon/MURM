@@ -48,6 +48,8 @@ Action diversity => Gripper Turning possible?
 1. Pretrain VAE or not  
     -> in awac_rig.py
     VAE Training: from rlkit.torch.grill.common import train_vae
+2. Save in .pt (python file)
+
 
 --------------------------
 
