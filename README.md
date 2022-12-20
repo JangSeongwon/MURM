@@ -50,20 +50,23 @@ Env2: Multi-view task
 
 2. Online RL will add Exploration to finetune MURM thus increase final success rate result in paper   
   
-3. Replay Buffer (CCVAE참조로 use z bar as representation)  
+3. Replay Buffer (CCVAE참조: Use z bar as representation)  
 
 4. Action diversity => Gripper Turning possible?  
   
   
 -> 문제는 Demo dataset 크기 문제로 보임 -> Collection takes too long 
++Deal with this by changing task with less action space needed    
 
 --------------------------
 
-12/14 Analysis  
+12/20 Analysis  
 1. Pretrain VAE or not  
     -> in awac_rig.py
-    VAE Training: from rlkit.torch.grill.common import train_vae
-2. Model can be Saved in .pt (python file)
+    VAE Training: from rlkit.torch.grill.common import train_vae, Model can be Saved in .pt (python file)  
+  
+2. Can consider more updated model with HRL as Paper 2  
+
 
 
 --------------------------
