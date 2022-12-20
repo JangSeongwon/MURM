@@ -70,7 +70,20 @@ Env2: Multi-view task
     -> in awac_rig.py
     VAE Training: from rlkit.torch.grill.common import train_vae, Model can be Saved in .pt (python file)  
   
-2. Can consider more updated model with HRL as Paper 2  
+2.  
+
+
+
+--------------------------
+
+# Next Process for Paper 2  
+
+*More updated model with HRL  
+
+In Low-level policy: Active-view and Global-view can be considered more suitably and efficiently      
+-Finding and detection of the object 
+-Pick & Placing in Multi-view task
+
 
 
 
