@@ -38,7 +38,7 @@ Env2: Multi-view task
 # Key Points Considered  
 
 
-***Our prime goal is to compare prior methods(Only single views) with MURM in solving GCRL***
+***Our prime goal is to compare prior methods(Only single views) with MURM in solving GCRL***  
 ***Plus, Multi-views can tackle more complicated tasks that prior methods cannot solve***
 
 1. GCRL components:  
