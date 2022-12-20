@@ -40,7 +40,7 @@ Env2: Multi-view task
 
 ***Our prime goal is to compare prior methods(Only single views) with MURM in solving GCRL.***  
 ***Plus, Multi-views can tackle more complicated tasks that prior methods cannot solve.***  
-***Consider Hierarchical Reinforcement Learning for initial state of active-camera and more broader cases as Later work***  
+***Consider Hierarchical Reinforcement Learning for initial state of active-camera and more broader cases as Next Paper***  
 
 1. GCRL components:  
    * Diversity in shapes and colors of objects  
