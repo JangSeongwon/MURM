@@ -53,7 +53,12 @@ Env2: Multi-view task
 3. Replay Buffer (CCVAE참조: Use z bar as representation)  
 
 4. Action diversity => Gripper Turning possible?  
-  
+
+5. Method:  
+    *Sample active-view goal image using a conditional decoder with 9 boxes images as condition   
+    *Do exactly same with global-view image  
+    *Design reward function computed with global-view first and active-view next without condition thought in MURM paper  
+      
   
 -> 문제는 Demo dataset 크기 문제로 보임 -> Collection takes too long 
 +Deal with this by changing task with less action space needed    
