@@ -1,5 +1,5 @@
 <?xml version="0.0" ?>
-<robot name="bowl.urdf">
+<robot name="box.urdf">
   <material name="mainColor">
     <color rgba="0.6549019607843137 0.39215686274509803 0.8431372549019608 1"/>
   </material>
@@ -19,12 +19,11 @@
     <color rgba=".93 .6 .23 1"/>
   </material>
 
-  <material name="box">
-    <color rgba=".92, .85, .7, 1"/>
+  <material name="box_side">
+    <color rgba="1 0.65 0 1"/>
   </material>
 
   <link name="world"/>
-
   <link name="base">
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -37,8 +36,29 @@
       <geometry>
         <box size="1 1 .1"/>
       </geometry>
-      <material name="box"/>
+      <material name="box">
+          <color rgba="0.95 1 0.95 1"/>
+      </material>
     </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.13"/>
+      <geometry>
+        <box size="1 1 .1"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base"/>
+  </joint>
+
+  <link name="base2">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+       <mass value=".1"/>
+       <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
     <visual>
       <!-- right -->
       <origin rpy="0 0 0" xyz="0 -.45 0"/>
@@ -66,13 +86,9 @@
       <geometry>
         <box size=".05 1 .5"/>
       </geometry>
+      <material name="box_side"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 -0.13"/>
-      <geometry>
-        <box size="1.2 1.2 .1"/>
-      </geometry>
-    </collision>
+
     <collision>
       <!-- right -->
       <origin rpy="0 0 0" xyz="0 -.45 0"/>
@@ -103,9 +119,9 @@
     </collision>
   </link>
 
-  <joint name="base_joint" type="fixed">
-    <parent link="world"/>
-    <child link="base"/>
+  <joint name="base_joint2" type="fixed">
+    <parent link="base"/>
+    <child link="base2"/>
   </joint>
 
 </robot>
