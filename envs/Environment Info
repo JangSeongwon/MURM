@@ -1,18 +1,36 @@
-With cube:
-
-Coordinate Z on Table: 1.024
-
-Coordinate Z on box 1: 1.4
+cube: 
+      Coordinate X on Table: 0.45
+      Coordinate Y on Table: 0
+      Coordinate Z on Table: 1.038
+      quat=[0, 0, 0, 1]
+      scale=0.065
 
 ------------------------------------------------------------------------------------------------------------------------------
+#Coordinate Z on box 1: 1.4
 
 Coordinate X of box center: 0 (+-0.25)
 Coordinate y of box center: -0.8
-
-------------------------------------------------------------------------------------------------------------------------------
 
 Coordinate X of center shelf: 0.8
 Coordinate y of center shelf: 0 (+-0.25)
 
 ------------------------------------------------------------------------------------------------------------------------------
+
+9-Boxes Single-view task env:
+
+Box scale: 0.15
+Coordinate X of box center: -0.05, 0.1, 0.25
+Coordinate y of box center: -0.4, -0.55, -0.7
+Coordinate z of box center: 1.03
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+9-Boxes Single-view task env:
+
+Wall: 
+pos=[ 0.38, -0.54, 1.1],
+quat=[0, 0, 0, 1],
+scale=0.04)
+
 
