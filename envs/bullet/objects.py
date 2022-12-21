@@ -56,7 +56,7 @@ marble_floor = loader_fixed(ASSET_PATH_ORI, 'floor/plane.urdf',
                scale=1)
 
 table = loader_fixed(ASSET_PATH, 'table/table.urdf',
-               pos=[-0.2, 0, -0.57],
+               pos=[0.2, 0, -0.57],
                quat=[0, 0, 0.707107, 0.707107],
                scale=2.5)
 
@@ -93,24 +93,56 @@ table = loader_fixed(ASSET_PATH, 'table/table.urdf',
 #                scale=0.25)
 
 #BOX LEFT
-box = loader_fixed(ASSET_PATH, 'box/box.urdf',
-               pos=[0, -0.9, 1.1],
-               quat=[1, 1, 1, 1],
-               scale=0.4)
+# box = loader_fixed(ASSET_PATH, 'box/box.urdf',
+#                pos=[0, -0.9, 1.1],
+#                quat=[1, 1, 1, 1],
+#                scale=0.4)
+#
+# box1 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+#                pos=[0, -0.75, 1.37],
+#                scale=0.25)
+# box2 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+#                pos=[0.25, -0.75, 1.37],
+#                scale=0.25)
+# box3 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+#                pos=[-0.25, -0.75, 1.37],
+#                scale=0.25)
 
+# 9 Boxes at left
 box1 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
-               pos=[0, -0.75, 1.37],
-               scale=0.25)
+               pos=[0.1, -0.4, 1.03],
+               scale=0.15)
 box2 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
-               pos=[0.25, -0.75, 1.37],
-               scale=0.25)
+               pos=[0.25, -0.4, 1.03],
+               scale=0.15)
 box3 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
-               pos=[-0.25, -0.75, 1.37],
-               scale=0.25)
+               pos=[-0.05, -0.4, 1.03],
+               scale=0.15)
+
+box4 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+               pos=[0.1, -0.55, 1.03],
+               scale=0.15)
+box5 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+               pos=[0.25, -0.55, 1.03],
+               scale=0.15)
+box6 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+               pos=[-0.05, -0.55, 1.03],
+               scale=0.15)
+
+box7 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+               pos=[0.1, -0.7, 1.03],
+               scale=0.15)
+box8 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+               pos=[0.25, -0.7, 1.03],
+               scale=0.15)
+box9 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+               pos=[-0.05, -0.7, 1.03],
+               scale=0.15)
+
 
 cube = loader(ASSET_PATH, os.path.join("cube", "cube.urdf"),
               #On a table
-              pos=[ 0.45, 0, 1.038 ],
+              pos=[ 0.45, 0, 1.038],
               # Goal example on box center
               #pos=[-0.75, 0, 1.4],
               #
