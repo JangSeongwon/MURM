@@ -23,8 +23,8 @@ Data Demo collection
 ---------------------------------------------------------------------------------------------------------
 
 Plan demo_action:
-  1. Reach and grab an cube and random objects (random color)
-  2. Place the cube in box
+  1. Reach and grab random shaped and colored objects
+  2. Place the object in goal (Amongst 9 boxes)
 
 ---------------------------------------------------------------------------------------------------------
 + Path Settings:
