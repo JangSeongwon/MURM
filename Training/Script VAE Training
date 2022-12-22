@@ -1,9 +1,9 @@
 
 1. rlkit.rlkit.launchers.conf.py: LOCAL_LOG_DIR = 'dataSaving' 
 
-2. /home/jang/PycharmProjects/rlkit/rlkit/core/logging.py (path for data modification)
+2. Path for Dataset Modification: /home/jang/PycharmProjects/rlkit/rlkit/core/logging.py 
 
-
+3. Path for Reconstruction Images: /home/jang/PycharmProjects/rlkit/rlkit/torch/vae/vq_vae_trainer.py
 
 
 ----------------------------------------------------------------------------------------------
