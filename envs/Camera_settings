@@ -47,3 +47,65 @@ def render_obs_active(self):
 
 ######################################## "RENDERDING" ########################################
 
+p.ER_TINY_RENDERER VERSION
+
+def render_obs(self):
+
+    img_tuple1 = p.getCameraImage(width=self.obs_img_dim,
+                     height=self.obs_img_dim,
+                     viewMatrix=self._view_matrix_obs,
+                     projectionMatrix=self._projection_matrix_obs,
+                     shadow=1,
+                     lightDirection=[0,0,1],
+                     renderer=p.ER_TINY_RENDERER)
+    _, _, img1, depth, segmentation = img_tuple1
+
+    img = img1[:, :, :-1]
+
+    if self._transpose_image:
+        img = np.transpose(img, (2, 0, 1))
+    return img
+
+def render_obs_active(self):
+    eef_pos_for_active_camera = self.get_end_effector_pos()
+    eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.15),float(eef_pos_for_active_camera[1]),float(eef_pos_for_active_camera[2])]
+    eef_theta_for_active_camera = self.get_end_effector_theta()
+    #print(eef_pos_for_active_camera)
+    #print('Total',eef_theta_for_active_camera)
+    # print('x',eef_theta_for_active_camera[0])
+    # print('y',eef_theta_for_active_camera[1])
+    # print('z',eef_theta_for_active_camera[2])
+
+    view_matrix_obs_active = bullet.get_view_matrix(
+        target_pos=eef_pos_for_active_camera, distance=0.35,
+        yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
+    projection_matrix_obs_active = bullet.get_projection_matrix(
+        self.obs_img_dim_active, self.obs_img_dim_active)
+
+    img_tuple2 = p.getCameraImage(width=self.obs_img_dim_active,
+                     height=self.obs_img_dim_active,
+                     viewMatrix=view_matrix_obs_active,
+                     projectionMatrix=projection_matrix_obs_active,
+                     shadow=1,
+                     lightDirection=[1,1,1],
+                     renderer=p.ER_TINY_RENDERER)
+    _, _, img2, depth2, segmentation2 = img_tuple2
+
+    img_active = img2[:, :, :-1]
+
+    if self._transpose_image:
+        img_active = np.transpose(img_active, (2, 0, 1))
+    return img_active
+
+
+
+
+
+
+
+
+
+
+
+
+
