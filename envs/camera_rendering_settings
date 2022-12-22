@@ -12,6 +12,10 @@ def get_projection_matrix(height, width, fov=60, near_plane=0.1, far_plane=5.5):
     projection_matrix = p.computeProjectionMatrixFOV(fov, aspect, near_plane, far_plane)
     return projection_matrix
 
+# Renderer: ER_BULLET_HARDWARE_OPENGL cannot erase shadows
+# Renderer: ER_TINY_RENDERER is possible to adjust shadow 
+# But TINY renderer's light direction must be fixed to [1,1,1] 
+
 def render(height, width, view_matrix, projection_matrix,
            shadow=1, light_direction=[1,1,1], renderer=p.ER_BULLET_HARDWARE_OPENGL, gaussian_width=5):
     img_tuple = p.getCameraImage(width,
