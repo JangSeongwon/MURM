@@ -1,6 +1,8 @@
 
 * May use ShapeNet data: https://shapenet.org/ 
-* Needed modules - pip install tqdm      
+* Needed modules - pip install tqdm     
+
+* Each episodes in Demos lasts for 170 timesteps (32sec) 
 
 ---------------------------------------------------------------------------------------------------------
 Data Demo collection
