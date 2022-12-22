@@ -56,7 +56,7 @@ def render_obs(self):
                      viewMatrix=self._view_matrix_obs,
                      projectionMatrix=self._projection_matrix_obs,
                      shadow=1,
-                     lightDirection=[0,0,1],
+                     lightDirection=[1, 1, 1],
                      renderer=p.ER_TINY_RENDERER)
     _, _, img1, depth, segmentation = img_tuple1
 
@@ -87,7 +87,7 @@ def render_obs_active(self):
                      viewMatrix=view_matrix_obs_active,
                      projectionMatrix=projection_matrix_obs_active,
                      shadow=1,
-                     lightDirection=[1,1,1],
+                     lightDirection=[1, 1, 1],
                      renderer=p.ER_TINY_RENDERER)
     _, _, img2, depth2, segmentation2 = img_tuple2
 
