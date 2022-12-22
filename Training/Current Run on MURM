@@ -1,0 +1,71 @@
+loaded /home/jang/data/data_collection/dataset/jang_global_images.npy
+filename /home/jang/data/data_collection/dataset/jang_global_images.npy
+loaded /home/jang/data/data_collection/dataset/jang_global_images.npy
+VAE class  <class 'rlkit.torch.vae.vq_vae_trainer.VQ_VAETrainer'>
+epoch & save_period 0 50
+2022-12-22 17:07:56.918405 KST | [jang0] --------------------  -----------
+2022-12-22 17:07:56.918482 KST | [jang0] epoch                   0
+2022-12-22 17:07:56.918510 KST | [jang0] test/Perplexity         5.00739
+2022-12-22 17:07:56.918531 KST | [jang0] test/Recon Error        0.0117452
+2022-12-22 17:07:56.918549 KST | [jang0] test/VQ Loss            0.0103957
+2022-12-22 17:07:56.918567 KST | [jang0] test/epoch_duration    16.2386
+2022-12-22 17:07:56.918584 KST | [jang0] test/losses             0.022141
+2022-12-22 17:07:56.918601 KST | [jang0] train/Perplexity        2.25233
+2022-12-22 17:07:56.918617 KST | [jang0] train/Recon Error       0.0697164
+2022-12-22 17:07:56.918633 KST | [jang0] train/VQ Loss           1.08751
+2022-12-22 17:07:56.918649 KST | [jang0] train/epoch_duration  411.237
+2022-12-22 17:07:56.918665 KST | [jang0] train/losses            1.15722
+2022-12-22 17:07:56.918680 KST | [jang0] --------------------  -----------
+filename /home/jang/data/data_collection/dataset/jang_global_images.npy
+  0%|          | 0/10 [00:00<?, ?it/s]loaded /home/jang/data/data_collection/dataset/jang_global_images.npy
+100%|██████████| 10/10 [00:13<00:00,  1.30s/it]
+filename /home/jang/data/data_collection/dataset/jang_global_images.npy
+loaded /home/jang/data/data_collection/dataset/jang_global_images.npy
+100%|██████████| 10/10 [00:12<00:00,  1.29s/it]
+Loading latent block data
+Done loading latent block data
+Loading latent block data
+Done loading latent block data
+Finished loading data
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Skipping initialization of  GatedMaskedConv2d
+Starting training
+Traceback (most recent call last):
+  File "/home/jang/PycharmProjects/rlkit/examples/val/MURM_VAE_Train.py", line 243, in <module>
+    run_variants(VAETrainer, variants, run_id=0, process_args_fn=process_args) #HERE
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/arglauncher.py", line 54, in run_variants
+    run_variant(experiment, variant)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/arglauncher.py", line 60, in run_variant
+    lu.run_experiment(
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/launcher_util.py", line 93, in run_experiment
+    method_call(None, variant)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/launcher_util.py", line 60, in __call__
+    self.exp_function(**variant)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/MyVAETrainer.py", line 375, in VAETrainer
+    model = train_model_func(train_vae_kwargs)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/torch/grill/common.py", line 83, in train_vqvae
+    vqvae = train_pixelcnn(
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/experiments/ashvin/pixelcnn_launcher.py", line 175, in train_pixelcnn
+    trainer.train_epoch(epoch, train_loader, num_train_batches_per_epoch)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/torch/vae/pixelcnn_trainer.py", line 51, in train_epoch
+    self.train_batch(epoch, batch) # .to(ptu.device))
+  File "/home/jang/PycharmProjects/rlkit/rlkit/torch/vae/pixelcnn_trainer.py", line 91, in train_batch
+    loss = self.compute_loss(batch, epoch, False)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/torch/vae/pixelcnn_trainer.py", line 65, in compute_loss
+    x = batch["x"].to(ptu.device)
+TypeError: new(): invalid data type 'str'
+
+Process finished with exit code 1
