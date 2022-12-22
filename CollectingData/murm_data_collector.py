@@ -14,8 +14,8 @@ physicsClient = p.connect(p.GUI)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--name", type=str, default='jang')
-parser.add_argument("--num_trajectories", type=int, default=100)
-parser.add_argument("--num_timesteps", type=int, default=250) # 450 Making videos For Graduation exam
+parser.add_argument("--num_trajectories", type=int, default=20)
+parser.add_argument("--num_timesteps", type=int, default=170) # 450 Making videos For Graduation exam #170 for 9 boxes env
 parser.add_argument("--video_save", type=int, default=1, help="Set to zero for no video saving")
 args = parser.parse_args()
 
@@ -84,10 +84,10 @@ for j in tqdm(range(args.num_trajectories)):
         observation = env.get_observation()
 
         action = env.get_demo_action()
-        print('Saving Action', action)
+        #print('Saving Action', action)
         next_observation, reward, done, info = env.step(action)
 
-        print('reward savings', reward)
+        #print('reward savings', reward)
         # Obs before action
         trajectory['observations'].append(observation)
         # Action given as delta_pos
@@ -108,7 +108,7 @@ for j in tqdm(range(args.num_trajectories)):
     avg_tasks_done += env.done
     print()
 
-    if ((j + 1) % 2) == 0:
+    if ((j + 1) % 4) == 0:
         curr_name = demo_data_save_path + '_{0}.pkl'.format(num_datasets)
         file = open(curr_name, 'wb')
         pkl.dump(demo_dataset, file)
