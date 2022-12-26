@@ -29,7 +29,7 @@ Panda Robot env settings
 Env1: Single-view task with details needed to solved
       - 9 Boxes as goals 
     
-Env2: Multi-view task 
+Env2: Multi-view task  
       MURMENV- Similar to Env1 but global-view is hindered with a wall to goal-boxes (Global camera disadvantage)   
       MURMENV1- Randomly positioned goal-box (Active camera disadvantage)   
 
