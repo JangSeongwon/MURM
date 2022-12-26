@@ -50,7 +50,7 @@ Env2: Multi-view task
   
 3. Replay Buffer (CCVAE참조: Use z bar as representation)  
 
-4. Action diversity => Gripper Turning possible?  
+4. Action diversity => Only 4-DOF 
 
 5. Method:  
     *Sample active-view goal image using a conditional decoder with 9 boxes images as condition   
@@ -68,7 +68,7 @@ Env2: Multi-view task
     -> in awac_rig.py
     VAE Training: from rlkit.torch.grill.common import train_vae, Model can be Saved in .pt (python file)  
  
-2. Start VAE training and img confirmation process
+2. Start VAE training and img confirmation process with VQVAE Trainer 2
 
 --------------------------
 
