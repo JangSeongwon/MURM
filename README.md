@@ -35,9 +35,9 @@ Env2: Multi-view task
 --------------------------
 # Key Points Considered  
 
-
 ***Our prime goal is to compare prior methods(Only single views) with MURM in solving GCRL.***  
 ***Plus, Multi-views can tackle more complicated tasks that prior methods cannot solve.***  
+***Furthermore, Hierarchical multi-scale latent maps can deal with high-resolution images needed necessarily for complicated tasks.***  
 ***Consider Hierarchical Reinforcement Learning for initial state of active-camera and more broader cases as Next Paper***  
 
 1. GCRL components:  
