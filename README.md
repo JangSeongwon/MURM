@@ -58,16 +58,18 @@ Env2: Multi-view task
     *Do exactly same with global-view image  
     *Design reward function computed with global-view first and active-view next without condition thought in MURM paper  
       
-  
--> 문제는 Demo dataset 크기 문제로 보임 -> Collection takes too long 
+      
+-------------------------- 
+
+12/29 Analysis  
+
+1. 문제는 Demo dataset 크기 문제로 보임 -> Collection takes too long 
 +Deal with this by changing task with less action space needed    
-=> Now, single episode takes about 45seconds(185 timesteps)
-=> For at least 50K transitions, 300 episodes == About 4hours 
+=> Now, single episode takes about 59seconds(250 timesteps)  
+=> For at least 50K transitions, 300 episodes == About 4hours  
+=> For 500 episodes = 125K transitions == 8.2 hours
 
---------------------------
-
-12/22 Analysis  
-1. Need to pretrain VAE. 
+2. Need to pretrain VAE. 
     -128 batches in 1 epoch = 8min, 480seconds
     -Maybe 500 epoches = 67hours, 3days
     - 1000 epoches = 133hours, 6days
