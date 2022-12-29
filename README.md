@@ -67,9 +67,11 @@ Env2: Multi-view task
 --------------------------
 
 12/22 Analysis  
-1. Need to pretrain VAE. 128batches in 1 epoch = 8min, 480seconds
-    Maybe 500 epoches = 67hours
-    Save Model in .pt   
+1. Need to pretrain VAE. 
+    -128 batches in 1 epoch = 8min, 480seconds
+    -Maybe 500 epoches = 67hours, 3days
+    - 1000 epoches = 133hours, 6days
+    -Save Model in .pt   
 
 --------------------------
 
