@@ -32,9 +32,9 @@ class MURMENV(PandaBaseEnv):
                  randomize=True,
                  observation_mode='state',
                  #Image Dimension
-                 obs_img_dim=1024, #sawyer=48
-                 obs_img_dim_active=1024,
-                 success_threshold=0.08,
+                 obs_img_dim=256, #VQVAE2 #sawyer=48
+                 obs_img_dim_active=256,
+                 success_threshold=0.01,
                  transpose_image=False,
                  invisible_robot=False,
                  object_subset='all',
@@ -44,7 +44,7 @@ class MURMENV(PandaBaseEnv):
                  task='goal_reaching',
                  test_env=False,
                  env_type=None,
-                 DoF = 6,
+                 DoF = 3,
                  *args,
                  **kwargs
                  ):
@@ -88,6 +88,8 @@ class MURMENV(PandaBaseEnv):
         self._ddeg_scale = 5
         self.task = task
         self.DoF = DoF
+        self.obj_pos = [0.45, 0, 1.038]
+        self.obj_2 = 0
 
         # if self.test_env:
         #     self.random_color_p = 0.0
@@ -96,9 +98,9 @@ class MURMENV(PandaBaseEnv):
 
         # self.object_dict, self.scaling = self.get_object_info()
         self.curr_object = None
-        self._object_position_low = (0.4, -0.2, 1.01)
-        self._object_position_high = (0.8, 0.2, 1.8)
-        self._fixed_object_position = np.array([.4, 0, 1.018])
+        # self._object_position_low = (0.4, -0.2, 1.01)
+        # self._object_position_high = (0.8, 0.2, 1.8)
+        # self._fixed_object_position = np.array([.4, 0, 1.018])
         self.start_obj_ind = 4 if (self.DoF == 4) else 8
         self.default_theta = bullet.deg_to_quat([180, 0, 0])
         self._success_threshold = success_threshold
@@ -114,53 +116,35 @@ class MURMENV(PandaBaseEnv):
         self._timeStep = 1. / 240.
 
         self._view_matrix_obs = bullet.get_view_matrix(
-            target_pos= [0.8, 0, 1.5], distance=0.8, # [0.7, -0.2, 1.3], distance=0.4,
+            target_pos=[0.7, -0.2, 1.3], distance=0.4, # [0.8, 0, 1.5], distance=0.8,
             yaw=90, pitch=-20, roll=0, up_axis_index=2)
         self._projection_matrix_obs = bullet.get_projection_matrix(
             self.obs_img_dim, self.obs_img_dim)
 
     def random_goal_generation(self):
-        list_floor = [1,2,3]
-        floor_choice = random.choice(list_floor)
-        list_shelf = [1,2,3]
-        shelf_choice = random.choice(list_shelf)
-        self.shelf_chosen = shelf_choice
+        boxesgoals = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        chosen_box = random.choice(boxesgoals)
 
-        if floor_choice == 1:
-            z_floor = 1.09
-            if shelf_choice == 1:
-                self._goal_low = np.array([-0.2, -0.8, z_floor])
-                self._goal_high = np.array([0.2, -0.8, z_floor])
-            elif shelf_choice == 2:
-                self._goal_low = np.array([0.8, -0.2, z_floor])
-                self._goal_high = np.array([0.8, 0.2, z_floor])
-            else:
-                self._goal_low = np.array([-0.2, 0.8, z_floor])
-                self._goal_high = np.array([0.2, 0.8, z_floor])
-        elif floor_choice == 2:
-            z_floor = 1.28
-            if shelf_choice == 1:
-                self._goal_low = np.array([-0.2, -0.8, z_floor])
-                self._goal_high = np.array([0.2, -0.8, z_floor])
-            elif shelf_choice == 2:
-                self._goal_low = np.array([0.8, -0.2, z_floor])
-                self._goal_high = np.array([0.8, 0.2, z_floor])
-            else:
-                self._goal_low = np.array([-0.2, 0.8, z_floor])
-                self._goal_high = np.array([0.2, 0.8, z_floor])
-        elif floor_choice == 3:
-            z_floor = 1.49
-            if shelf_choice == 1:
-                self._goal_low = np.array([-0.2, -0.8, z_floor])
-                self._goal_high = np.array([0.2, -0.8, z_floor])
-            elif shelf_choice == 2:
-                self._goal_low = np.array([0.8, -0.2, z_floor])
-                self._goal_high = np.array([0.8, 0.2, z_floor])
-            else:
-                self._goal_low = np.array([-0.2, 0.8, z_floor])
-                self._goal_high = np.array([0.2, 0.8, z_floor])
+        if chosen_box == 1:
+            goal = np.array([-0.05, -0.4, 1.05])
+        elif chosen_box == 2:
+            goal = np.array([0.1, -0.4, 1.05])
+        elif chosen_box == 3:
+            goal = np.array([0.25, -0.4, 1.05])
 
-        goal = np.random.uniform(low=self._goal_low, high=self._goal_high)
+        elif chosen_box == 4:
+            goal = np.array([-0.05, -0.55, 1.05])
+        elif chosen_box == 5:
+            goal = np.array([0.1, -0.55, 1.05])
+        elif chosen_box == 6:
+            goal = np.array([0.25, -0.55, 1.05])
+
+        elif chosen_box == 7:
+            goal = np.array([-0.05, -0.7, 1.05])
+        elif chosen_box == 8:
+            goal = np.array([0.1, -0.7, 1.05])
+        elif chosen_box == 9:
+            goal = np.array([0.25, -0.7, 1.05])
 
         return goal
 
@@ -219,15 +203,36 @@ class MURMENV(PandaBaseEnv):
         self._end_effector = bullet.get_index_by_attribute(
             self._panda, 'link_name', 'gripper_site')
 
-        # self.add_object(change_object=change_object)
+        # Random Color and Shape
+        self._obj = self.random_obj_generation()
+        rgba = self.sample_object_color()
+        p.changeVisualShape(self._obj, -1, rgbaColor=rgba)
+
         self._format_state_query()
 
         #Goal Generation Process
         #self.goal_pos = self.random_goal_generation()
-        self.goal_pos = np.array([-0.05, -0.7, 1.05]) #Fixed goal for demo video
+        self.goal_pos = np.array([0.25, -0.55, 1.05]) #Fixed goal for demo video
         #print('Printing Goal:',self.goal_pos)
 
         return self.get_observation()
+
+    def random_obj_generation(self):
+        random_shape = ['cube', 'rectangularprism1', 'rectangularprism2']
+        chosen_shape = random.choice(random_shape)
+
+        chosen_shape = 'rectangularprism2'
+        if chosen_shape == 'cube':
+            obj = bullet.objects.cube()
+        elif chosen_shape == 'rectangularprism1':
+            obj = bullet.objects.rectangularprism1()
+        elif chosen_shape == 'rectangularprism2':
+            obj = bullet.objects.rectangularprism2()
+            self.obj_2 = 1
+        else:
+            exit()
+
+        return obj
 
     # def get_object_info(self):
     #     complete_object_dict, scaling = metadata.obj_path_map, metadata.path_scaling_map
@@ -293,29 +298,28 @@ class MURMENV(PandaBaseEnv):
         self._box8 = bullet.objects.box8()
         self._box9 = bullet.objects.box9()
 
-        self._wall = bullet.objects.wall()
+        #self._wall = bullet.objects.wall()
         #self._wall2 = bullet.objects.wall2()
         # Wall color Thick Brown "0.55 0.35 0.17 1"
 
-        self._objectcube = bullet.objects.cube()
         self._objects = {}
         self._sensors = {}
 
-    def sample_object_location(self):
-        if self._randomize:
-            return np.random.uniform(
-                low=self._object_position_low, high=self._object_position_high)
-        return self._fixed_object_position
+    # def sample_object_location(self):
+    #     if self._randomize:
+    #         return np.random.uniform(
+    #             low=self._object_position_low, high=self._object_position_high)
+    #     return self._fixed_object_position
 
     def sample_object_color(self):
-        if np.random.uniform() < self.random_color_p:
-            return list(np.random.choice(range(256), size=3) / 255.0) + [1]
-        return None
+        a = list(np.random.choice(range(256), size=3) / 255.0) + [1]
+        #print('color', a)
+        return a
 
-    def sample_quat(self, object_name):
-        if object_name in self.quat_dict:
-            return self.quat_dict[self.curr_object]
-        return deg_to_quat(np.random.randint(0, 360, size=3))
+    # def sample_quat(self, object_name):
+    #     if object_name in self.quat_dict:
+    #         return self.quat_dict[self.curr_object]
+    #     return deg_to_quat(np.random.randint(0, 360, size=3))
 
     # def _set_positions(self, pos):
     #     bullet.reset()
@@ -350,7 +354,7 @@ class MURMENV(PandaBaseEnv):
     #         self.curr_color = self.sample_object_color()
     #
     #     else:
-    #         self.curr_object = self._objectcube
+    #         self.curr_object = self._obj
     #         self.curr_id = 'cube'
     #         self.curr_color = self.sample_object_color()
 
@@ -408,28 +412,6 @@ class MURMENV(PandaBaseEnv):
                 raise RuntimeError('Unrecognized action: {}'.format(action))
             return np.array(delta_pos), np.array(delta_angle), gripper
 
-    def get_info(self):
-        # object_pos = np.asarray(self.get_object_midpoint('obj'))
-        object_pos = np.asarray(bullet.get_midpoint(self._objectcube))
-
-        height = object_pos[2]
-        object_goal_distance = np.linalg.norm(object_pos - self.goal_pos)
-        end_effector_pos = self.get_end_effector_pos()
-        object_gripper_distance = np.linalg.norm(
-            object_pos - end_effector_pos)
-        gripper_goal_distance = np.linalg.norm(
-            self.goal_pos - end_effector_pos)
-        object_goal_success = int(object_goal_distance < self._success_threshold)
-        picked_up = height > self.pickup_eps
-
-        info = {
-            'object_goal_distance': object_goal_distance,
-            'object_goal_success': object_goal_success,
-            'object_height': height,
-            'picked_up': picked_up,
-        }
-
-        return info
 
     def get_contextual_diagnostics(self, paths, contexts):
         from multiworld.envs.env_util import create_stats_ordered_dict
@@ -557,6 +539,28 @@ class MURMENV(PandaBaseEnv):
 
     ############################################
     ##################REWARD####################
+    def get_info(self):
+        # object_pos = np.asarray(self.get_object_midpoint('obj'))
+        object_pos = np.asarray(bullet.get_midpoint(self._obj))
+
+        height = object_pos[2]
+        object_goal_distance = np.linalg.norm(object_pos - self.goal_pos)
+        end_effector_pos = self.get_end_effector_pos()
+        object_gripper_distance = np.linalg.norm(
+            object_pos - end_effector_pos)
+        gripper_goal_distance = np.linalg.norm(
+            self.goal_pos - end_effector_pos)
+        object_goal_success = int(object_goal_distance < self._success_threshold)
+        picked_up = height > self.pickup_eps
+
+        info = {
+            'object_goal_distance': object_goal_distance,
+            'object_goal_success': object_goal_success,
+            'object_height': height,
+            'picked_up': picked_up,
+        }
+
+        return info
 
     def get_reward(self, info):
         if self.task == 'goal_reaching':
@@ -580,7 +584,7 @@ class MURMENV(PandaBaseEnv):
         return object_goal_success - 1
 
 
-    def compute_reward(self, obs, actions, next_obs, contexts):
+    def compute_reward_pp(self, obs, actions, next_obs, contexts):
         obj_state = self.format_obs(next_obs['state_observation'])[:, self.start_obj_ind:self.start_obj_ind + 3]
         obj_goal = self.format_obs(contexts['state_desired_goal'])[:, self.start_obj_ind:self.start_obj_ind + 3]
         object_goal_distance = np.linalg.norm(obj_state - obj_goal, axis=1)
@@ -593,21 +597,21 @@ class MURMENV(PandaBaseEnv):
         elif self.task == 'pickup':
             return self.compute_reward_pu(obs, actions, next_obs, contexts)
         elif self.task == 'Pick and Place':
-            return self.compute_reward(obs, actions, next_obs, contexts)
+            return self.compute_reward_pp(obs, actions, next_obs, contexts)
 
     ##################REWARD####################
     ############################################
 
-    def get_object_deg(self):
-        # object_info = bullet.get_body_info(self._objects['obj'],
-        #                                    quat_to_deg=True)
-        object_info = bullet.get_body_info(self._objectcube,
-                                           quat_to_deg=True)
-        return object_info['theta']
-
-    def get_hand_deg(self):
-        return bullet.get_link_state(self._panda, self._end_effector,
-            'theta', quat_to_deg=True)
+    # def get_object_deg(self):
+    #     # object_info = bullet.get_body_info(self._objects['obj'],
+    #     #                                    quat_to_deg=True)
+    #     object_info = bullet.get_body_info(self._obj,
+    #                                        quat_to_deg=True)
+    #     return object_info['theta']
+    #
+    # def get_hand_deg(self):
+    #     return bullet.get_link_state(self._panda, self._end_effector,
+    #         'theta', quat_to_deg=True)
 
     def get_observation(self):
         left_tip_pos = bullet.get_link_state(
@@ -628,25 +632,25 @@ class MURMENV(PandaBaseEnv):
         #                                    quat_to_deg=False)
 
         # Cube code
-        object_info = bullet.get_body_info(self._objectcube, quat_to_deg=False)
-        #print('pos cube',object_info)
+        object_info = bullet.get_body_info(self._obj, quat_to_deg=False)
+        #print(' cube',object_info)
         object_pos = object_info['pos']
-        object_theta = object_info['theta']
+        #object_theta = object_info['theta']
 
         if self.DoF > 3:
             observation = np.concatenate((
                 end_effector_pos, hand_theta, gripper_tips_distance,
-                object_pos, object_theta))
+                object_pos))
             goal_pos = np.concatenate((
-                self.goal_pos, hand_theta, gripper_tips_distance,
-                self.goal_pos, object_theta))
+                 hand_theta, gripper_tips_distance,
+                self.goal_pos))
         else:
             observation = np.concatenate((
                 end_effector_pos, gripper_tips_distance,
-                object_pos, object_theta))
+                object_pos))
             goal_pos = np.concatenate((
                 end_effector_pos, gripper_tips_distance,
-                self.goal_pos, object_theta))
+                self.goal_pos))
 
         obs_dict = dict(
             observation=observation,
@@ -672,17 +676,18 @@ class MURMENV(PandaBaseEnv):
         # c = theta[2]*pi
         # theta = np.array([a, b, c])
         #print('theta',theta)
-        theta = [m.pi, 0, 0]
+        theta = [m.pi, 0, 0] # Theta Fixed to pi
 
         #print('action_before format', action)
-        delta_pos, delta_angle, gripper = self._format_action(*action)
+        # delta_pos, delta_angle, gripper = self._format_action(*action)
+        delta_pos, gripper = self._format_action(*action)
 
         #print('gripper',gripper)
         if gripper == -1:
             self.pre_grasp()
             p.stepSimulation()
         elif gripper == 1:
-            self.grasp(self._objectcube)
+            self.grasp(self._obj)
             p.stepSimulation()
 
         adjustment = 0.1
@@ -691,14 +696,15 @@ class MURMENV(PandaBaseEnv):
         # pos = np.clip(pos, self._pos_low, self._pos_high)
         #print(delta_angle)
 
-        theta_adjustment = 0.2
-        theta += delta_angle*theta_adjustment
+        # theta_adjustment = 0.2
+        # theta += delta_angle*theta_adjustment
         #print('delta_action', pos, theta)
 
         pos_and_theta = np.append(pos, theta)
         #print('action_to_apply', pos_and_theta)
 
         self.apply_action(pos_and_theta)
+
         p.stepSimulation()
         #print('eef_pos with action', pos)
 
@@ -716,15 +722,19 @@ class MURMENV(PandaBaseEnv):
         self.done = False
         self.trigger = 0
         self.timeStep = 0
+        self.taketime = 0
         self.x = 0
         self.y = 0
         self.z = 0.5
+        self.xx = 0.5
         self.goal_near = 0
+        self.achieve_check = 0
+        self.time_add = 0
         reset_obs = self.reset()
         return reset_obs
 
     def get_demo_action(self):
-        action, done = self.move_obj(self.goal_pos)
+        action, done = self.my_action(self.goal_pos)
         self.done = done or self.done
         action = np.append(action, [self.grip])
         #action = np.append(action, [self.action_theta])
@@ -732,25 +742,31 @@ class MURMENV(PandaBaseEnv):
         action = np.clip(action, a_min=-3.14, a_max=3.14)
         return action
 
-    def move_obj(self, goal):
+    def my_action(self, goal):
         ee_pos = self.get_end_effector_pos()
-        target_pos = np.array(bullet.get_body_info(self._objectcube)['pos'])
-        # target_pos = np.array(bullet.get_body_info(self._objects['obj'], quat_to_deg=False)['pos']) + adjustment
+        target_pos = np.array(bullet.get_body_info(self._obj)['pos'])
+        adjustment = np.array([0, 0, 0.014])
+        adjustment2 = np.array([0, 0, 0.01])
+        if self.obj_2 == 1:
+            target_pos = np.array(bullet.get_body_info(self._obj)['pos']) + adjustment
+            goal = goal + adjustment2
+
         ee_set_pos = np.array([0.1, -0.55, 1.5])
+        checking_pos = np.array([-0.1, -0.5, 1.25])
         #print('cube', target_pos)
         #print('eef', ee_pos)
 
         aligned = np.linalg.norm(target_pos[:2] - ee_pos[:2]) < 0.005
         on_top = np.linalg.norm(target_pos[2] - ee_pos[2]) < 0.01
-        done = (np.linalg.norm(target_pos - goal) < 0.04) or self.done
+        done = (np.linalg.norm(target_pos - goal) < 0.03) or self.done
 
         on_drop_height = 0.095 < target_pos[2] - goal[2] < 0.125
         placing = np.linalg.norm(ee_set_pos[:2] - target_pos[:2]) < 0.05
         placing_near = np.linalg.norm(goal[:2] - target_pos[:2]) < 0.005
 
-        # check = self.check_contact_fingertips(self._objectcube)
+        # check = self.check_contact_fingertips(self._obj)
         # print('check', check)
-        grasp = int(self.check_contact_fingertips(self._objectcube)[0]) == 2
+        grasp = int(self.check_contact_fingertips(self._obj)[0]) == 2
         #print('Check Grasp',grasp)
 
         #print(self.shelf_chosen)
@@ -761,49 +777,71 @@ class MURMENV(PandaBaseEnv):
         turned = p.getLinkState(self._panda, self.end_eff_idx)[5][2] > pi*1.4
         #print('theta', turned)
         #print('trigger',self.trigger)
-        print('time', self.timeStep)
 
-        if done and self.goal_near == 1:
+        if self.timeStep > 200:
+            print('time', self.timeStep)
+
+        action = np.array([0, 0, 0])
+        self.grip = 1
+
+        if done and self.goal_near == 1 and self.achieve_check == 0:
             #print('Finished')
-            action = np.array([0., 0, 0.4])
-            action = np.append(action, ori_angle)
+            action = np.array([0, 0, 0])
+            # action = np.append(action, ori_angle)
             self.grip = -1
+            self.time_add += 1
+
+        if done and 15 > self.time_add > 7:
+            action = np.array([0, 0, 0.25])
+            self.grip = -1
+            self.achieve_check += 0.15
+
+        if done and self.achieve_check > 1:
+            action = checking_pos - ee_pos
+            action *= self.xx * 1.5
+            self.grip = -1
+            self.xx += 0.1
 
         if not grasp and self.goal_near == 0:
             if not aligned and not on_top:
-                #print('Stage 1: Appraoching')
+                #print('Stage 1: Approaching')
                 action = target_pos - ee_pos
                 self.z += 0.1
                 #print('z', self.z)
                 action *= self.z*1.5
-                action = np.append(action, ori_angle)
+                # action = np.append(action, ori_angle)
                 self.grip = -1
 
             elif aligned and not on_top:
                 #print('Stage 2: Not on top')
                 action = np.array([0., 0., -0.3])
-                action = np.append(action, ori_angle)
+                # action = np.append(action, ori_angle)
                 self.grip = -1
 
             elif not aligned and on_top:
                 #print('Stage 2: Aligning')
                 action = target_pos - ee_pos
                 action[2] = 0
-                action *= 0.5
-                action = np.append(action, ori_angle)
+                action *= 1
+                # action = np.append(action, ori_angle)
                 self.grip = -1
 
             elif aligned and on_top:
                 #print('Stage 4: Grasping')
                 action = np.array([0., 0., 0])
-                action = np.append(action, ori_angle)
+                # action = np.append(action, ori_angle)
                 self.grip = 1
 
-        if grasp:
+        if grasp and self.taketime < 3:
+            action = np.array([0., 0., 0])
+            self.grip = 1
+            self.taketime += 1
+
+        if grasp and self.taketime > 2:
             if not on_drop_height and not placing and not self.trigger: # and not turned:
                 #print('Stage 5: Going to Placing(up)')
-                action = np.array([0., 0., 0.25])
-                action = np.append(action, ori_angle)
+                action = np.array([0., 0., 0.2])
+                # action = np.append(action, ori_angle)
                 self.grip = 1
 
             if on_drop_height and not placing and not self.trigger: # and not turned:
@@ -812,8 +850,8 @@ class MURMENV(PandaBaseEnv):
                 action[2] = 0
                 self.x += 0.1
                 #print('x', self.x)
-                action *= self.x*1.1
-                action = np.append(action, ori_angle)
+                action *= self.x*0.6
+                # action = np.append(action, ori_angle)
                 self.grip = 1
 
             # if on_drop_height and placing and not turned:
@@ -829,17 +867,15 @@ class MURMENV(PandaBaseEnv):
                 action = goal - target_pos
                 action[2] = 0
                 self.y += 0.1
-                action *= self.y * 1.3
-                action = np.append(action, ori_angle)
+                action *= self.y * 1
+                # action = np.append(action, ori_angle)
                 self.grip = 1
 
             if placing_near and not done and self.trigger == 1:
                 self.goal_near = 1
                 #print('Stage 9: Dropping to Goal')
-                action = np.array([0., 0., -0.3])
-                action = np.append(action, ori_angle)
+                action = np.array([0., 0., -0.2])
+                # action = np.append(action, ori_angle)
                 self.grip = 1
 
         return action, done
-
-
