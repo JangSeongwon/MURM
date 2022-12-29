@@ -1,7 +1,5 @@
 import os
 import pybullet_data as pdata
-
-
 from roboverse.bullet.misc import (
   load_urdf,
   load_urdf_randomize_color,
@@ -60,6 +58,11 @@ table = loader_fixed(ASSET_PATH, 'table/table.urdf',
                quat=[0, 0, 0.707107, 0.707107],
                scale=2.5)
 
+wall = loader_fixed(ASSET_PATH, os.path.join("wall", "wall.urdf"),
+
+              pos=[ 0.38, -0.58, 1.15],
+              quat=[0, 0, 0, 1],
+              scale=0.05)
 #Shelf
 # shelf1 = loader_fixed(ASSET_PATH, 'shelf/shelf1/shelf.urdf',
 #                pos=[0, -1.1, 1.2],
@@ -140,12 +143,35 @@ box9 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
                scale=0.15)
 
 
-cube = loader(ASSET_PATH, os.path.join("cube", "cube.urdf"),
+cube = loader(ASSET_PATH, os.path.join("obj", "cube.urdf"),
               #On a table
-              pos=[ 0.45, 0, 1.038],
+              pos=[ 0.45, 0, 1.03],
               # Goal example on box center
               #pos=[-0.75, 0, 1.4],
               #
               quat=[0, 0, 0, 1],
               scale=0.065) #0.05
 
+# cylinder = loader(ASSET_PATH, os.path.join("obj", "cylinder.urdf"),
+#               #On a table
+#               pos=[ 0.45, 0, 1.037],
+#               quat=[0, 0, 0, 1],
+#               scale=0.5)
+
+rectangularprism1 = loader(ASSET_PATH, os.path.join("obj", "rectangularprism1.urdf"),
+              #On a table
+              pos=[ 0.45, 0, 1.031],
+              quat=[0, 1, 1, 0],
+              scale=0.06)
+
+rectangularprism2 = loader(ASSET_PATH, os.path.join("obj", "rectangularprism2.urdf"),
+              #On a table
+              pos=[ 0.45, 0, 1.048],
+              quat=[0, 0, 0, 1],
+              scale=0.06)
+
+# wall2 = loader_fixed(ASSET_PATH, os.path.join("wall", "wall2.urdf"),
+#
+#               pos=[ 0, 0, 3],
+#               quat=[1, 0, 1, 0],
+#               scale=1)
