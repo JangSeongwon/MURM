@@ -67,11 +67,9 @@ Env2: Multi-view task
 --------------------------
 
 12/22 Analysis  
-1. Pretrain VAE or not  
-    -> in awac_rig.py
-    VAE Training: from rlkit.torch.grill.common import train_vae, Model can be Saved in .pt (python file)  
- 
-2. Start VAE training and img confirmation process with VQVAE Trainer 2
+1. Need to pretrain VAE. 128batches in 1 epoch = 8min, 480seconds
+    Maybe 500 epoches = 67hours
+    Save Model in .pt   
 
 --------------------------
 
