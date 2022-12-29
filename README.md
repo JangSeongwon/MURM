@@ -42,7 +42,7 @@ Env2: Multi-view task
 ***Consider Hierarchical Reinforcement Learning for initial state of active-camera and more broader cases as Next Paper***  
 
 1. GCRL components:  
-   * Diversity in shapes and colors of objects  
+   * Diversity in shapes(cube, rectangular prism) and colors(Full random) of objects  
    * Fixed 9 goal boxes VS Random 1 goal box   
    * Random initial position(In range) of the object
    * Random Action velocity in demos
@@ -61,6 +61,8 @@ Env2: Multi-view task
   
 -> 문제는 Demo dataset 크기 문제로 보임 -> Collection takes too long 
 +Deal with this by changing task with less action space needed    
+=> Now, single episode takes about 45seconds(185 timesteps)
+=> For at least 50K transitions, 300 episodes == About 4hours 
 
 --------------------------
 
