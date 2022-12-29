@@ -31,7 +31,7 @@ class PandaBaseEnv(gym.Env, Serializable):
                  visualize=True,
 
                  use_IK = 1,
-                 control_orientation = 1,
+                 control_orientation = 0,
                  control_eu_or_quat = 0,
                  joint_action_space = 9
                  ):
