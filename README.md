@@ -64,10 +64,9 @@ Env2: Multi-view task
 
 12/30 Analysis  
 
-1. 문제는 Demo dataset 크기 문제로 보임 -> Collection takes too long 
-+Deal with this by changing task with less action space needed    
-=> Now, single episode takes about 110seconds(300 timesteps)  
-=> For 90K transitions, 300 episodes == About 9hours  
+1. Collected first demo data    
+=> Single episode = 110seconds (300 timesteps)  
+=> 90K transitions, 300 episodes, About 9hours  
 
 2. Need to pretrain VAE. 
     -128 batches in 1 epoch = 8min, 480seconds
@@ -75,6 +74,12 @@ Env2: Multi-view task
     - 1000 epoches = 133hours, 6days
     -Save Model in .pt   
 
+    Parameters:   
+    Beta = 0.25  
+    weight decay = 0  
+    latent_loss_weight = 0.25  
+    batch = 128  
+    
 --------------------------
 
 # Next Process for Paper 2  
