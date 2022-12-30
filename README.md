@@ -26,8 +26,9 @@ Panda Robot env settings
 -RL: Give action with POS  
 
   
-Env1: Single-view task with details needed to solved
+Env1: Single-view task 
       - 9 Boxes as goals 
+      - Random initially placed objects + 3 types of shapes + Random color(rgb)  
     
 Env2: Multi-view task  
       MURMENV- Similar to Env1 but global-view is hindered with a wall to goal-boxes (Global camera disadvantage)   
