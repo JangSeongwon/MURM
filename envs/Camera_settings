@@ -4,7 +4,7 @@ Assuming usage of D435 (fov: 69)
 Global Camera
 
 self._view_matrix_obs = bullet.get_view_matrix(
-    target_pos=[0.7, -0.2, 1.3], distance=0.4,  # [0.8, 0, 1.5], distance=0.8,
+    target_pos=[0.7, -0.2, 1.3], distance=0.4, # [0.8, 0, 1.5], distance=0.8,
     yaw=90, pitch=-20, roll=0, up_axis_index=2)
 self._projection_matrix_obs = bullet.get_projection_matrix(
     self.obs_img_dim, self.obs_img_dim)
@@ -51,17 +51,20 @@ p.ER_TINY_RENDERER VERSION
 
 def render_obs(self):
 
-    img_tuple1 = p.getCameraImage(width=self.obs_img_dim,
-                     height=self.obs_img_dim,
-                     viewMatrix=self._view_matrix_obs,
-                     projectionMatrix=self._projection_matrix_obs,
-                     shadow=1,
-                     lightDirection=[1, 1, 1],
-                     renderer=p.ER_TINY_RENDERER)
-    _, _, img1, depth, segmentation = img_tuple1
+    # img_tuple1 = p.getCameraImage(width=self.obs_img_dim,
+    #                  height=self.obs_img_dim,
+    #                  viewMatrix=self._view_matrix_obs,
+    #                  projectionMatrix=self._projection_matrix_obs,
+    #                  shadow=1,
+    #                  lightDirection=[1,1,1],
+    #                  renderer=p.ER_TINY_RENDERER)
+    # _, _, img1, depth, segmentation = img_tuple1
+    #
+    # img = img1[:, :, :-1]
 
-    img = img1[:, :, :-1]
-
+    img, depth, segmentation = bullet.render(
+        self.obs_img_dim, self.obs_img_dim, self._view_matrix_obs,
+        self._projection_matrix_obs, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
     if self._transpose_image:
         img = np.transpose(img, (2, 0, 1))
     return img
@@ -82,23 +85,28 @@ def render_obs_active(self):
     projection_matrix_obs_active = bullet.get_projection_matrix(
         self.obs_img_dim_active, self.obs_img_dim_active)
 
-    img_tuple2 = p.getCameraImage(width=self.obs_img_dim_active,
-                     height=self.obs_img_dim_active,
-                     viewMatrix=view_matrix_obs_active,
-                     projectionMatrix=projection_matrix_obs_active,
-                     shadow=1,
-                     lightDirection=[1, 1, 1],
-                     renderer=p.ER_TINY_RENDERER)
-    _, _, img2, depth2, segmentation2 = img_tuple2
+    # img_tuple2 = p.getCameraImage(width=self.obs_img_dim_active,
+    #                  height=self.obs_img_dim_active,
+    #                  viewMatrix=view_matrix_obs_active,
+    #                  projectionMatrix=projection_matrix_obs_active,
+    #                  shadow=1,
+    #                  lightDirection=[1,1,1],
+    #                  renderer=p.ER_TINY_RENDERER)
+    # _, _, img2, depth2, segmentation2 = img_tuple2
+    #
+    # img_active = img2[:, :, :-1]
 
-    img_active = img2[:, :, :-1]
-
+    img_active, depth, segmentation = bullet.render(
+        self.obs_img_dim_active, self.obs_img_dim_active, view_matrix_obs_active,
+        projection_matrix_obs_active, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
     if self._transpose_image:
         img_active = np.transpose(img_active, (2, 0, 1))
     return img_active
 
 
-
+def get_image(self, width, height):
+    image = np.float32(self.render_obs())
+    return image
 
 
 
