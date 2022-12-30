@@ -21,7 +21,7 @@ python = 3.8 version
 
 Panda Robot env settings  
   
--Control with end-effector's XYZ coordinate (7DOF using quaternions possible as well) 
+-Control with end-effector's XYZ coordinate (7DOF using quaternions possible as well)   
 -Gripper Control with Distance and Robot finger's Contact  
 -RL: Give action with POS  
 
