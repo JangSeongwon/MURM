@@ -1,4 +1,6 @@
 import numpy as np
+path = "/home/jang/data/data_collection/dataset/"
+
 
 num_episodes = 2
 num_timesteps = 4
