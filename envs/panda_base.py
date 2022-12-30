@@ -170,13 +170,17 @@ class PandaBaseEnv(gym.Env, Serializable):
                                         positionGain=0.5, velocityGain=1.0)
 
     def pre_grasp(self):
-        self.apply_action_fingers([0.04, 0.04])
+        self.apply_action_fingers([0.04, 0.04], force=5)
 
     def grasp(self, obj_id=None):
-        self.apply_action_fingers([0, 0], obj_id)
+        self.apply_action_fingers([0, 0], obj_id, force=5)
 
-    def apply_action_fingers(self, action_grip, obj_id=None):
+    def grasp2(self, obj_id=None):
+        self.apply_action_fingers([0, 0], obj_id, force=10)
+
+    def apply_action_fingers(self, action_grip, obj_id=None, force=0):
         # move finger joints in position control
+        # print('force', force)
         assert len(action_grip) == 2, ('finger joints are 2! The number of actions you passed is ', len(action))
         idx_fingers = [self._joint_name_to_ids['panda_finger_joint1'], self._joint_name_to_ids['panda_finger_joint2']]
 
@@ -197,7 +201,7 @@ class PandaBaseEnv(gym.Env, Serializable):
                                     idx,
                                     p.POSITION_CONTROL,
                                     targetPosition=action_grip[i],
-                                    force=50,
+                                    force=force,
                                     maxVelocity=1)
 
     def check_contact_fingertips(self, obj_id):
