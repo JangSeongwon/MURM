@@ -32,40 +32,22 @@ class MURMENV(PandaBaseEnv):
                  randomize=True,
                  observation_mode='state',
                  #Image Dimension
-                 obs_img_dim=256, #VQVAE2 #sawyer=48
-                 obs_img_dim_active=256,
-                 success_threshold=0.01,
+                 obs_img_dim=32, #VQVAE2 #sawyer=48
+                 obs_img_dim_active=32,
+                 success_threshold=0.03,
                  transpose_image=False,
                  invisible_robot=False,
                  object_subset='all',
                  use_bounding_box=True,
                  random_color_p=1,
                  quat_dict=quat_dict,
-                 task='goal_reaching',
                  test_env=False,
                  env_type=None,
                  DoF = 3,
                  *args,
                  **kwargs
                  ):
-        """
-        Grasping env with a single object
-        :param goal_pos: xyz coordinate of desired goal
-        :param reward_type: one of 'shaped', 'sparse'
-        :param reward_min: minimum possible reward per timestep
-        :param randomize: whether to randomize the object position or not
-        :param observation_mode: state, pixels, pixels_debug
-        :param obs_img_dim: image dimensions for the observations
-        :param transpose_image: first dimension is channel when true
-        :param invisible_robot: the robot arm is invisible when set to True
-        """
-
-        print('INIT')
-
         assert DoF in [3, 6, 7]
-        assert task in ['goal_reaching', 'pickup', 'Pick and Place']
-        print("Task Type: " + task)
-
         is_set = object_subset in ['test', 'train', 'all']
         is_list = type(object_subset) == list
         assert is_set or is_list
@@ -86,21 +68,21 @@ class MURMENV(PandaBaseEnv):
         self.object_subset = object_subset
         self.test_env = test_env
         self._ddeg_scale = 5
-        self.task = task
         self.DoF = DoF
-        self.obj_pos = [0.45, 0, 1.038]
-        self.obj_2 = 0
-
-        # if self.test_env:
-        #     self.random_color_p = 0.0
-        #     if object_subset is 'all':
-        #         self.object_subset = ['grill_trash_can']
+        self.obj_index = 0
 
         # self.object_dict, self.scaling = self.get_object_info()
         self.curr_object = None
-        # self._object_position_low = (0.4, -0.2, 1.01)
-        # self._object_position_high = (0.8, 0.2, 1.8)
-        # self._fixed_object_position = np.array([.4, 0, 1.018])
+
+        # _obj POSITION
+        self._object_position_low = (0.4, -0.1, 1.03)
+        self._object_position_high = (0.5, 0.1, 1.03)
+        self._fixed_object_position = np.array([0.45, 0, 1.03])
+
+        self._fixed_object_position1 = np.array([0.45, 0, 1.048])
+        self._object_position_low1 = (0.4, -0.1, 1.048)
+        self._object_position_high1 = (0.5, 0.1, 1.048)
+
         self.start_obj_ind = 4 if (self.DoF == 4) else 8
         self.default_theta = bullet.deg_to_quat([180, 0, 0])
         self._success_threshold = success_threshold
@@ -207,28 +189,49 @@ class MURMENV(PandaBaseEnv):
         self._obj = self.random_obj_generation()
         rgba = self.sample_object_color()
         p.changeVisualShape(self._obj, -1, rgbaColor=rgba)
-
         self._format_state_query()
 
         #Goal Generation Process
         #self.goal_pos = self.random_goal_generation()
-        self.goal_pos = np.array([0.25, -0.55, 1.05]) #Fixed goal for demo video
-        #print('Printing Goal:',self.goal_pos)
+        self.goal_pos = np.array([-0.05, -0.7, 1.05]) #Fixed goal for demo video
+        print('Printing Goal:',self.goal_pos)
 
         return self.get_observation()
+
+    def sample_object_location(self):
+        if self.obj_index == 0:
+            initial_random_pos = np.random.uniform(low=self._object_position_low, high=self._object_position_high)
+        elif self.obj_index == 1:
+            initial_random_pos = np.random.uniform(low=self._object_position_low1, high=self._object_position_high1)
+        else:
+            print('No Obj')
+        print(initial_random_pos)
+        return initial_random_pos
+
+    def sample_object_color(self):
+        a = list(np.random.choice(range(256), size=3) / 255.0) + [1]
+        #print('color', a)
+        return a
 
     def random_obj_generation(self):
         random_shape = ['cube', 'rectangularprism1', 'rectangularprism2']
         chosen_shape = random.choice(random_shape)
 
-        chosen_shape = 'rectangularprism2'
+        chosen_shape = 'rectangularprism2' #Bottle
+        #chosen_shape='cube'
         if chosen_shape == 'cube':
-            obj = bullet.objects.cube()
+            self.obj_index = 0
+            obj = bullet.objects.cube(pos=self.sample_object_location())
+
         elif chosen_shape == 'rectangularprism1':
-            obj = bullet.objects.rectangularprism1()
+            self.obj_index = 0
+            obj = bullet.objects.rectangularprism1(pos=self.sample_object_location())
+
         elif chosen_shape == 'rectangularprism2':
-            obj = bullet.objects.rectangularprism2()
-            self.obj_2 = 1
+            self.obj_index = 1
+            #obj = bullet.objects.rectangularprism2(pos=self.sample_object_location())
+            obj = bullet.objects.rectangularprism2(pos=[0.5, 0.1, 1.048])
+
         else:
             exit()
 
@@ -304,17 +307,6 @@ class MURMENV(PandaBaseEnv):
 
         self._objects = {}
         self._sensors = {}
-
-    # def sample_object_location(self):
-    #     if self._randomize:
-    #         return np.random.uniform(
-    #             low=self._object_position_low, high=self._object_position_high)
-    #     return self._fixed_object_position
-
-    def sample_object_color(self):
-        a = list(np.random.choice(range(256), size=3) / 255.0) + [1]
-        #print('color', a)
-        return a
 
     # def sample_quat(self, object_name):
     #     if object_name in self.quat_dict:
@@ -539,36 +531,17 @@ class MURMENV(PandaBaseEnv):
 
     ############################################
     ##################REWARD####################
+
     def get_info(self):
-        # object_pos = np.asarray(self.get_object_midpoint('obj'))
-        object_pos = np.asarray(bullet.get_midpoint(self._obj))
-
-        height = object_pos[2]
+        object_pos = np.asarray(bullet.get_body_info(self._obj)['pos'])
         object_goal_distance = np.linalg.norm(object_pos - self.goal_pos)
-        end_effector_pos = self.get_end_effector_pos()
-        object_gripper_distance = np.linalg.norm(
-            object_pos - end_effector_pos)
-        gripper_goal_distance = np.linalg.norm(
-            self.goal_pos - end_effector_pos)
         object_goal_success = int(object_goal_distance < self._success_threshold)
-        picked_up = height > self.pickup_eps
-
-        info = {
-            'object_goal_distance': object_goal_distance,
-            'object_goal_success': object_goal_success,
-            'object_height': height,
-            'picked_up': picked_up,
-        }
-
+        info = {'Goal_success': object_goal_success}
         return info
 
     def get_reward(self, info):
-        if self.task == 'goal_reaching':
-            return info['object_goal_success'] - 1
-        elif self.task == 'pickup':
-            return info['picked_up'] - 1
-        elif self.task == 'Pick and Place':
-            return info['Goal_Success'] - 1
+        return info['Goal_success'] - 1
+
 
     def compute_reward_pu(self, obs, actions, next_obs, contexts):
         obj_state = self.format_obs(next_obs['state_observation'])[:, self.start_obj_ind:self.start_obj_ind + 3]
@@ -746,9 +719,11 @@ class MURMENV(PandaBaseEnv):
         ee_pos = self.get_end_effector_pos()
         target_pos = np.array(bullet.get_body_info(self._obj)['pos'])
         adjustment = np.array([0, 0, 0.014])
+        adjustment1 = np.array([0, 0, 0.1])
         adjustment2 = np.array([0, 0, 0.01])
-        if self.obj_2 == 1:
+        if self.obj_index == 1:
             target_pos = np.array(bullet.get_body_info(self._obj)['pos']) + adjustment
+            target_pos2 = np.array(bullet.get_body_info(self._obj)['pos']) + adjustment1
             goal = goal + adjustment2
 
         ee_set_pos = np.array([0.1, -0.55, 1.5])
@@ -757,7 +732,7 @@ class MURMENV(PandaBaseEnv):
         #print('eef', ee_pos)
 
         aligned = np.linalg.norm(target_pos[:2] - ee_pos[:2]) < 0.005
-        on_top = np.linalg.norm(target_pos[2] - ee_pos[2]) < 0.01
+        on_top = np.linalg.norm(target_pos[2] - ee_pos[2]) < 0.02
         done = (np.linalg.norm(target_pos - goal) < 0.03) or self.done
 
         on_drop_height = 0.095 < target_pos[2] - goal[2] < 0.125
@@ -805,7 +780,10 @@ class MURMENV(PandaBaseEnv):
         if not grasp and self.goal_near == 0:
             if not aligned and not on_top:
                 #print('Stage 1: Approaching')
-                action = target_pos - ee_pos
+                if self.obj_index == 1:
+                    action = target_pos2 - ee_pos
+                else:
+                    action = target_pos - ee_pos
                 self.z += 0.1
                 #print('z', self.z)
                 action *= self.z*1.5
@@ -822,7 +800,7 @@ class MURMENV(PandaBaseEnv):
                 #print('Stage 2: Aligning')
                 action = target_pos - ee_pos
                 action[2] = 0
-                action *= 1
+                action *= 0.5
                 # action = np.append(action, ori_angle)
                 self.grip = -1
 
