@@ -144,13 +144,8 @@ box9 = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
 
 
 cube = loader(ASSET_PATH, os.path.join("obj", "cube.urdf"),
-              #On a table
-              pos=[ 0.45, 0, 1.03],
-              # Goal example on box center
-              #pos=[-0.75, 0, 1.4],
-              #
               quat=[0, 0, 0, 1],
-              scale=0.065) #0.05
+              scale=0.065)
 
 # cylinder = loader(ASSET_PATH, os.path.join("obj", "cylinder.urdf"),
 #               #On a table
@@ -159,14 +154,10 @@ cube = loader(ASSET_PATH, os.path.join("obj", "cube.urdf"),
 #               scale=0.5)
 
 rectangularprism1 = loader(ASSET_PATH, os.path.join("obj", "rectangularprism1.urdf"),
-              #On a table
-              pos=[ 0.45, 0, 1.031],
               quat=[0, 1, 1, 0],
               scale=0.06)
 
 rectangularprism2 = loader(ASSET_PATH, os.path.join("obj", "rectangularprism2.urdf"),
-              #On a table
-              pos=[ 0.45, 0, 1.048],
               quat=[0, 0, 0, 1],
               scale=0.06)
 
