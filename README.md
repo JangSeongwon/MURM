@@ -3,11 +3,11 @@
 --------------------------
 
 During Training RL,
-nvidia-smi -q (Check GPU temperature)
+nvidia-smi -q (Check GPU temperature in case)
 
 --------------------------
 
-## Installation
+## Installation Needed
 
 Used : PyBullet, Pytorch
 
