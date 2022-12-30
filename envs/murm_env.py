@@ -179,7 +179,7 @@ class MURMENV(PandaBaseEnv):
         self._end_effector = bullet.get_index_by_attribute(
             self._panda, 'link_name', 'gripper_site')
 
-        # Random Color and Shape
+        # Random Color and Shape of Obj
         self._obj = self.random_obj_generation()
         print('cube 0 / prism1 1 / prism2 2 / ', self.obj_index)
         rgba = self.sample_object_color()
@@ -213,11 +213,11 @@ class MURMENV(PandaBaseEnv):
         random_shape = ['cube', 'rectangularprism1', 'rectangularprism2']
         chosen_shape = random.choice(random_shape)
 
-        #chosen_shape = 'rectangularprism1' #Bottle
+        #chosen_shape = 'rectangularprism2' #Bottle
         #chosen_shape='cube'
         if chosen_shape == 'cube':
             self.obj_index = 0
-            obj = bullet.objects.cube(pos=[0.5, 0.1, 1.03])
+            obj = bullet.objects.cube(pos=self.sample_object_location())
 
         elif chosen_shape == 'rectangularprism1':
             self.obj_index = 1
@@ -648,7 +648,10 @@ class MURMENV(PandaBaseEnv):
         if gripper == -1:
             self.pre_grasp()
             p.stepSimulation()
-        elif gripper == 1:
+        elif gripper == 1 and self.obj_index == 2:
+            self.grasp2(self._obj)
+            p.stepSimulation()
+        elif gripper == 1 and (self.obj_index == 0 or self.obj_index == 1):
             self.grasp(self._obj)
             p.stepSimulation()
 
@@ -689,6 +692,7 @@ class MURMENV(PandaBaseEnv):
         self.y = 0
         self.z = 0.5
         self.xx = 0.5
+        self.up = 0
         self.goal_near = 0
         self.achieve_check = 0
         self.time_add = 0
@@ -723,7 +727,7 @@ class MURMENV(PandaBaseEnv):
 
         aligned = np.linalg.norm(target_pos[:2] - ee_pos[:2]) < 0.005
         done = (np.linalg.norm(target_pos - goal) < 0.03) or self.done
-        on_top = np.linalg.norm(target_pos[2] - ee_pos[2]) < 0.02
+        on_top = np.linalg.norm(target_pos[2] - ee_pos[2]) < 0.015
         if self.obj_index == 1 or self.obj_index == 0:
             on_top = np.linalg.norm(target_pos[2] - ee_pos[2]) < 0.01
         on_drop_height = 0.095 < target_pos[2] - goal[2] < 0.125
@@ -807,6 +811,8 @@ class MURMENV(PandaBaseEnv):
             if not on_drop_height and not placing and not self.trigger: # and not turned:
                 #print('Stage 5: Going to Placing(up)')
                 action = np.array([0., 0., 0.2])
+                self.up += 0.1
+                action *= self.up*1
                 # action = np.append(action, ori_angle)
                 self.grip = 1
 
