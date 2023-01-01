@@ -65,8 +65,8 @@ Env2: Multi-view task
 12/30 Analysis  
 
 1. Collected first demo data    
-=> Single episode = 110seconds (300 timesteps)  
-=> 90K transitions, 300 episodes, About 9hours  
+=> Single episode = 78seconds (300 timesteps)  
+=> 120K transitions, 400 episodes with 80x5 split RAM, About 6hours  
 
 2. Need to pretrain VAE. 
     -128 batches in 1 epoch = 8min, 480seconds
