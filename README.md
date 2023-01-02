@@ -5,6 +5,9 @@
 During Training RL,
 nvidia-smi -q (Check GPU temperature in case)
 
+RAM check
+sar -r 1
+
 --------------------------
 
 ## Installation Needed
