@@ -16,7 +16,7 @@ Used : PyBullet, Pytorch
 
 ```
 python = 3.8 version
-
+Anaconda env = murm1  
 ```
 
 Need at least 120GB space
