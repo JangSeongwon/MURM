@@ -19,6 +19,14 @@ python = 3.8 version
 
 ```
 
+Need at least 120GB space
+
+```
+Using 2TB HDD  
+path: /media/jang/jang/0ubuntu/    
+```
+
+
 --------------------------
 # Environment Settings
 
