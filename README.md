@@ -23,7 +23,8 @@ Need at least 120GB space
 
 ```
 Using 2TB HDD  
-path: /media/jang/jang/0ubuntu/    
+path: /media/jang/jang/0ubuntu/ 
+image_dataset , images , Video_Check , Vae_Model
 ```
 
 
