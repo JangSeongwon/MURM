@@ -1,0 +1,58 @@
+import numpy as np
+
+from rlkit.util.io import load_local_or_remote_file
+
+
+
+path = "/home/jang/data/data_collection/dataset/Running_Test/"
+data1 = path + 'singleview_global_images.npy'
+data2 = path + 'singleview_active_images.npy'
+
+image1 = load_local_or_remote_file(data1)
+image2 = load_local_or_remote_file(data2)
+
+# print('IMAGE1', image1, type(image1))
+# print('IMAGE2', image2)
+dataset1 = image1.item()
+dataset2 = image2.item()
+
+x = dataset1.get('initial env')
+y = dataset2.get('initial env')
+print('X',x,y)
+
+num_episodes = 80
+num_timesteps = 300
+imlength = 256*256*3
+
+# Example
+# a = {'obs': np.zeros((num_episodes, num_timesteps, imlength), dtype=np.uint8),
+#     'i_env' : np.zeros((num_episodes, imlength), dtype=np.uint8)}
+#
+# b = {'obs': np.ones((num_episodes, num_timesteps, imlength), dtype=np.uint8),
+#     'i_env' : np.ones((num_episodes, imlength), dtype=np.uint8)}
+# print('a obs', a['obs'])
+# print('a i_env', a['i_env'])
+
+c = np.zeros((num_episodes, num_timesteps, imlength), dtype=np.uint8)
+c = np.append(c, dataset1['observations'], axis=0)
+c = np.append(c, dataset2['observations'], axis=0)
+# c = np.append(c, dataset3['observations'], axis=0)
+# c = np.append(c, dataset4['observations'], axis=0)
+# c = np.append(c, dataset5['observations'], axis=0)
+c = np.delete(c, np.s_[0:81], axis=0)
+
+d = np.zeros((num_episodes, imlength), dtype=np.uint8)
+d = np.append(d, dataset1['initial env'], axis=0)
+d = np.append(d, dataset2['initial env'], axis=0)
+# d = np.append(d, dataset3['initial env'], axis=0)
+# d = np.append(d, dataset4['initial env'], axis=0)
+# d = np.append(d, dataset5['initial env'], axis=0)
+d = np.delete(d, np.s_[0:81], axis=0)
+
+Image_For_Training = {
+    'observations': c,
+    'initial_env': d
+}
+
+print('Image_For_Training', Image_For_Training)
+
