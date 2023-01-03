@@ -9,11 +9,11 @@ from roboverse.envs.serializable import Serializable
 
 
 class PandaBaseEnv(gym.Env, Serializable):
-
+    
     initial_positions = {
-        'panda_joint1': 0.0, 'panda_joint2': -0.54, 'panda_joint3': 0.0,
-        'panda_joint4': -2.6, 'panda_joint5': -0.30, 'panda_joint6': 2.0,
-        'panda_joint7': 1.0, 'panda_finger_joint1': 0.02, 'panda_finger_joint2': 0.02,
+        'panda_joint1': 0.05, 'panda_joint2': -0.5, 'panda_joint3': -0.07,
+        'panda_joint4': -2.95, 'panda_joint5': -0.06, 'panda_joint6': 2.4,
+        'panda_joint7': 0.81, 'panda_finger_joint1': 0.02, 'panda_finger_joint2': 0.02,
     }
 
     def __init__(self,
