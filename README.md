@@ -16,6 +16,11 @@ Used : PyBullet, Pytorch
 
 ```
 python = 3.8 version
+gym==0.12.1
+pybullet==2.5.5
+pygame==1.9.6
+opencv-python
+
 Anaconda env = murm1  
 ```
 
