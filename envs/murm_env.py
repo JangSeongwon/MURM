@@ -172,9 +172,9 @@ class MURMENV(PandaBaseEnv):
             p.stepSimulation()
             time.sleep(self._timeStep)
 
-        self._workspace = bullet.Sensor(self._panda,
-            xyz_min=self._pos_low, xyz_max=self._pos_high,
-            visualize=False, rgba=[0,1,0,.1])
+        # self._workspace = bullet.Sensor(self._panda,
+        #     xyz_min=self._pos_low, xyz_max=self._pos_high,
+        #     visualize=False, rgba=[0,1,0,.1])
 
         self._end_effector = bullet.get_index_by_attribute(
             self._panda, 'link_name', 'gripper_site')
