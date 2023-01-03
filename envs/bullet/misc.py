@@ -14,6 +14,10 @@ import pybullet_data as pdata
 from roboverse.utils.serialization import make_dir
 
 
+#########################
+#### setup functions ####
+#########################
+
 def connect():
     clid = p.connect(p.SHARED_MEMORY)
     if (clid < 0):
@@ -97,11 +101,10 @@ def load_urdf(filepath, pos=[0, 0, 0], quat=[0, 0, 0, 1], scale=1, rgba=None):
     return body
 
 def load_fixed_urdf(filepath, pos=[0, 0, 0], quat=[0, 0, 0, 1], scale=1, rgba=None):
-    body = p.loadURDF(filepath, globalScaling=scale,useFixedBase=True)
+    body = p.loadURDF(filepath, globalScaling=scale, useFixedBase=True)
     p.resetBasePositionAndOrientation(body, pos, quat)
     if rgba is not None:
         p.changeVisualShape(body, -1, rgbaColor=rgba)
-
     return body
 
 def load_obj(filepathcollision, filepathvisual, pos=[0, 0, 0], quat=[0, 0, 0, 1], scale=1, rgba=None):
@@ -131,31 +134,31 @@ def load_state(*loadpath):
 #### rendering functions ####
 #############################
 
-def get_view_matrix(target_pos=[.75, -.2, 0], distance=0.9,
-                    yaw=90, pitch=-20, roll=0, up_axis_index=2):
+#Inputs are adjusted from the murm_env
+def get_view_matrix(target_pos=[0, 0, 0], distance=0.1,
+                    yaw=0, pitch=-90, roll=0, up_axis_index=2):
     view_matrix = p.computeViewMatrixFromYawPitchRoll(
         target_pos, distance, yaw, pitch, roll, up_axis_index)
     return view_matrix
 
-def get_projection_matrix(height, width, fov=60, near_plane=0.1, far_plane=2):
+def get_projection_matrix(height, width, fov=60, near_plane=0.1, far_plane=5.5):
     aspect = width / height
     projection_matrix = p.computeProjectionMatrixFOV(fov, aspect, near_plane, far_plane)
     return projection_matrix
 
-def render(height, width, view_matrix, projection_matrix,
-           shadow=1, light_direction=[1,1,1], renderer=p.ER_BULLET_HARDWARE_OPENGL, gaussian_width=5):
-    ## ER_BULLET_HARDWARE_OPENGL
+def render(height, width, view_matrix, projection_matrix, lightdistance=0.1,
+           shadow=1, light_direction=[0, 0, 1], renderer=p.ER_TINY_RENDERER, gaussian_width=5): #p.ER_BULLET_HARDWARE_OPENGL
+
     img_tuple = p.getCameraImage(width,
                                  height,
                                  view_matrix,
                                  projection_matrix,
+                                 lightDistance=lightdistance,
                                  shadow=shadow,
                                  lightDirection=light_direction,
                                  renderer=renderer)
     _, _, img, depth, segmentation = img_tuple
-    # import ipdb; ipdb.set_trace()
-    # Here, if I do len(img), I get 9216.
-    # img = np.reshape(np.array(img), (48, 48, 4))
+
     img = img[:,:,:-1]
     if gaussian_width > 0:
         img = cv2.GaussianBlur(img, (gaussian_width, gaussian_width), 0)
