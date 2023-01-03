@@ -17,7 +17,7 @@ class PandaBaseEnv(gym.Env, Serializable):
     }
 
     def __init__(self,
-                 img_dim=128,
+                 img_dim=256,
                  gui=False,
                  action_scale=.2,
                  action_repeat=10,
