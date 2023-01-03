@@ -1,0 +1,78 @@
+newmtl Preview:1
+Ns 50
+Ka 0 0 0
+Kd 0.666667 0.666667 0.666667
+Ks 0.13403 0.0498845 0.00845036
+d 1
+newmtl ShelfLeft:1
+Ns 50
+Ka 0 0 0
+Kd 0.996078 0.996078 0.996078
+Ks 0.17248 0.0792941 0.0959837
+map_Kd white-marble.png
+d 1
+newmtl Preview:2
+Ns 50
+Ka 0 0 0
+Kd 0.666667 0.666667 0.666667
+Ks 0.13403 0.0498845 0.00845036
+d 1
+newmtl ShelfRight:2
+Ns 50
+Ka 0 0 0
+Kd 0.988235 0.988235 0.988235
+Ks 0.121691 0.0565572 0.15711
+map_Kd white-marble.png
+d 1
+newmtl Preview:3
+Ns 50
+Ka 0 0 0
+Kd 0.666667 0.666667 0.666667
+Ks 0.13403 0.0498845 0.00845036
+d 1
+newmtl ShelfBottom:3
+Ns 50
+Ka 0 0 0
+Kd 0.996078 0.996078 0.996078
+Ks 0.087304 0.118911 0.135935
+map_Kd white-marble.png
+d 1
+newmtl Preview:4
+Ns 50
+Ka 0 0 0
+Kd 0.666667 0.666667 0.666667
+Ks 0.13403 0.0498845 0.00845036
+d 1
+newmtl ShelfTop:4
+Ns 50
+Ka 0 0 0
+Kd 0.992157 0.992157 0.992157
+Ks 0.14574 0.0442635 0.136975
+map_Kd white-marble.png
+d 1
+newmtl Preview:5
+Ns 50
+Ka 0 0 0
+Kd 0.666667 0.666667 0.666667
+Ks 0.13403 0.0498845 0.00845036
+d 1
+newmtl Shelf1:5
+Ns 50
+Ka 0 0 0
+Kd 0.996078 0.996078 0.996078
+Ks 0.0943453 0.0616815 0.0818113
+map_Kd white-marble.png
+d 1
+newmtl Preview:6
+Ns 50
+Ka 0 0 0
+Kd 0.666667 0.666667 0.666667
+Ks 0.13403 0.0498845 0.00845036
+d 1
+newmtl Shelf2:6
+Ns 50
+Ka 0 0 0
+Kd 0.988235 0.988235 0.988235
+Ks 0.0182901 0.00244284 0.0568326
+map_Kd white-marble.png
+d 1

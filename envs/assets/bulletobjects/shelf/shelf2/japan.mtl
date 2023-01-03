@@ -1,0 +1,10 @@
+# Blender MTL File: 'jpcbhlwshlfhgfr.blend'
+# Material Count: 1
+
+newmtl Wood
+Ns 50
+Ka 0 0 0
+Kd 0.992157 0.992157 0.992157
+Ks 0.14574 0.0442635 0.136975
+map_Kd plywood.jpg
+d 1

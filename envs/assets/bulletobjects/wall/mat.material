@@ -1,0 +1,13 @@
+material wallmat{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                plywood.jpg
+                scale 1 1
+            }
+        }   
+    }
+}
