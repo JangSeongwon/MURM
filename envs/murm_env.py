@@ -28,8 +28,8 @@ class MURMENV(PandaBaseEnv):
                  observation_mode='state',
 
                  #Image Dimension
-                 obs_img_dim=1024, #VQVAE2 #sawyer=48
-                 obs_img_dim_active=128,
+                 obs_img_dim=256, #VQVAE2 #sawyer=48
+                 obs_img_dim_active=256,
                  success_threshold=0.03,
                  transpose_image=False,
                  invisible_robot=False,
@@ -221,7 +221,7 @@ class MURMENV(PandaBaseEnv):
 
         elif chosen_shape == 'rectangularprism1':
             self.obj_index = 1
-            obj = bullet.objects.rectangularprism1(pos=self.sample_object_location())
+            obj = bullet.objects.rectangularprism1(pos=self.sample_object_location()) #[0.5, 0.1, 1.03])
 
         elif chosen_shape == 'rectangularprism2':
             self.obj_index = 2
@@ -757,8 +757,8 @@ class MURMENV(PandaBaseEnv):
         #print('theta', turned)
         #print('trigger',self.trigger)
         #
-        # if self.timeStep > 200:
-        #     print('time', self.timeStep)
+        if self.timeStep > 200:
+            print('time', self.timeStep)
 
         action = np.array([0, 0, 0])
         self.grip = 1
