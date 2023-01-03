@@ -28,8 +28,8 @@ class MURMENV(PandaBaseEnv):
                  observation_mode='state',
 
                  #Image Dimension
-                 obs_img_dim=256, #VQVAE2 #sawyer=48
-                 obs_img_dim_active=256,
+                 obs_img_dim=1024, #VQVAE2 #sawyer=48
+                 obs_img_dim_active=128,
                  success_threshold=0.03,
                  transpose_image=False,
                  invisible_robot=False,
@@ -163,7 +163,7 @@ class MURMENV(PandaBaseEnv):
         self.ll, self.ul, self.jr, self.rs = self.get_joint_ranges()
 
         if self._use_IK:
-            self._home_hand_pose = [0.2, 0.0, 1.4,
+            self._home_hand_pose = [0.45, 0.0, 1.4,
                                     min(m.pi, max(-m.pi, m.pi)),
                                     min(m.pi, max(-m.pi, 0)),
                                     min(m.pi, max(-m.pi, 0))]
@@ -630,9 +630,18 @@ class MURMENV(PandaBaseEnv):
 #################################################################################################
 
     def step(self, *action):
+        # Joint Initialization Code
+        # a0 = bullet.get_joint_state(self._panda, 0)
+        # a1 = bullet.get_joint_state(self._panda, 1)
+        # a2 = bullet.get_joint_state(self._panda, 2)
+        # a3 = bullet.get_joint_state(self._panda, 3)
+        # a4 = bullet.get_joint_state(self._panda, 4)
+        # a5 = bullet.get_joint_state(self._panda, 5)
+        # a6 = bullet.get_joint_state(self._panda, 6)
+        # print('jointinfo0', a0, a1, a2, a3, a4, a5, a6)
 
         pos = bullet.get_link_state(self._panda, self._end_effector, 'pos')
-        # theta = p.getLinkState(self._panda, self.end_eff_idx)[5][:3]
+        #theta = p.getLinkState(self._panda, self.end_eff_idx)[5][:3]
         # a = theta[0]*pi
         # b = theta[1]*pi
         # c = theta[2]*pi
