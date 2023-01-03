@@ -9,7 +9,7 @@ from roboverse.envs.serializable import Serializable
 
 
 class PandaBaseEnv(gym.Env, Serializable):
-    
+
     initial_positions = {
         'panda_joint1': 0.05, 'panda_joint2': -0.5, 'panda_joint3': -0.07,
         'panda_joint4': -2.95, 'panda_joint5': -0.06, 'panda_joint6': 2.4,
@@ -17,7 +17,7 @@ class PandaBaseEnv(gym.Env, Serializable):
     }
 
     def __init__(self,
-                 img_dim=256,
+                 img_dim=128,
                  gui=False,
                  action_scale=.2,
                  action_repeat=10,
