@@ -137,7 +137,7 @@ class MURMENV(PandaBaseEnv):
 
         #Robot
         flags = p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES | p.URDF_USE_INERTIA_FROM_FILE | p.URDF_USE_SELF_COLLISION
-        self._panda = p.loadURDF(os.path.join('/home/skc/PycharmProjects/murm_env/roboverse/envs/assets/Panda_robot/urdf/panda.urdf'),
+        self._panda = p.loadURDF(os.path.join('/home/jang/PycharmProjects/bullet env/roboverse/envs/assets/Panda_robot/urdf/panda.urdf'),
                                    basePosition=self._pos_init, useFixedBase=True, flags=flags)
         assert self._panda is not None, "Failed to load the panda model"
 
@@ -172,12 +172,16 @@ class MURMENV(PandaBaseEnv):
             p.stepSimulation()
             time.sleep(self._timeStep)
 
+        self._workspace = bullet.Sensor(self._panda,
+            xyz_min=self._pos_low, xyz_max=self._pos_high,
+            visualize=False, rgba=[0,1,0,.1])
+
         self._end_effector = bullet.get_index_by_attribute(
             self._panda, 'link_name', 'gripper_site')
 
         # Random Color and Shape of Obj
         self._obj = self.random_obj_generation()
-        print('cube 0 / prism1 1 / prism2 2 / ', self.obj_index)
+        # print('cube 0 / prism1 1 / prism2 2 / ', self.obj_index)
         rgba = self.sample_object_color()
         p.changeVisualShape(self._obj, -1, rgbaColor=rgba)
         self._format_state_query()
@@ -185,17 +189,17 @@ class MURMENV(PandaBaseEnv):
         #Goal Generation Process
         self.goal_pos = self.random_goal_generation()
         #self.goal_pos = np.array([0.25, -0.7, 1.05]) #Fixed goal for demo video
-        print('Printing Goal:', self.goal_pos)
+        # print('Printing Goal:', self.goal_pos)
 
         return self.get_observation()
 
     def sample_object_location(self):
         if self.obj_index == 0 or self.obj_index == 1:
             initial_random_pos = np.random.uniform(low=self._object_position_low, high=self._object_position_high)
-            print('Initial pos', initial_random_pos)
+            #print('Initial pos', initial_random_pos)
         elif self.obj_index == 2:
             initial_random_pos = np.random.uniform(low=self._object_position_low1, high=self._object_position_high1)
-            print('Initial pos', initial_random_pos)
+            #print('Initial pos', initial_random_pos)
         else:
             print('No Obj')
         return initial_random_pos
@@ -460,7 +464,7 @@ class MURMENV(PandaBaseEnv):
 
         img, depth, segmentation = bullet.render(
             self.obs_img_dim, self.obs_img_dim, self._view_matrix_obs,
-            self._projection_matrix_obs, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
+            self._projection_matrix_obs, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
         if self._transpose_image:
             img = np.transpose(img, (2, 0, 1))
         return img
@@ -494,7 +498,7 @@ class MURMENV(PandaBaseEnv):
 
         img_active, depth, segmentation = bullet.render(
             self.obs_img_dim_active, self.obs_img_dim_active, view_matrix_obs_active,
-            projection_matrix_obs_active, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
+            projection_matrix_obs_active, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
         if self._transpose_image:
             img_active = np.transpose(img_active, (2, 0, 1))
         return img_active
