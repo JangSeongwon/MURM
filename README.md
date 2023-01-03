@@ -81,11 +81,11 @@ Env2: Multi-view task
       
 -------------------------- 
 
-12/30 Analysis  
+1/2 Analysis  
 
-1. Collected first demo data    
-=> Single episode = 73seconds (300 timesteps)  
-=> 120K transitions, 400 episodes with 80x5 split RAM, About 6hours  
+1. Collecting demo data with two computers    
+=> Single episode = 60, 70 seconds (275 timesteps) about an hour per set
+=> 120K transitions, ? episodes with 50x8   
 
 2. Need to pretrain VAE. 
     -128 batches in 1 epoch = 8min, 480seconds
