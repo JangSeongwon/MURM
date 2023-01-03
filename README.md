@@ -24,7 +24,7 @@ opencv-python
 Anaconda env = murm1  
 ```
 
-Need at least 120GB space
+Need at least 240GB space
 
 ```
 Using 2TB HDD  
