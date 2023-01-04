@@ -1,12 +1,17 @@
 import numpy as np
 from rlkit.util.io import load_local_or_remote_file
 
-path = "/home/jang/data/data_collection/dataset/Running_Test/"
-data1 = path + 'singleview_global_images.npy'
-data2 = path + 'singleview_active_images.npy'
+path = "/media/jang/jang/0ubuntu/image_dataset/Running_test/"
 
-image1 = load_local_or_remote_file(data1)
-image2 = load_local_or_remote_file(data2)
+path1 = "/media/jang/jang/0ubuntu/image_dataset/128_150_5/1/"
+path2 = "/media/jang/jang/0ubuntu/image_dataset/128_150_5/2/"
+
+
+data_path1 = path1 + 'singleview_active_images.npy'
+data_path2 = path2 + 'singleview_active_images.npy'
+
+image1 = load_local_or_remote_file(data_path1)
+image2 = load_local_or_remote_file(data_path2)
 
 # print('IMAGE1', image1, type(image1))
 # print('IMAGE2', image2)
@@ -15,11 +20,11 @@ dataset2 = image2.item()
 
 x = dataset1.get('initial env')
 y = dataset2.get('initial env')
-print('X',x,y)
+#print('X', x, y)
 
-num_episodes = 80
-num_timesteps = 300
-imlength = 256*256*3
+num_episodes = 150
+num_timesteps = 275
+imlength = 128*128*3
 
 # Example
 # a = {'obs': np.zeros((num_episodes, num_timesteps, imlength), dtype=np.uint8),
@@ -36,7 +41,7 @@ obs = np.append(obs, dataset2['observations'], axis=0)
 # obs = np.append(obs, dataset3['observations'], axis=0)
 # obs = np.append(obs, dataset4['observations'], axis=0)
 # obs = np.append(obs, dataset5['observations'], axis=0)
-obs = np.delete(obs, np.s_[0:81], axis=0)
+obs = np.delete(obs, np.s_[0:151], axis=0)
 
 ini = np.zeros((num_episodes, imlength), dtype=np.uint8)
 ini = np.append(ini, dataset1['initial env'], axis=0)
@@ -44,7 +49,7 @@ ini = np.append(ini, dataset2['initial env'], axis=0)
 # ini = np.append(ini, dataset3['initial env'], axis=0)
 # ini = np.append(ini, dataset4['initial env'], axis=0)
 # ini = np.append(ini, dataset5['initial env'], axis=0)
-ini = np.delete(ini, np.s_[0:81], axis=0)
+ini = np.delete(ini, np.s_[0:151], axis=0)
 
 fin = np.zeros((num_episodes, imlength), dtype=np.uint8)
 fin = np.append(fin, dataset1['final env'], axis=0)
@@ -52,7 +57,7 @@ fin = np.append(fin, dataset2['final env'], axis=0)
 # fin = np.append(fin, dataset3['final env'], axis=0)
 # fin = np.append(fin, dataset4['final env'], axis=0)
 # fin = np.append(fin, dataset5['final env'], axis=0)
-fin = np.delete(fin, np.s_[0:81], axis=0)
+fin = np.delete(fin, np.s_[0:151], axis=0)
 
 Image_For_Training = {
     'observations': obs,
@@ -60,5 +65,6 @@ Image_For_Training = {
     'final env': fin,
 }
 
-print('Image_For_Training', Image_For_Training)
+np.save(path + "train_images.npy", Image_For_Training)
+#print('Image_For_Training', Image_For_Training.shape)
 
