@@ -37,8 +37,8 @@ path: /media/jang/jang/0ubuntu/
 
 Dataset Size
 ```
-128 image - 150 episodes, 275 timesteps = 4.125K images  
-256 image - 50 episodes, 275 timesteps = 1.375K images 
+128 image - 150 episodes, 275 timesteps = 41.25K images  
+256 image - 50 episodes, 275 timesteps = 13.75K images 
 
 Comparing Standard:
       ImageNet = 1200K
