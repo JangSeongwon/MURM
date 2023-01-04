@@ -40,8 +40,9 @@ Dataset Size
 128 image - 150 episodes, 275 timesteps = 4.125K images  
 256 image - 50 episodes, 275 timesteps = 1.375K images 
 
-ImageNet = 1200K
-FFHQ = 70K
+Comparing Standard:
+      ImageNet = 1200K
+      FFHQ = 70K
 ```
 
 --------------------------
