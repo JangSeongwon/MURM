@@ -34,6 +34,14 @@ path: /media/jang/jang/0ubuntu/
       275 timesteps per episode 
 ```
 
+Dataset Size
+```
+128 image - 150 episodes, 275 timesteps = 4.125K images  
+256 image - 50 episodes, 275 timesteps = 1.375K images 
+
+ImageNet = 1200K
+FFHQ = 70K
+```
 
 --------------------------
 # Environment Settings
@@ -93,7 +101,7 @@ Env2: Multi-view task
     - 1000 epoches = 133hours, 6days
     -Save Model in .pt   
 
-    Parameters:   
+    Parameters of VQVAE2:   
     Beta = 0.25  
     weight decay = 0  
     latent_loss_weight = 0.25  
