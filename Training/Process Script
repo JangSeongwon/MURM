@@ -10,6 +10,22 @@ VQVAEs
 -------------------------------------------------------------------------------------------------------------
 Offline RL
 
+
+def contextual_env_distrib_and_reward:  
+      Sample latent vector for goal from '/home/jang/PycharmProjects/rlkit/rlkit/envs/contextual/latent_distributions.py'
+            Go to 'def presample_goals(self)'
+            Code 
+            '''
+                          for i in range(self.num_batches):  
+                              self.env.reset()  
+                              init_obs = ptu.from_numpy(np.uint8(self.env.render_obs()).transpose() / 255.0)  
+                              init_z = ptu.get_numpy(self.model.encode(init_obs))  
+                              sampled_z = self.model.sample_prior(self.samples_per_batch, cond=init_z)  
+                              dataset.append(sampled_z)  
+            '''
+
+
+
 -------------------------------------------------------------------------------------------------------------
 
 
