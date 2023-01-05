@@ -104,8 +104,13 @@ Env2: Multi-view task
     weight decay = 0  
     latent_loss_weight = 0.25  
     batch = 128  
- 
-3. Need to think of active-disadv task 
+
+3. Use latent space specification method for goal sampling active camera goals  
+      - Only have to condition one goal to end  
+      - If global as well -> difficult to converge?  
+      - Reward Turning on and off version as solution  
+      
+4. Need to think of active-disadv task 
     
 --------------------------
 
