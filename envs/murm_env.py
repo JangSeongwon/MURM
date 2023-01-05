@@ -28,8 +28,8 @@ class MURMENV(PandaBaseEnv):
                  observation_mode='state',
 
                  #Image Dimension
-                 obs_img_dim=256, #VQVAE2 #sawyer=48
-                 obs_img_dim_active=256,
+                 obs_img_dim=128, #VQVAE2 #sawyer=48
+                 obs_img_dim_active=128,
                  success_threshold=0.03,
                  transpose_image=False,
                  invisible_robot=False,
@@ -757,8 +757,8 @@ class MURMENV(PandaBaseEnv):
         #print('theta', turned)
         #print('trigger',self.trigger)
         #
-        if self.timeStep > 200:
-            print('time', self.timeStep)
+        # if self.timeStep > 200:
+        #     print('time', self.timeStep)
 
         action = np.array([0, 0, 0])
         self.grip = 1
