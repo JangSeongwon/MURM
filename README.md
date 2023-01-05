@@ -28,7 +28,7 @@ Anaconda env = murm1
 Need at least 240GB space
 
 ```
-Using 2TB HDD  
+Using 2TB HDD (+ 1TB SSD)
 path: /media/jang/jang/0ubuntu/ 
       image_dataset , images , presampled_goals, Video_Check , Vae_Model  
       128_100_1, 128_150_5+, 256_50_8+, Running_test  
@@ -91,23 +91,21 @@ Env2: Multi-view task
       
 -------------------------- 
 
-1/2 Analysis  
+1/5 Analysis  
 
 1. Collecting demo data with two computers    
-=> Single episode = 60, 70 seconds (275 timesteps) about an hour per set
-=> 120K transitions, ? episodes with 50x8   
+=> OKAY 
 
 2. Need to pretrain VAE. 
-    -128 batches in 1 epoch = 8min, 480seconds
-    -Maybe 500 epoches = 67hours, 3days
-    - 1000 epoches = 133hours, 6days
-    -Save Model in .pt   
+=> OKAY Perhaps 500 epoches = 3days
 
     Parameters of VQVAE2:   
     Beta = 0.25  
     weight decay = 0  
     latent_loss_weight = 0.25  
     batch = 128  
+ 
+3. Need to think of active-disadv task 
     
 --------------------------
 
