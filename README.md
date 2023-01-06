@@ -91,13 +91,16 @@ Env2: Multi-view task
       
 -------------------------- 
 
-1/5 Analysis  
+1/6 Analysis  
 
 1. Collecting demo data with two computers    
 => OKAY 
 
 2. Need to pretrain VAE. 
-=> OKAY Perhaps 500 epoches = 3days
+
+=> OKAY Perhaps 300 epoches = 1.5days & 6VQVAE model    
+=> Getting VQVAE with 300 epoches  
+=> Check goal sampling theory with vqvae model i have  
 
     Parameters of VQVAE2:   
     Beta = 0.25  
@@ -106,12 +109,12 @@ Env2: Multi-view task
     batch = 128  
 
 3. Use latent space specification method for goal sampling active camera goals  
-      - Only have to condition one goal to end  
-      - If global as well -> difficult to converge?  
-      - Reward Turning on and off version as solution  
+      - Condition active image goal to end  
+      - Global as wide  
+      - Reward global achieve as the same time active 
       
 4. Need to think of active-disadv task 
-    
+    - RandomGoal box as solution
 --------------------------
 
 # Next Process for Paper 2  
