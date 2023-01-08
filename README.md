@@ -114,7 +114,7 @@ Env2: Multi-view task
       - Reward global achieve as the same time active 
       
 4. Need to think of active-disadv task 
-    - RandomGoal box as solution
+    - Random Goal box as solution
 --------------------------
 
 # Next Process for Paper 2  
