@@ -99,7 +99,7 @@ Env2: Multi-view task
 2. Need to pretrain VAE. 
 
 => OKAY - Perhaps 500 epoches = 2days+4hours & 6VQVAE model    
-=> Getting VQVAE with 300 epoches  
+=> Getting VQVAE with 500 epoches with 600 episodes/ 165K images   
 => Check goal sampling theory with vqvae model i have  
 
     Parameters of VQVAE2:   
