@@ -91,7 +91,7 @@ Env2: Multi-view task
       
 -------------------------- 
 
-1/6 Analysis  
+1/11 Analysis  
 
 1. Collecting demo data with two computers    
 => OKAY 
@@ -100,7 +100,7 @@ Env2: Multi-view task
 
 => OKAY - Perhaps 500 epoches = 2days+4hours & 6VQVAE model    
 => Getting VQVAE with 500 epoches with 600 episodes/ 165K images   
-=> Check goal sampling theory with vqvae model i have  
+=> Check goal sampling theory with vqvae model I have - On Process 
 
     Parameters of VQVAE2:   
     Beta = 0.25  
