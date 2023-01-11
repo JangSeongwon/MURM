@@ -5,6 +5,7 @@
 ```
 Check GPU temperature in case  
 nvidia-smi -q 
+device = torch.device('cuda:0') 
 
 RAM check  
 sar -r 1
