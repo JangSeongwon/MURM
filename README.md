@@ -23,7 +23,7 @@ pybullet==2.5.5
 pygame==1.9.6
 opencv-python
 
-Anaconda env = murm1  
+Anaconda env = conda create -n murm python=3.8
 ```
 
 Need at least 240GB space
