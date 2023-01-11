@@ -1,0 +1,63 @@
+Starting training
+num_epoch for pixelcnn 100
+epoch 0
+Checking Batch 0
+LV + CLV, 1024 == root_len^2 torch.Size([32, 2048])
+num of batch 1
+e_indices.shape[0]  = 32768 32768
+Checking Batch 1
+LV + CLV, 1024 == root_len^2 torch.Size([32, 2048])
+num of batch 2
+e_indices.shape[0]  = 32768 32768
+Checking Batch 2
+LV + CLV, 1024 == root_len^2 torch.Size([32, 2048])
+num of batch 3
+e_indices.shape[0]  = 32768 32768
+Checking Batch 3
+LV + CLV, 1024 == root_len^2 torch.Size([32, 2048])
+num of batch 4
+e_indices.shape[0]  = 32768 32768
+Checking Batch 4
+LV + CLV, 1024 == root_len^2 torch.Size([32, 2048])
+num of batch 5
+e_indices.shape[0]  = 32768 32768
+Checking Batch 5
+LV + CLV, 1024 == root_len^2 torch.Size([32, 2048])
+num of batch 6
+e_indices.shape[0]  = 32768 32768
+Checking Batch 6
+LV + CLV, 1024 == root_len^2 torch.Size([32, 2048])
+num of batch 7
+e_indices.shape[0]  = 32768 32768
+Checking Batch 7
+LV + CLV, 1024 == root_len^2 torch.Size([32, 2048])
+num of batch 8
+e_indices.shape[0]  = 32768 32768
+Checking Batch 8
+LV + CLV, 1024 == root_len^2 torch.Size([19, 2048])
+num of batch 9
+e_indices.shape[0]  = 32768 19456
+Trainer / Train
+e_indices.shape[0]  = 32768 1024
+Traceback (most recent call last):
+  File "/home/jang/PycharmProjects/rlkit/examples/val/MURM_VAE_Train.py", line 257, in <module>
+    run_variants(VAETrainer, variants, run_id=0, process_args_fn=process_args)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/arglauncher.py", line 54, in run_variants
+    run_variant(experiment, variant)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/arglauncher.py", line 60, in run_variant
+    lu.run_experiment(
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/launcher_util.py", line 93, in run_experiment
+    method_call(None, variant)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/launcher_util.py", line 60, in __call__
+    self.exp_function(**variant)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/MyVAETrainer.py", line 383, in VAETrainer
+    model = train_model_func(train_vae_kwargs)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/torch/grill/common.py", line 97, in train_vqvae
+    vqvae = train_pixelcnn(
+  File "/home/jang/PycharmProjects/rlkit/rlkit/launchers/experiments/ashvin/pixelcnn_launcher.py", line 208, in train_pixelcnn
+    trainer.dump_samples(epoch, train_data, test=False)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/torch/vae/pixelcnn_trainer.py", line 144, in dump_samples
+    cond = self.vqvae.discrete_to_cont(env_latent).reshape(1, -1)
+  File "/home/jang/PycharmProjects/rlkit/rlkit/torch/vae/vq_vae.py", line 631, in discrete_to_cont
+    quantized = torch.matmul(
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu! (when checking argument for argument mat2 in method wrapper_mm)
