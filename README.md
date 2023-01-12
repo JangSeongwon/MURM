@@ -7,6 +7,9 @@ Check GPU temperature in case
 nvidia-smi -q 
 device = torch.device('cuda:0') 
 
+import rlkit.torch.pytorch_util as ptu  
+ptu.set_gpu_mode(True)  
+
 RAM check  
 sar -r 1
 ```
