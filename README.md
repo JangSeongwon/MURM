@@ -95,7 +95,7 @@ Env2: Multi-view task
       
 -------------------------- 
 
-1/11 Analysis  
+1/12 Analysis  
 
 1. Collecting demo data with two computers    
 => OKAY 
@@ -116,6 +116,7 @@ Env2: Multi-view task
       - Condition active image goal to end  
       - Global as wide  
       - Reward global achieve as the same time active 
+      => Problem: Taking too long to sample a goal + Not working
       
 4. Need to think of active-disadv task 
     - Random Goal box as solution
