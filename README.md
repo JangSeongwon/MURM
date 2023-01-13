@@ -76,21 +76,20 @@ Env2: Multi-view task
 ***Consider Hierarchical Reinforcement Learning for initial state of active-camera and more broader cases as Next Paper***  
 
 1. GCRL components:  
-   * Diversity in shapes(cube, rectangular prism) and colors(Full random) of objects  
+   * Diversity in shapes(cube, rectangular prism1, 2) and colors(Full random) of objects  
    * Fixed 9 goal boxes VS Random 1 goal box   
    * Random initial position(In range) of the object
-   * Random Action velocity in demos
+   * Random Action POS in demos
 
-2. Online RL will add Exploration to finetune MURM thus increase final success rate result in paper   
+2. Online Tuning needed - Add Exploration to finetune MURM thus increase final success rate   
   
-3. Replay Buffer (CCVAE참조: Use z bar as representation)  
+3. Replay Buffer
 
 4. Action diversity => Only 4-DOF 
 
 5. Method:  
-    *Sample active-view goal image using a conditional decoder with 9 boxes images as condition   
-    *Do exactly same with global-view image  
-    *Design reward function computed with global-view first and active-view next without condition thought in MURM paper  
+    *With Demo and VQVAE, train in offline RL   
+    *Design reward function computed with global-view first and active-view next  
       
       
 -------------------------- 
@@ -100,17 +99,12 @@ Env2: Multi-view task
 1. Collecting demo data with two computers    
 => OKAY 
 
-2. Need to pretrain VAE. 
+2. Need to pretrain VQVAE. 
 
 => OKAY - Perhaps 500 epoches = 2days+4hours & 6VQVAE model    
 => VQVAE with 500 epoches with 600 episodes/ 165K images   
 => Check goal sampling theory with vqvae model I have - On Process 
 
-    Parameters of VQVAE2:   
-    Beta = 0.25  
-    weight decay = 0  
-    latent_loss_weight = 0.25  
-    batch = 128  
 
 3. Use latent space specification method for goal sampling active camera goals  
       - Condition active image goal to end  
@@ -120,6 +114,7 @@ Env2: Multi-view task
       
 4. Need to think of active-disadv task 
     - Random Goal box as solution
+    
 --------------------------
 
 # Next Process for Paper 2  
@@ -130,6 +125,11 @@ In Low-level policy: Active-view and Global-view can be considered more suitably
 -Finding and detection of the object: Considering a more variety of initial state in terms of active-view camera    
 -Pick & Placing in Multi-view task: More organized reward function and structure of MURM  
 
-
+    Parameters of VQVAE2:   
+    Beta = 0.25  
+    weight decay = 0  
+    latent_loss_weight = 0.25  
+    batch = 128  
+ 
 --------------------------
 
