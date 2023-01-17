@@ -118,7 +118,7 @@ Env2: Multi-view task
     - IQL algorithm
     
     *Primary Concern*  
-    - How to use two latent vectors efficiently?? 
+    - How to use two latent vectors efficiently??    
            Images: Simply Concatenate features as in Lookcloser   
            Reward:  
              
