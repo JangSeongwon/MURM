@@ -116,6 +116,11 @@ Env2: Multi-view task
 5. Offline RL framework implementation   
     - PtP Analysis needed to utilize   
     - IQL algorithm
+    
+    *Primary Concern*  
+    - How to use two latent vectors efficiently?? Concatenate & Reward     
+    - Do I have to add noisy dataset?? and how much offline prior data??  
+       
         
 6. *If* success rate is satisfactory, Go for online fine-tuning as well     
    *If not* = Need to also implement online fine-tuning and check the results again   
