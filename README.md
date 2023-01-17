@@ -93,7 +93,7 @@ Env2: Multi-view task
       
 -------------------------- 
 
-1/12 Analysis  
+1/17 Analysis  
 
 1. Collecting demo data with two computers    
 => OKAY 
@@ -102,8 +102,7 @@ Env2: Multi-view task
 
 => OKAY - Perhaps 500 epoches = 2days+4hours & 6VQVAE model    
 => VQVAE with 500 epoches with 600 episodes/ 165K images   
-=> Check goal sampling theory with vqvae model I have - On Process 
-
+=> Need to check Offline RL training results
 
 3. Use latent space specification method for goal sampling active camera goals  
       - Condition active image goal to end  
@@ -113,22 +112,34 @@ Env2: Multi-view task
       
 4. Need to think of active-disadv task 
     - Random Goal box as solution
+
+5. Offline RL framework implementation   
+    - PtP Analysis needed to utilize   
+    - IQL algorithm
+        
+6. *If* success rate is satisfactory, Go for online fine-tuning as well     
+   *If not* = Need to also implement online fine-tuning and check the results again   
+            
+*The conclusion is first to think of way how to use online fine-tuning in my case*   
+ We can first expect task similarity & Use GCB theory      
     
+7. As additional process try images with lower-dimensional size (64x64 or 48x48 as lowest possibility)  
+  
+  
 --------------------------
 
 # Next Process for Paper 2  
 
 *More updated model with HRL  
-
+  
 In Low-level policy: Active-view and Global-view can be considered more suitably and efficiently      
 -Finding and detection of the object: Considering a more variety of initial state in terms of active-view camera    
 -Pick & Placing in Multi-view task: More organized reward function and structure of MURM  
 
-    Parameters of VQVAE2:   
-    Beta = 0.25  
-    weight decay = 0  
-    latent_loss_weight = 0.25  
-    batch = 128  
- 
 --------------------------
-
+Possible implementation of VQVAE2:  
+      *Parameters of VQVAE2:*  
+      Beta = 0.25  
+      weight decay = 0  
+      latent_loss_weight = 0.25  
+      batch = 128  
