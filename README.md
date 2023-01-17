@@ -118,7 +118,10 @@ Env2: Multi-view task
     - IQL algorithm
     
     *Primary Concern*  
-    - How to use two latent vectors efficiently?? Images: Simply Concatenate features as in Lookcloser & Reward:       
+    - How to use two latent vectors efficiently?? 
+           Images: Simply Concatenate features as in Lookcloser   
+           Reward:  
+             
     - Do I have to add noisy dataset?? and how much offline prior data??  
        
         
