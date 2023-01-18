@@ -38,7 +38,7 @@ Using 2TB HDD (+ 1TB SSD)
 path: /media/jang/jang/0ubuntu/ 
       image_dataset , images , presampled_goals, Video_Check , Vae_Model  
       128_100_1, 128_150_5+, 256_50_8+, Running_test  
-      275 timesteps per episode 
+      275 timesteps per episode = 78sec per episode
 ```
 
 Dataset Size
