@@ -3,23 +3,19 @@ import numpy as np
 import pybullet as p
 import pickle as pkl
 from tqdm import tqdm
-from roboverse.utils.renderer import EnvRenderer, InsertImageEnv
+from roboverse.utils.renderer import EnvRenderer, InsertImageEnv, EnvRenderer_active
 from roboverse.bullet.misc import quat_to_deg 
 import os
 from PIL import Image
-import math
 import argparse
-
 physicsClient = p.connect(p.GUI)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--name", type=str, default='singleview')
 # parser.add_argument("--name", type=str, default='multiview1')
 # parser.add_argument("--name", type=str, default='multiview2')
-parser.add_argument("--num_episodes", type=int, default=80) # Analogies made 50K transitions (300 episodes=60K T) "--num_trajectories"
-parser.add_argument("--num_timesteps", type=int, default=300) # 450 Making videos For Graduation exam #250 for 9 boxes env
-
-# 300 timestep, 400 epi == 120k transitions
+parser.add_argument("--num_episodes", type=int, default=150) # Analogies made 50K transitions (300 episodes=60K T) "--num_trajectories"
+parser.add_argument("--num_timesteps", type=int, default=275) # 450 Making videos For Graduation exam #275 for 9 boxes env
 
 parser.add_argument("--video_save", type=int, default=1, help="Set to zero for no video saving")
 args = parser.parse_args()
@@ -41,7 +37,9 @@ renderer_kwargs=dict(
         flatten_image=True,)
 
 renderer = EnvRenderer(init_camera=None, **renderer_kwargs)
-env = InsertImageEnv(state_env, renderer=renderer)
+renderer_active = EnvRenderer_active(init_camera=None, **renderer_kwargs)
+
+env = InsertImageEnv(state_env, renderer1=renderer, renderer2=renderer_active)
 imlength = env.obs_img_dim * env.obs_img_dim * 3
 
 success = 0
@@ -88,6 +86,7 @@ for j in tqdm(range(args.num_episodes)):
         'next_observations': [],
         'actions': np.zeros((args.num_timesteps, act_dim), dtype=np.float64),
         'rewards': np.zeros((args.num_timesteps), dtype=np.float64),
+        # TODO: Need Extra info??
     }
 
     images = []
@@ -106,6 +105,9 @@ for j in tqdm(range(args.num_episodes)):
         #print('Saving Action', action)
         next_observation, reward, done, info = env.step(action)
 
+        # print('observation = 128*128*3=49152', observation['image_global_observation'])
+        # print('observation = 128*128*3=49152', observation['image_active_observation'])
+
         # Obs before action
         trajectory['observations'].append(observation)
         # Action given as delta_pos
@@ -114,15 +116,15 @@ for j in tqdm(range(args.num_episodes)):
         trajectory['next_observations'].append(next_observation)
         trajectory['rewards'][i] = reward
 
-        # #Checking with videos (Global & Active)
-        # if args.video_save:
-        #     img = env.render_obs()
-        #     images.append(img)
-        # if args.video_save:
-        #     img_active = env.render_obs_active()
-        #     images_active.append(img_active)
+        #Checking with videos (Global & Active)
+        if args.video_save:
+            img = env.render_obs()
+            images.append(img)
+        if args.video_save:
+            img_active = env.render_obs_active()
+            images_active.append(img_active)
 
-        if i == 80:
+        if i == 274:
             Global_image_dataset['final env'][j, :] = img.transpose().flatten()
             Active_image_dataset['final env'][j, :] = img_active.transpose().flatten()
 
@@ -133,7 +135,7 @@ for j in tqdm(range(args.num_episodes)):
     demo_dataset.append(trajectory)
     avg_tasks_done += env.done
 
-    if ((j + 1) % 80) == 0:
+    if ((j + 1) % 150) == 0:
         curr_name = demo_data_save_path + '_{0}.pkl'.format(num_datasets)
         file = open(curr_name, 'wb')
         pkl.dump(demo_dataset, file)
@@ -147,11 +149,10 @@ for j in tqdm(range(args.num_episodes)):
         num_datasets += 1
 
     # if args.video_save:
-    #     if j % 30 == 0:
-    # roboverse.utils.save_video('{}/{}_global.avi'.format(path, j), images)
-    # roboverse.utils.save_video('{}/{}_active.avi'.format(path, j), images_active)
+    # #     if j % 30 == 0:
+    roboverse.utils.save_video('{}/{}_global.avi'.format(path, j), images)
+    roboverse.utils.save_video('{}/{}_active.avi'.format(path, j), images_active)
 
 print('Demo Success Rate: {}'.format(avg_tasks_done / args.num_episodes))
 np.save(gImage_save_path, Global_image_dataset)
 np.save(aImage_save_path, Active_image_dataset)
-
