@@ -1,40 +1,9 @@
 
-* May use ShapeNet data: https://shapenet.org/ 
 * Needed modules - pip install tqdm     
-
-* Each episodes in Demos lasts for 170 timesteps (32sec) 
 
 ---------------------------------------------------------------------------------------------------------
 Data Demo collection
 
-1. Path Settings:
+Path Settings:
   Dataset Colleting:
-    /home/jang/data/data_collection/dataset
-  Goal data Collecting:
-    /home/jang/data/data_collection/presampled_goals
-    
-2. Collecting Dataset 
-    Data collector: 1.Demo Trajectories: 'observations', 'next_observations', 'actions', 'rewards', 'terminals', 'agent_infos', 'env_infos', 'object_name'
-                    2.Images for training: 'observations', 'object', 'env'
-           Type: 1. jang_collection.pkl 
-                 2. jang_images.npy
-    
-    Goals: 'initial_latent_state', 'latent_desired_goal', 'state_desired_goal', 'image_desired_goal', 'initial_image_observation'
-           Type: .pkl
-
----------------------------------------------------------------------------------------------------------
-
-Plan demo_action:
-  1. Reach and grab random shaped and colored objects
-  2. Place the object in goal (Amongst 9 boxes)
-
----------------------------------------------------------------------------------------------------------
-+ Path Settings:
-  /home/jang/data/~
-  
-  For testing:            
-  /home/jang/data/test/            
-              
-+ import pickle as pkl: pickle type = 'wb' and 'rb'              
-        
-
+    /media/jang/jang/0ubuntu/image_dataset/
