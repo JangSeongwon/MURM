@@ -68,23 +68,23 @@ class MURMENV(PandaBaseEnv):
         # self.object_dict, self.scaling = self.get_object_info()
         self.curr_object = None
 
-        # _obj POSITION for wall
-        self._object_position_low = (0.35, -0.1, 1.03)
-        self._object_position_high = (0.45, 0.1, 1.03)
+        # _obj POSITION wall
+        # self._object_position_low = (0.35, -0.1, 1.03)
+        # self._object_position_high = (0.45, 0.1, 1.03)
+        # self._fixed_object_position = np.array([0.45, 0, 1.03])
+        #
+        # self._fixed_object_position1 = np.array([0.45, 0, 1.048])
+        # self._object_position_low1 = (0.35, -0.1, 1.048)
+        # self._object_position_high1 = (0.45, 0.1, 1.048)
+
+        # # _obj POSITION
+        self._object_position_low = (0.4, -0.1, 1.03)
+        self._object_position_high = (0.5, 0.1, 1.03)
         self._fixed_object_position = np.array([0.45, 0, 1.03])
 
         self._fixed_object_position1 = np.array([0.45, 0, 1.048])
-        self._object_position_low1 = (0.35, -0.1, 1.048)
-        self._object_position_high1 = (0.45, 0.1, 1.048)
-        
-#         # _obj POSITION
-#         self._object_position_low = (0.4, -0.1, 1.03)
-#         self._object_position_high = (0.5, 0.1, 1.03)
-#         self._fixed_object_position = np.array([0.45, 0, 1.03])
-
-#         self._fixed_object_position1 = np.array([0.45, 0, 1.048])
-#         self._object_position_low1 = (0.4, -0.1, 1.048)
-#         self._object_position_high1 = (0.5, 0.1, 1.048)
+        self._object_position_low1 = (0.4, -0.1, 1.048)
+        self._object_position_high1 = (0.5, 0.1, 1.048)
 
         self.start_obj_ind = 4 if (self.DoF == 4) else 8
         self.default_theta = bullet.deg_to_quat([180, 0, 0])
@@ -96,6 +96,7 @@ class MURMENV(PandaBaseEnv):
         self.obs_img_dim_active = obs_img_dim_active
 
         self.dt = 0.1
+
         super().__init__(*args, **kwargs)
         self._max_force = 100
         self._timeStep = 1. / 240.
@@ -513,8 +514,11 @@ class MURMENV(PandaBaseEnv):
         return img_active
 
 
-    def get_image(self, width, height):
-        image = np.float32(self.render_obs())
+    def get_image(self, width, height, camera):
+        if camera == 'global':
+            image = np.float32(self.render_obs())
+        elif camera == 'active':
+            image = np.float32(self.render_obs_active())
         return image
 
 ######################################## "RENDERDING" ########################################
