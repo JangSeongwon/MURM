@@ -2,7 +2,6 @@
 IEEE ACCESS  
 --------------------------
 *Process after submission: Clear out the codes and sort out*
---------------------------
 
 ```
 Check GPU temperature in case  
