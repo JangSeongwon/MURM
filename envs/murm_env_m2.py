@@ -414,8 +414,11 @@ class MURMENV_m2(PandaBaseEnv):
         return img_active
 
 
-    def get_image(self, width, height):
-        image = np.float32(self.render_obs())
+    def get_image(self, width, height, camera):
+        if camera == 'global':
+            image = np.float32(self.render_obs())
+        elif camera == 'active':
+            image = np.float32(self.render_obs_active())
         return image
 
 ######################################## "RENDERDING" ########################################
@@ -517,22 +520,23 @@ class MURMENV_m2(PandaBaseEnv):
             goal_pos = np.concatenate((
                  hand_theta, gripper_tips_distance,
                 self.goal_pos))
+            
         else:
             observation = np.concatenate((
-                end_effector_pos, gripper_tips_distance,
-                object_pos))
+                end_effector_pos, gripper_tips_distance))
             goal_pos = np.concatenate((
                 end_effector_pos, gripper_tips_distance,
                 self.goal_pos))
+            # print('DOF  @@  HERE')
 
         obs_dict = dict(
-            observation=observation,
+            # observation=observation,
             state_observation=observation,
-            desired_goal=goal_pos,
-            state_desired_goal=goal_pos,
-            achieved_goal=observation,
-            state_achieved_goal=observation,
-            )
+            # desired_goal=goal_pos,
+            # state_desired_goal=goal_pos,
+            # achieved_goal=observation,
+            # state_achieved_goal=observation,
+        )
 
         return obs_dict
 
