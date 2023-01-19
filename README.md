@@ -36,19 +36,12 @@ For Computer2: sudo mount /dev/sda2 /media/skc/
 ```
 Using 2TB HDD (+ 1TB SSD)
 path: /media/jang/jang/0ubuntu/ 
-      image_dataset , images , presampled_goals, Video_Check , Vae_Model  
-      128_100_1, 128_150_5+, 256_50_8+, Running_test  
-      275 timesteps per episode = 78sec per episode
-```
+      demos_dataset, image_dataset , images , presampled_goals, Video_Check , Vae_Model  
+      RandomBox, SingleView, Wall, z_Running_test  
+      0     600   600
+      1500 episodes of images = 412.5K
+      Total 1.2M images
 
-Dataset Size
-```
-128 image - 150 episodes, 275 timesteps = 41.25K images  
-256 image - 50 episodes, 275 timesteps = 13.75K images 
-
-Comparing Standard:
-      ImageNet = 1200K
-      FFHQ = 70K
 ```
 
 --------------------------
