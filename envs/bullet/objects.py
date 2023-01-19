@@ -166,3 +166,6 @@ rectangularprism2 = loader(ASSET_PATH, os.path.join("obj", "rectangularprism2.ur
 #               pos=[ 0, 0, 3],
 #               quat=[1, 0, 1, 0],
 #               scale=1)
+
+multi_box_goal = loader_fixed(ASSET_PATH, 'box/box2/box.urdf',
+               scale=0.15)
