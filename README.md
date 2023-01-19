@@ -74,7 +74,6 @@ Env2: Multi-view task
 
 ***Our prime goal is to compare prior methods(Only single views) with MURM in solving GCRL.***  
 ***Plus, Multi-views can tackle more complicated tasks that prior methods cannot solve.***  
-***Furthermore, Hierarchical multi-scale latent maps can deal with high-resolution images needed necessarily for complicated tasks.***  
 ***Consider Hierarchical Reinforcement Learning for initial state of active-camera and more broader cases as Next Paper***  
 
 1. GCRL components:  
@@ -92,11 +91,13 @@ Env2: Multi-view task
 5. Method:  
     *With Demo and VQVAE, train in offline RL   
     *Design reward function computed with global-view first and active-view next  
+    *Use Robot state information as further work  
+    *Compare percentage of what not to do + expert dataset size  
       
       
 -------------------------- 
 
-1/17 Analysis  
+1/19 Analysis  
 
 1. Collecting demo data with two computers    
 => OKAY 
@@ -146,6 +147,7 @@ Env2: Multi-view task
 In Low-level policy: Active-view and Global-view can be considered more suitably and efficiently      
 -Finding and detection of the object: Considering a more variety of initial state in terms of active-view camera    
 -Pick & Placing in Multi-view task: More organized reward function and structure of MURM  
+***Furthermore, Hierarchical multi-scale latent maps can deal with high-resolution images needed necessarily for complicated tasks.***  
 
 --------------------------
 Possible implementation of VQVAE2:  
