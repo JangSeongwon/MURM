@@ -55,12 +55,11 @@ Panda Robot env settings
 
   
 Env1: Single-view task 
-      - 9 Boxes as goals 
-      - Random initially placed objects + 3 types of shapes + Random color(rgb)  
+      MURMENV- 9 Boxes as goals, Random initially placed objects + 3 types of shapes + Random color(rgb)  
     
 Env2: Multi-view task  
-      MURMENV- Similar to Env1 but global-view is hindered with a wall to goal-boxes (Global camera disadvantage)   
-      MURMENV1- Randomly positioned goal-box (Active camera disadvantage)   
+      MURMENV_m1- Similar to Env1 but global-view is hindered with a wall to goal-boxes (Global camera disadvantage)   
+      MURMENV_m2- Randomly positioned goal-box (Active camera disadvantage)   
 
 --------------------------
 # Key Points Considered  
@@ -86,8 +85,7 @@ Env2: Multi-view task
     *Design reward function computed with global-view first and active-view next  
     *Use Robot state information as further work  
     *Compare percentage of what not to do + expert dataset size  
-      
-      
+            
 -------------------------- 
 
 1/19 Analysis  
@@ -97,8 +95,8 @@ Env2: Multi-view task
 
 2. Need to pretrain VQVAE. 
 
-=> OKAY - Perhaps 500 epoches = 2days+4hours & 6VQVAE model    
-=> VQVAE with 500 epoches with 600 episodes/ 165K images   
+=> OKAY - Perhaps 1000 epoches = 4days+8hours & 2VQVAE model    
+=> VQVAE with 1500*3 episodes  
 => Need to check Offline RL training results
 
 3. Use latent space specification method for goal sampling active camera goals  
