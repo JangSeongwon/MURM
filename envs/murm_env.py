@@ -27,8 +27,8 @@ class MURMENV(PandaBaseEnv):
                  randomize=True,
                  observation_mode='state',
 
-                 #Image Dimension
-                 obs_img_dim=128, #VQVAE2 #sawyer=48
+                 #TODO: Image Dimension
+                 obs_img_dim=128,
                  obs_img_dim_active=128,
                  success_threshold=0.03,
                  transpose_image=False,
@@ -602,13 +602,7 @@ class MURMENV(PandaBaseEnv):
             left_tip_pos - right_tip_pos)]
         end_effector_pos = self.get_end_effector_pos()
 
-        #Spawning random objects code
-        # object_info = bullet.get_body_info(self._objects['obj'],
-        #                                    quat_to_deg=False)
-
-        # Cube code
         object_info = bullet.get_body_info(self._obj, quat_to_deg=False)
-        #print(' cube',object_info)
         object_pos = object_info['pos']
         #object_theta = object_info['theta']
 
@@ -619,21 +613,22 @@ class MURMENV(PandaBaseEnv):
             goal_pos = np.concatenate((
                  hand_theta, gripper_tips_distance,
                 self.goal_pos))
+
         else:
             observation = np.concatenate((
-                end_effector_pos, gripper_tips_distance,
-                object_pos))
+                end_effector_pos, gripper_tips_distance))
             goal_pos = np.concatenate((
                 end_effector_pos, gripper_tips_distance,
                 self.goal_pos))
+            #print('DOF  @@  HERE')
 
         obs_dict = dict(
-            observation=observation,
+            #observation=observation,
             state_observation=observation,
-            desired_goal=goal_pos,
-            state_desired_goal=goal_pos,
-            achieved_goal=observation,
-            state_achieved_goal=observation,
+            #desired_goal=goal_pos,
+            #state_desired_goal=goal_pos,
+            #achieved_goal=observation,
+            #state_achieved_goal=observation,
             )
 
         return obs_dict
