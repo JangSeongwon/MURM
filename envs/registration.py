@@ -5,6 +5,14 @@ BULLET_ENVIRONMENT_SPECS = (
         'id': 'MURMENV-v0',
         'entry_point': ('roboverse.envs.murm_env:MURMENV'),
     },
+    {
+        'id': 'MURMENV-v1',
+        'entry_point': ('roboverse.envs.murm_env_m1:MURMENV_m1'),
+    },
+    {
+        'id': 'MURMENV-v2',
+        'entry_point': ('roboverse.envs.murm_env_m2:MURMENV_m2'),
+    },
 )
 
 def register_bullet_environments():
