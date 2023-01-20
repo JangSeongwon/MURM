@@ -1,4 +1,3 @@
-
 import rlkit.util.hyperparameter as hyp
 from rlkit.launchers.MyVAETrainer import MYVAETrainer
 from rlkit.launchers.arglauncher import run_variants
@@ -10,17 +9,8 @@ from rlkit.torch.vae.vq_vae import VQ_VAE
 from rlkit.torch.vae.vq_vae import VQVAE2 as VQ_VAE2
 from rlkit.torch.vae.vq_vae import VAE
 
-# image_train_data = '/media/jang/jang/0ubuntu/image_dataset/SingleView/128_100_5/singleview_active_images.npy'
-image_train_data = '/media/jang/jang/0ubuntu/image_dataset/Running_test/128_600_Single/128_600_Training_Active_Images.npy'
-image_test_data = '/media/jang/jang/0ubuntu/image_dataset/Running_test/128_600_Single/128_600_Training_Active_Images.npy'
-Sampled_goals = '/media/jang/jang/0ubuntu/presampled_goals/goals_delete.pkl'
-
-#Final Model Version Mounting
-vqvae_Single_Global = '/media/jang/jang/0ubuntu/Vae_Model/SingleView/Global/vqvae_Global.pt'
-vqvae_Single_Active = '/media/jang/jang/0ubuntu/Vae_Model/SingleView/Active/vqvae_Active.pt'
-
-#Before Conditional PixelCNN
-vqvae_pre = '/media/jang/jang/0ubuntu/image_dataset/Running_test/128_600_Single/300epoches/200.pt'
+image_train_data = '/media/jang/jang/0ubuntu/image_dataset/Combined_For_VQVAE/Combined_Active_Images.npy'
+image_test_data = '/media/jang/jang/0ubuntu/image_dataset/Combined_For_VQVAE/Combined_Active_Images.npy'
 
 ptu.set_gpu_mode(True)
 
@@ -39,7 +29,7 @@ if __name__ == "__main__":
                 x_values=(0, 250),
                 y_values=(0, 100),
             ),
-            num_epochs=1,
+            num_epochs=1501,
             embedding_dim=64,
             dump_skew_debug_plots=False,
             decoder_activation='sigmoid',
