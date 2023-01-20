@@ -89,15 +89,15 @@ Env2: Multi-view task
             
 -------------------------- 
 
-1/19 Analysis  
+1/21 Analysis  
 
-1. Collecting demo data with two computers    
+1. Collecting demo data with three computers    
 => OKAY 
 
 2. Need to pretrain VQVAE. 
 
-=> OKAY - Perhaps 1000 epoches = 4days+8hours & 2VQVAE model    
-=> VQVAE with 1500*3 episodes  
+=> OKAY - Perhaps 1500 epoches = 6.5days & 2VQVAE model    
+=> VQVAE with 2100 episodes  
 => Need to check Offline RL training results
 
 3. Use latent space specification method for goal sampling active camera goals  
@@ -118,7 +118,9 @@ Env2: Multi-view task
            Images: Simply Concatenate features as in Lookcloser   
            Reward:  
              
-    - Do I have to add noisy dataset?? and how much offline prior data??  
+    - Point1: Do I have to add noisy dataset??  
+    - Point2: How much offline demo data??   
+    - Point3: Add robot state information  
        
         
 6. *If* success rate is satisfactory, Go for online fine-tuning as well     
