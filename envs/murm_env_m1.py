@@ -199,7 +199,7 @@ class MURMENV_m1(PandaBaseEnv):
         #Goal Generation Process
         self.goal_pos = self.random_goal_generation()
         #self.goal_pos = np.array([0.25, -0.7, 1.05]) #Fixed goal for demo video
-        # print('Printing Goal:', self.goal_pos)
+        print('Printing Goal:', self.goal_pos)
 
         return self.get_observation()
 
@@ -223,7 +223,7 @@ class MURMENV_m1(PandaBaseEnv):
         random_shape = ['cube', 'rectangularprism1', 'rectangularprism2']
         chosen_shape = random.choice(random_shape)
 
-        chosen_shape = 'rectangularprism2' #Bottle
+        #chosen_shape = 'rectangularprism2' #Bottle
         #chosen_shape='cube'
         if chosen_shape == 'cube':
             self.obj_index = 0
