@@ -206,10 +206,10 @@ class MURMENV_m1(PandaBaseEnv):
     def sample_object_location(self):
         if self.obj_index == 0 or self.obj_index == 1:
             initial_random_pos = np.random.uniform(low=self._object_position_low, high=self._object_position_high)
-            #print('Initial pos', initial_random_pos)
+            print('Initial pos', initial_random_pos)
         elif self.obj_index == 2:
             initial_random_pos = np.random.uniform(low=self._object_position_low1, high=self._object_position_high1)
-            #print('Initial pos', initial_random_pos)
+            print('obj2 Initial pos', initial_random_pos)
         else:
             print('No Obj')
         return initial_random_pos
