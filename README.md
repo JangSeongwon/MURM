@@ -38,10 +38,11 @@ Using 2TB HDD (+ 1TB SSD)
 path: /media/jang/jang/0ubuntu/ 
       demos_dataset, image_dataset , images , presampled_goals, Video_Check , Vae_Model  
       RandomBox, SingleView, Wall, z_Running_test  
-      1200     600   600
-      1500 episodes of images = 412.5K
-      Total 1.2M images
-
+                        demos
+      800 / 800 / 400 
+        
+      2100 episodes of images(900,600,600) = 577.5K
+  
 ```
 
 --------------------------
