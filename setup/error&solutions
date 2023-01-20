@@ -1,3 +1,10 @@
+
+
+-----------------------------------------------------------------------------
+when loading images: 'invalid load key \xff'
+=> Image pickle corruption error
+
+-----------------------------------------------------------------------------
 PyRep Problem (StephenJ's Solution)
 
 No module named 'pyrep.backend._sim_cffi'
