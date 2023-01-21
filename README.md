@@ -96,7 +96,7 @@ Env2: Multi-view task
 
 2. Need to pretrain VQVAE. 
 
-=> OKAY - Perhaps 1500 epoches = 6.5days & 2VQVAE model    
+=> OKAY - Perhaps 1500 epoches = 6.5days & 2VQVAE model Sooner stop and use   
 => VQVAE with 2100 episodes  
 => Need to check Offline RL training results
 
