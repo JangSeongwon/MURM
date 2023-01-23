@@ -91,7 +91,7 @@ Env2: Multi-view task
 
 1/23 Analysis  
 
-Started codings on ptp-keep going   
+Started codings on ptp-keep going, vqvae 1000 may be enough   
 
 1. Collecting demo data with three computers    
 => OKAY 
