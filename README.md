@@ -89,9 +89,9 @@ Env2: Multi-view task
             
 -------------------------- 
 
-1/21 Analysis  
+1/23 Analysis  
 
-Started codings on ptp   
+Started codings on ptp-keep going   
 
 1. Collecting demo data with three computers    
 => OKAY 
