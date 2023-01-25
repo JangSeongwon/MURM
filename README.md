@@ -112,11 +112,11 @@ Started codings on ptp-keep going, vqvae 1000 may be enough
     - Random Goal box as solution
 
 5. Offline RL framework implementation   
-    - PtP Analysis needed to utilize   
+    - USE PtP Analysis     
     - IQL algorithm
     
     *Primary Concern*  
-    - How to use two latent vectors efficiently??    
+    - How to use two latent vectors efficiently??  (5120 + 5120latent space)      
            Images: Simply Concatenate features as in Lookcloser   
            Reward:  
              
