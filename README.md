@@ -96,7 +96,7 @@ Started codings on ptp-keep going, vqvae 1000 may be enough
 1. Collecting demo data with three computers    
 => OKAY 
 
-2. Pretrained VQVAE. 
+2. Pretrained VQVAE.  
 
 => OKAY - 1500 epoches = 6.5days & 2VQVAE model   
 => Need to check Offline RL training results
