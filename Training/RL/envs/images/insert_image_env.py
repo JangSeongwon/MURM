@@ -36,23 +36,28 @@ class InsertImagesEnv(gym.Wrapper):
     print(obs.keys())  # ['observations', 'image_observation', 'debugging_img']
     ```
     """
-
     def __init__(
             self,
             wrapped_env: gym.Env,
             renderers: typing.Dict[str, EnvRenderer],
+            renderers2: typing.Dict[str, EnvRenderer_active],
     ):
         super().__init__(wrapped_env)
         spaces = self.env.observation_space.spaces.copy()
         for image_key, renderer in renderers.items():
             if renderer.image_is_normalized:
-                img_space = Box(
-                    0, 1, (prod(renderer.image_shape), ), dtype=np.float32)
+                img_space = Box(0, 1, renderer.image_shape, dtype=np.float32)
             else:
-                img_space = Box(
-                    0, 255, (prod(renderer.image_shape), ), dtype=np.uint8)
+                img_space = Box(0, 255, renderer.image_shape, dtype=np.uint8)
             spaces[image_key] = img_space
+        for image_key, renderer in renderers2.items():
+            if renderer.image_is_normalized:
+                img_space2 = Box(0, 1, renderer.image_shape, dtype=np.float32)
+            else:
+                img_space2 = Box(0, 255, renderer.image_shape, dtype=np.uint8)
+            spaces[image_key] = img_space2
         self.renderers = renderers
+        self.renderers2 = renderers2
         self.observation_space = Dict(spaces)
         self.action_space = self.env.action_space
 
@@ -73,6 +78,8 @@ class InsertImagesEnv(gym.Wrapper):
 
     def _update_obs(self, obs):
         for image_key, renderer in self.renderers.items():
+            obs[image_key] = renderer(self.env)
+        for image_key, renderer in self.renderers2.items():
             obs[image_key] = renderer(self.env)
 
 
