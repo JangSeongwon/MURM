@@ -89,17 +89,16 @@ Env2: Multi-view task
             
 -------------------------- 
 
-1/27 Analysis  
+2/1 Analysis  
 
 Started codings on ptp-keep going, vqvae 1000 may be enough   
 
 1. Collecting demo data with three computers    
 => OKAY 
 
-2. Need to pretrain VQVAE. 
+2. Pretrained VQVAE. 
 
-=> OKAY - Perhaps 1500 epoches = 6.5days & 2VQVAE model Sooner stop and use   
-=> VQVAE with 2100 episodes  
+=> OKAY - 1500 epoches = 6.5days & 2VQVAE model   
 => Need to check Offline RL training results
 
 3. Use latent space specification method for goal sampling active camera goals  
