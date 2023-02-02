@@ -89,7 +89,7 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/1 Analysis  
+2/2 Analysis  
 
 Started codings on ptp-keep going, vqvae 1000 may be enough   
 
