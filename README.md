@@ -132,7 +132,8 @@ Started codings on ptp-keep going, vqvae 1000 may be enough
     
 7. As additional process try images with lower-dimensional size (64x64 or 48x48 as lowest possibility)  
   
-  
+8. Edited rollout functions and goal sampling part -> Now need diagnostics   
+
 --------------------------
 
 # Next Process for Paper 2  
