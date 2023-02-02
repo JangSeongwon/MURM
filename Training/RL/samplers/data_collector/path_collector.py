@@ -49,22 +49,27 @@ class MdpPathCollector(PathCollector):
     def collect_new_paths(
             self,
             max_path_length,
-            num_steps,
+            num_steps, # == num_eval_steps_per_epoch
             discard_incomplete_paths,
     ):
         paths = []
         num_steps_collected = 0
+
+        print('STEPS', num_steps)
+
         while num_steps_collected < num_steps:
             max_path_length_this_loop = min(  # Do not go over num_steps
                 max_path_length,
-                num_steps - num_steps_collected,
+                num_steps - num_steps_collected, #leftovers
             )
             path = self._rollout_fn(
                 self._env,
                 self._policy,
                 max_path_length=max_path_length_this_loop,
             )
+
             path_len = len(path['actions'])
+
             if (
                     path_len != max_path_length
                     and not path['dones'][-1]
@@ -73,6 +78,7 @@ class MdpPathCollector(PathCollector):
                 break
             num_steps_collected += path_len
             paths.append(path)
+
         self._num_paths_total += len(paths)
         self._num_steps_total += num_steps_collected
         self._epoch_paths.extend(paths)
