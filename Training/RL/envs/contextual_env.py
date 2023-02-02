@@ -88,7 +88,7 @@ class ContextualEnv(gym.Wrapper):
     def __init__(
             self,
             env: gym.Env,
-            context_distribution: DictDistribution, #TODO: Defined at latent goal sampling stage
+            context_distribution: DictDistribution, #TODO: Defined
             reward_fn: ContextualRewardFn,
             observation_key=None,  # for backwards compatibility
             observation_keys=None,
@@ -105,13 +105,9 @@ class ContextualEnv(gym.Wrapper):
         if not isinstance(env.observation_space, gym.spaces.Dict):
             raise ValueError("ContextualEnvs require wrapping Dict spaces.")
 
-
         spaces = env.observation_space.spaces
-
-        # TODO: fix
         for key, space in context_distribution.spaces.items():
-           spaces[key] = space
-
+            spaces[key] = space
 
         self.observation_space = gym.spaces.Dict(spaces)
         self.reward_fn = reward_fn
@@ -119,11 +115,11 @@ class ContextualEnv(gym.Wrapper):
         self._update_env_info = update_env_info_fn or insert_reward
 
         self._curr_context = None
+        self.goal_latent_produced = {}
 
         self._observation_key = observation_key
         del observation_keys
 
-        # TODO: fix
         self._context_distribution = context_distribution
         self._context_keys = list(context_distribution.spaces.keys())
 
@@ -136,18 +132,31 @@ class ContextualEnv(gym.Wrapper):
 
     def reset(self):
         obs = self.env.reset()
-        print('check obs for vqvae',obs)
-        # TODO: fix
+        # print('check obs for vqvae', obs)
+        #todo: state observation / image_global_obs, image_active_obs/
+        #todo: latent_observation / latent_active_observation / initial_latent_state / initial_latent_state_active
         self._curr_context = self._context_distribution(
            context=obs).sample(1)
-        self._add_context_to_obs(obs) #To obs: goal adding process
+
+        for key in self._context_keys:
+            # print('keys now', self._context_keys)
+            if len(self._curr_context) == 1:
+                self.goal_latent_produced[key] = self._curr_context[0]
+                # print('goal keys check for sampling', self.goal_latent_produced)
+            elif len(self._curr_context) == 2:
+                self.goal_latent_produced[key] = self._curr_context
+                print('goal latent produced checking for murm in contextial env', self.goal_latent_produced)
+            else:
+                exit()
+        self._add_context_to_obs(obs) #TODO: To obs: goal adding as latent_desired_goal
         self._last_obs = obs
+        # print('Final obs format', obs)
         return obs
 
     def step(self, action):
         obs, reward, done, info = self.env.step(action) #Todo: Sent to encoder_wrapper
-        # TODO: fix
         self._add_context_to_obs(obs)
+        print('obs now check', obs)
         new_reward = self._compute_reward(self._last_obs, action, obs, reward)
         self._last_obs = obs
         info = self._update_env_info(self, info, obs, reward, done)
@@ -159,11 +168,11 @@ class ContextualEnv(gym.Wrapper):
             return env_reward
         else:
             return self.unbatched_reward_fn(
-                state, action, next_state, self._curr_context)
+                state, action, next_state, self.goal_latent_produced)
 
     def _add_context_to_obs(self, obs):
         for key in self._context_keys:
-            obs[key] = self._curr_context[key][0]
+            obs[key] = self.goal_latent_produced[key]
 
     def get_diagnostics(self, paths):
         stats = OrderedDict()
