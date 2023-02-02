@@ -19,9 +19,12 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
             demo_train_buffer,
             demo_test_buffer,
             model=None,
+            model_global=None,
+            model_active=None,
             model_path=None,
             reward_fn=None,
             compare_reward_fn=None,
+            MURM_view=None,
             env=None,
             demo_paths=[],  # list of dicts
             normalize=False,
@@ -72,12 +75,15 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                          **kwargs)
 
         if model is None:
-            assert model_path is not None
-            self.model = load_local_or_remote_file(
-                model_path, delete_after_loading=delete_after_loading)
+            exit()
         else:
             assert model_path is None
-            self.model = model
+            if MURM_view == 'murm':
+                self.model_global = model_global
+                self.model_active = model_active
+            else:
+                self.model = model
+                # print(self.model)
 
         self.condition_encoding = condition_encoding
         self.reward_fn = reward_fn
@@ -85,63 +91,109 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
         self.normalize = normalize
         self.object_list = object_list
         self.env = env
+        self.murm = MURM_view
 
     def preprocess(self, observation, use_latents=True, use_gripper_obs=False):
+
+        # print('SEE Previous version', observation)
         observation = copy.deepcopy(observation[:-1])
+
+        # b = np.stack([observation[0]['image_global_observation']])
+        # print('SEE Previous version', b.shape)
+
         # import ipdb; ipdb.set_trace()
-        images = np.stack([observation[i]['image_global_observation']
-                          for i in range(len(observation))])
-        if use_gripper_obs:
-            gripper_states = np.stack([
-                np.concatenate(
-                    (observation[i]['state_observation'][:3],
-                     quat_to_deg(observation[i]['state_observation'][3:7])
-                     / 360.,
-                     observation[i]['state_observation'][7:8],
-                     ),
-                    axis=0)
-                for i in range(len(observation))
-            ])
 
-        if self.normalize:
-            raise NotImplementedError
-            images = images / 255.0
+        if self.murm == 'murm':
+            images_global = np.stack([observation[i]['image_global_observation']
+                              for i in range(len(observation))])
 
-        if self.condition_encoding:
-            cond = images[0].repeat(len(observation), axis=0)
-            latents = self.model['vqvae'].encode_np(images, cond)
-        else:
+            images_active = np.stack([observation[i]['image_active_observation']
+                              for i in range(len(observation))])
+            latents_global = self.model['vqvae'].encode_np(images_global)
+            latents_active = self.model['vqvae'].encode_np(images_active)
+            print('LATENTS G/A', latents_global.shape, latents_active.shape)
+
+        elif self.murm == 'g':
+            images = np.stack([observation[i]['image_global_observation']
+                                      for i in range(len(observation))])
             latents = self.model['vqvae'].encode_np(images)
+            print('LATENTS G', latents.shape)
 
-        if 'obs_encoder' in self.model:
-            vibs = self.model['obs_encoder'].encode_np(latents)
+        elif self.murm == 'a':
+            images = np.stack([observation[i]['image_active_observation']
+                                      for i in range(len(observation))])
+            latents = self.model['vqvae'].encode_np(images)
+            print('LATENTS A', latents.shape)
+
         else:
-            vibs = None
+            exit()
+        # if use_gripper_obs:
+        #     gripper_states = np.stack([
+        #         np.concatenate(
+        #             (observation[i]['state_observation'][:3],
+        #              quat_to_deg(observation[i]['state_observation'][3:7])
+        #              / 360.,
+        #              observation[i]['state_observation'][7:8],
+        #              ),
+        #             axis=0)
+        #         for i in range(len(observation))
+        #     ])
+
+        # if self.normalize:
+        #     print('Normalize NO')
+        #     raise NotImplementedError
+        #     images = images / 255.0
+
+
+
+        # if 'obs_encoder' in self.model:
+        #     print('obs_encoder')
+        #     vibs = self.model['obs_encoder'].encode_np(latents)
+        # else:
+        #     vibs = None
 
         # latents = np.stack([observation[i]['latent_observation']
         #                   for i in range(len(observation))])
 
         for i in range(len(observation)):
-            observation[i]['initial_latent_state'] = latents[0]
-            observation[i]['latent_observation'] = latents[i]
-            observation[i]['latent_desired_goal'] = latents[-1]
+            if self.murm == 'murm':
+                observation[i]['initial_latent_state'] = latents_global[0]
+                observation[i]['latent_observation'] = latents_global[i]
+                observation[i]['latent_desired_goal'] = latents_global[-1]
+                observation[i]['initial_latent_state_active'] = latents_active[0]
+                observation[i]['latent_observation_active'] = latents_active[i]
+                observation[i]['latent_desired_goal_active'] = latents_active[-1]
 
-            if vibs is not None:
-                observation[i]['initial_vib_state'] = vibs[0]
-                observation[i]['vib_observation'] = vibs[i]
-                observation[i]['vib_desired_goal'] = vibs[-1]
+            elif self.murm == 'g':
+                observation[i]['initial_latent_state'] = latents[0]
+                observation[i]['latent_observation'] = latents[i]
+                observation[i]['latent_desired_goal'] = latents[-1]
+                observation[i]['initial_latent_state_active'] = [0]
+
+            elif self.murm == 'a':
+                observation[i]['initial_latent_state'] = latents[0]
+                observation[i]['latent_observation'] = latents[i]
+                observation[i]['latent_desired_goal'] = latents[-1]
+                observation[i]['initial_latent_state_active'] = [0]
+            else:
+                exit()
 
             if use_latents:
                 del observation[i]['image_global_observation']
+                del observation[i]['image_active_observation']
             else:
-                observation[i]['initial_image_observation'] = images[0]
-                observation[i]['image_observation'] = images[i]
-                observation[i]['image_desired_goal'] = images[-1]
+                observation[i]['initial_image_observation'] = images_global[0]
+                observation[i]['image_observation'] = images_global[i]
+                observation[i]['image_desired_goal'] = images_global[-1]
 
-            if use_gripper_obs:
-                observation[i]['gripper_state_observation'] = gripper_states[i]
-                observation[i]['gripper_state_desired_goal'] = (
-                    gripper_states[-1])
+            # if use_gripper_obs:
+            #     observation[i]['gripper_state_observation'] = gripper_states[i]
+            #     observation[i]['gripper_state_desired_goal'] = (
+            #         gripper_states[-1])
+
+        # print('Checking final output version',observation)
+        # a = np.stack([observation[0]['latent_observation']])
+        # print('SEE Later version', a.shape)
 
         return observation
 
@@ -163,6 +215,9 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                   obs_dict=None,
                   use_latents=True,
                   use_gripper_obs=False):
+
+        print('Correct Latent Changing')
+
         # Filter data #
         if not self.data_filter_fn(path):
             return
@@ -170,11 +225,10 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
         rewards = []
         compare_rewards = []
         path_builder = PathBuilder()
-
-        print('Correct Latent Changing')
-
         H = min(len(path['observations']), len(path['actions'])) - 1
+
         if obs_dict:
+            # print('HERE ff')
             traj_obs = self.preprocess(
                 path['observations'],
                 use_latents=use_latents,
@@ -202,6 +256,8 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
 
             terminal = np.array([terminal]).reshape((1,))
 
+            # print('recompute reward == True', self.recompute_reward)
+
             if self.recompute_reward:
                 reward, terminal = self.reward_fn(ob, action, next_ob, next_ob)
 
@@ -213,6 +269,9 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                     ob, action, next_ob, next_ob)
                 compare_rewards.append(compare_reward)
 
+            # print('obs', ob)
+            # print('actions', action)
+
             path_builder.add_all(
                 observations=ob,
                 actions=action,
@@ -222,12 +281,13 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                 agent_infos=agent_info,
                 env_infos=env_info,
             )
+
         self.demo_trajectory_rewards.append(rewards)
         path = path_builder.get_all_stacked()
         replay_buffer.add_path(path)
-        print('loading path, length', len(
+        print('loading path(obs), length(action)', len(
             path['observations']), len(path['actions']))
-        print('actions', np.min(path['actions']), np.max(path['actions']))
+        # print('actions', np.min(path['actions']), np.max(path['actions'])) #TODO: Due to Gripper: -1, 1 are min and max
         print('rewards', np.min(rewards), np.max(rewards))
         if self.compare_reward_fn:
             print('- rewards',
