@@ -38,15 +38,20 @@ class ConditionalEncoder(object, metaclass=abc.ABCMeta):
 
 class EncoderWrappedEnv(ProxyEnv):
     def __init__(self,
+                 MURM_view,
                  wrapped_env,
                  model: Encoder,
+                 model_add_murm: Encoder,
                  step_keys_map=None,
                  reset_keys_map=None,
                  ):
         super().__init__(wrapped_env)
-        self.model = model
-        self.representation_size = self.model.representation_size
 
+        self.MURM_view = MURM_view
+        self.model = model
+        self.model_active_murm = model_add_murm
+
+        self.representation_size = self.model.representation_size
         # print('representation size= ', self.representation_size)
 
         latent_space = Box(
@@ -80,16 +85,23 @@ class EncoderWrappedEnv(ProxyEnv):
         self.model.eval()
         for key in self.step_keys_map:
             value = self.step_keys_map[key]
+            # print('keys in step keys', value)
             obs[value] = self.model.encode_one_np(obs[key])
+            # del obs[key]
+            # del obs['image_active_observation']
         obs = {**obs, **self.reset_obs}
+        # print('obs in steps', obs)
+        # print('lets check step key left', self.step_keys_map)
+
         return obs
 
-    def reset(self):
-        # print('Going to here??')
+    def reset(self): #TODO: Giving obs to contextual env
         self.model.eval()
         obs = self.wrapped_env.reset()
+        # print('lets check reset key left', self.reset_keys_map)
         for key in self.reset_keys_map:
             value = self.reset_keys_map[key]
+            # print('reset keys = initial latent state + initial latent state active', value)
             self.reset_obs[value] = self.model.encode_one_np(obs[key])
         obs = self._update_obs(obs)
         return obs
@@ -98,6 +110,7 @@ class EncoderWrappedEnv(ProxyEnv):
         obs = self.wrapped_env.get_observation()
         self._update_obs(obs)
         return obs
+
 
 
 class PresamplingEncoderWrappedEnv(ProxyEnv):
