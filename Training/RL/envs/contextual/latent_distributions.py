@@ -304,7 +304,7 @@ class murmlatentgoalspace(DictDistribution):
 
             sample1 = ptu.get_numpy(self.model.encode(goal_global))
             sample2 = ptu.get_numpy(self.model.encode(goal_active))
-            # sample = dicttype(sample1, sample2)
+            sample = (sample1, sample2)
 
         elif self.murm == 'g':
             goal_global, goal_active = self.env.run_for_goal()
