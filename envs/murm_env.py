@@ -241,6 +241,66 @@ class MURMENV(PandaBaseEnv):
 
         return obj
 
+    def run_for_goal(self):
+        image_check_save_path="/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
+        a, q = p.getBasePositionAndOrientation(self._obj)
+        p.resetBasePositionAndOrientation(self._obj, self.goal_pos, q)
+
+        self.goal_positions = {
+            'panda_joint1': -1.94, 'panda_joint2': 0.427, 'panda_joint3': 0.153,
+            'panda_joint4': -2.3415, 'panda_joint5': -0.1715, 'panda_joint6': 2.7593,
+            'panda_joint7': -0.8575, 'panda_finger_joint1': 0.02, 'panda_finger_joint2': 0.02,
+        }
+
+        num_joints = p.getNumJoints(self._panda)
+        # print('joints',num_joints)
+
+        for i in range(num_joints):
+            joint_info = p.getJointInfo(self._panda, i)
+            joint_name = joint_info[1].decode("UTF-8")
+            joint_type = joint_info[2]
+
+            if joint_type is p.JOINT_REVOLUTE or joint_type is p.JOINT_PRISMATIC:
+                assert joint_name in self.initial_positions.keys()
+
+                p.resetJointState(self._panda, i, self.goal_positions[joint_name])
+                p.setJointMotorControl2(self._panda, i, p.POSITION_CONTROL,
+                                        targetPosition=self.goal_positions[joint_name],
+                                        positionGain=0.2, velocityGain=1.0)
+
+        target_pos_check = np.array(bullet.get_body_info(self._obj)['pos'])
+        ee_pos_check = self.get_end_effector_pos()
+        # print('obj, ee pos for goal', target_pos_check, ee_pos_check)
+
+        goal_global = np.uint8(self.render_obs())
+        goal_active = np.uint8(self.render_obs_active())
+
+        num_joints = p.getNumJoints(self._panda)
+        for i in range(num_joints):
+            joint_info = p.getJointInfo(self._panda, i)
+            joint_name = joint_info[1].decode("UTF-8")
+            joint_type = joint_info[2]
+
+            if joint_type is p.JOINT_REVOLUTE or joint_type is p.JOINT_PRISMATIC:
+                assert joint_name in self.initial_positions.keys()
+
+                p.resetJointState(self._panda, i, self.initial_positions[joint_name])
+                p.setJointMotorControl2(self._panda, i, p.POSITION_CONTROL,
+                                        targetPosition=self.initial_positions[joint_name],
+                                        positionGain=0.2, velocityGain=1.0)
+
+        p.resetBasePositionAndOrientation(self._obj, a, q)
+
+        reset_global = np.uint8(self.render_obs())
+        reset_active = np.uint8(self.render_obs_active())
+
+        np.save(image_check_save_path+"1.npy", goal_global)
+        np.save(image_check_save_path+"2.npy", goal_active)
+        np.save(image_check_save_path+"3.npy", reset_global)
+        np.save(image_check_save_path+"4.npy", reset_active)
+
+        return goal_global, goal_active
+
     # def get_object_info(self):
     #     complete_object_dict, scaling = metadata.obj_path_map, metadata.path_scaling_map
     #     complete = self.object_subset is None
@@ -267,7 +327,7 @@ class MURMENV(PandaBaseEnv):
         act_high = np.ones(act_dim) * act_bound
         self.action_space = gym.spaces.Box(-act_high, act_high)
 
-        observation_dim = 11
+        observation_dim = 4
         if self.DoF > 3:
             observation_dim += 4
 
@@ -405,7 +465,7 @@ class MURMENV(PandaBaseEnv):
 
 
     def get_contextual_diagnostics(self, paths, contexts):
-        from multiworld.envs.env_util import create_stats_ordered_dict
+        from multiworld.multiworld.envs.env_util import create_stats_ordered_dict
         diagnostics = OrderedDict()
         state_key = "state_observation"
         goal_key = "state_desired_goal"
@@ -475,6 +535,7 @@ class MURMENV(PandaBaseEnv):
         img, depth, segmentation = bullet.render(
             self.obs_img_dim, self.obs_img_dim, self._view_matrix_obs,
             self._projection_matrix_obs, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
+
         if self._transpose_image:
             img = np.transpose(img, (2, 0, 1))
         return img
@@ -695,7 +756,7 @@ class MURMENV(PandaBaseEnv):
         info = self.get_info()
         reward = self.get_reward(info)
         done = False
-        self.timeStep += 1
+        # self.timeStep += 1
 
         return observation, reward, done, info
 
