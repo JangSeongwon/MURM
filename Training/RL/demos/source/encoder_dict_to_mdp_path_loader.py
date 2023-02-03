@@ -1,12 +1,10 @@
 import copy
-
 import numpy as np
 
 import rlkit.torch.pytorch_util as ptu
 from rlkit.demos.source.dict_to_mdp_path_loader import DictToMDPPathLoader
 from rlkit.util.io import load_local_or_remote_file
 from rlkit.data_management.path_builder import PathBuilder
-
 from roboverse.bullet.misc import quat_to_deg
 
 
@@ -92,6 +90,7 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
         self.object_list = object_list
         self.env = env
         self.murm = MURM_view
+        self.counting_loaded_demos = 0
 
     def preprocess(self, observation, use_latents=True, use_gripper_obs=False):
 
@@ -101,8 +100,6 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
         # b = np.stack([observation[0]['image_global_observation']])
         # print('SEE Previous version', b.shape)
 
-        # import ipdb; ipdb.set_trace()
-
         if self.murm == 'murm':
             images_global = np.stack([observation[i]['image_global_observation']
                               for i in range(len(observation))])
@@ -111,49 +108,22 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                               for i in range(len(observation))])
             latents_global = self.model['vqvae'].encode_np(images_global)
             latents_active = self.model['vqvae'].encode_np(images_active)
-            print('LATENTS G/A', latents_global.shape, latents_active.shape)
+            # print('LATENTS G/A', latents_global.shape, latents_active.shape)
 
         elif self.murm == 'g':
             images = np.stack([observation[i]['image_global_observation']
                                       for i in range(len(observation))])
             latents = self.model['vqvae'].encode_np(images)
-            print('LATENTS G', latents.shape)
+            # print('LATENTS G', latents.shape)
 
         elif self.murm == 'a':
             images = np.stack([observation[i]['image_active_observation']
                                       for i in range(len(observation))])
             latents = self.model['vqvae'].encode_np(images)
-            print('LATENTS A', latents.shape)
+            # print('LATENTS A', latents.shape)
 
         else:
             exit()
-        # if use_gripper_obs:
-        #     gripper_states = np.stack([
-        #         np.concatenate(
-        #             (observation[i]['state_observation'][:3],
-        #              quat_to_deg(observation[i]['state_observation'][3:7])
-        #              / 360.,
-        #              observation[i]['state_observation'][7:8],
-        #              ),
-        #             axis=0)
-        #         for i in range(len(observation))
-        #     ])
-
-        # if self.normalize:
-        #     print('Normalize NO')
-        #     raise NotImplementedError
-        #     images = images / 255.0
-
-
-
-        # if 'obs_encoder' in self.model:
-        #     print('obs_encoder')
-        #     vibs = self.model['obs_encoder'].encode_np(latents)
-        # else:
-        #     vibs = None
-
-        # latents = np.stack([observation[i]['latent_observation']
-        #                   for i in range(len(observation))])
 
         for i in range(len(observation)):
             if self.murm == 'murm':
@@ -174,7 +144,7 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                 observation[i]['initial_latent_state'] = latents[0]
                 observation[i]['latent_observation'] = latents[i]
                 observation[i]['latent_desired_goal'] = latents[-1]
-                observation[i]['initial_latent_state_active'] = [0]
+                observation[i]['initial_latent_state_active'] = [0] #Just needed for murm code to run
             else:
                 exit()
 
@@ -186,12 +156,7 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                 observation[i]['image_observation'] = images_global[i]
                 observation[i]['image_desired_goal'] = images_global[-1]
 
-            # if use_gripper_obs:
-            #     observation[i]['gripper_state_observation'] = gripper_states[i]
-            #     observation[i]['gripper_state_desired_goal'] = (
-            #         gripper_states[-1])
-
-        # print('Checking final output version',observation)
+        # print('Checking final output version', observation)
         # a = np.stack([observation[0]['latent_observation']])
         # print('SEE Later version', a.shape)
 
@@ -216,7 +181,7 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                   use_latents=True,
                   use_gripper_obs=False):
 
-        print('Correct Latent Changing')
+        # print('Correct Latent Changing')
 
         # Filter data #
         if not self.data_filter_fn(path):
@@ -228,7 +193,6 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
         H = min(len(path['observations']), len(path['actions'])) - 1
 
         if obs_dict:
-            # print('HERE ff')
             traj_obs = self.preprocess(
                 path['observations'],
                 use_latents=use_latents,
@@ -269,8 +233,8 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                     ob, action, next_ob, next_ob)
                 compare_rewards.append(compare_reward)
 
-            # print('obs', ob)
-            # print('actions', action)
+            print('obs', ob)
+            print('actions', action)
 
             path_builder.add_all(
                 observations=ob,
@@ -282,17 +246,19 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                 env_infos=env_info,
             )
 
+        self.counting_loaded_demos += 1
+        print('demos loaded = ', self.counting_loaded_demos)
+
         self.demo_trajectory_rewards.append(rewards)
         path = path_builder.get_all_stacked()
         replay_buffer.add_path(path)
-        print('loading path(obs), length(action)', len(
+        print('length of obs and action', len(
             path['observations']), len(path['actions']))
         # print('actions', np.min(path['actions']), np.max(path['actions'])) #TODO: Due to Gripper: -1, 1 are min and max
-        print('rewards', np.min(rewards), np.max(rewards))
+        # print('rewards', np.min(rewards), np.max(rewards))
+        # print('path sum rewards', sum(rewards), len(rewards))
         if self.compare_reward_fn:
-            print('- rewards',
+            print('Min / Max rewards',
                   np.min(compare_rewards), np.max(compare_rewards))
-        print('path sum rewards', sum(rewards), len(rewards))
-        if self.compare_reward_fn:
-            print('- path sum rewards',
+            print('Sum rewards',
                   sum(compare_rewards), len(compare_rewards))
