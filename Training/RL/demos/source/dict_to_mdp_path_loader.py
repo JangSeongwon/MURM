@@ -119,16 +119,7 @@ class DictToMDPPathLoader:
         self.min_path_length = min_path_length
 
     def preprocess(self, observation):
-        observation = copy.deepcopy(observation[:-1])
-        images = np.stack([observation[i]['image_observation']
-                          for i in range(len(observation))])
-
-        for i in range(len(observation)):
-            observation[i]['initial_image_observation'] = images[0]
-            observation[i]['image_observation'] = images[i]
-            observation[i]['image_achieved_goal'] = images[i]
-            observation[i]['image_desired_goal'] = images[-1]
-
+        print('Not use')
         return observation
 
     def preprocess_array_obs(self, observation):
@@ -137,99 +128,11 @@ class DictToMDPPathLoader:
             new_observations.append(dict(observation=observation[i]))
         return new_observations
 
-    def load_path(self, path, replay_buffer, obs_dict=None, use_latents=True, use_gripper_obs=False):  
-        del use_latents
-        del use_gripper_obs
-
-        print('Wrong Latent changing')
-
-        # Filter data #
-        if not self.data_filter_fn(path):
-            return
-
-        rewards = []
-        path_builder = PathBuilder()
-
-        H = min(len(path['observations']), len(path['actions'])) - 1
-
-        if self.min_path_length is not None:
-            if H < self.min_path_length:
-                return
-
-        if obs_dict:
-            traj_obs = self.preprocess(
-                path['observations'])
-            next_traj_obs = self.preprocess(
-                path['next_observations'])
-        else:
-            traj_obs = self.preprocess_array_obs(
-                path['observations'])
-            next_traj_obs = self.preprocess_array_obs(
-                path['next_observations'])
-
-        for i in range(H):
-            ob = traj_obs[i]
-            next_ob = next_traj_obs[i]
-            action = path['actions'][i]
-            reward = path['rewards'][i]
-            terminal = path['terminals'][i]
-            if not self.load_terminals:
-                terminal = np.zeros(terminal.shape)
-            agent_info = path['agent_infos'][i]
-            env_info = path['env_infos'][i]
-
-            if (self.filter_step_fn is not None and
-                    self.min_action_value is not None):
-                if self.filter_step_fn(ob, action, next_ob,
-                                       self.min_action_value):
-                    continue
-
-            if self.action_round_thresh is not None:
-                for dim in [0, 1, 2, 4]:
-                    if action[dim] >= self.action_round_thresh:
-                        action[dim] = 1.0
-                    elif action[dim] <= -self.action_round_thresh:
-                        action[dim] = -1.0
-                    else:
-                        pass
-
-            terminal = np.array([terminal]).reshape((1, ))
-
-            if self.recompute_reward:
-                reward, terminal = self.reward_fn(ob, action, next_ob, next_ob)
-
-            reward = np.array([reward]).flatten()
-            rewards.append(reward)
-            path_builder.add_all(
-                observations=ob,
-                actions=action,
-                rewards=reward,
-                next_observations=next_ob,
-                terminals=terminal,
-                agent_infos=agent_info,
-                env_infos=env_info,
-            )
-        self.demo_trajectory_rewards.append(rewards)
-        path = path_builder.get_all_stacked()
-        replay_buffer.add_path(path)
-        print('loading path, length', len(
-            path['observations']), len(path['actions']))
-        print('actions', np.min(path['actions']), np.max(path['actions']))
-        print('rewards', np.min(rewards), np.max(rewards))
-        print('path sum rewards', sum(rewards), len(rewards))
-
-        if self.filter_step_fn is not None:
-            print("unfiltered states: %d / %d"
-                  % (len(path["observations"]), H))
-
     def load_demos(self):
         # Off policy
         for demo_path in self.demo_paths:
             self.load_demo_path(**demo_path)
 
-    # Parameterize which demo is being tested (and all jitter variants)
-    # If is_demo is False, we only add the demos to the
-    # replay buffer, and not to the demo_test or demo_train buffers
     def load_demo_path(self,  
                        path,
                        is_demo,
@@ -239,15 +142,14 @@ class DictToMDPPathLoader:
                        sync_dir=None,
                        use_latents=True,
                        use_gripper_obs=False):
-        print('loading off-policy path', path)
+        print('loading demo path', path)
 
         if sync_dir is not None:
             sync_down_folder(sync_dir)
             paths = glob.glob(get_absolute_path(path))
+            # print('Not here')
         else:
             paths = [path]
-
-        # input('Prepare to load demos...')
 
         data = []
         for filename in paths:
@@ -266,19 +168,18 @@ class DictToMDPPathLoader:
 
             data.extend(data_i)
 
-        # if not is_demo:
-        # data = [data]
-        # random.shuffle(data)
-
         if train_split is None:
             train_split = self.demo_train_split
+            # print('train split', train_split)
 
         if data_split is None:
             data_split = self.demo_data_split
+            # print('data split', data_split)
 
         M = int(len(data) * train_split * data_split)
         N = int(len(data) * data_split)
-        print('using', M, 'paths for training')
+        print('using', M, 'trajectories for training')
+        # print('using', N, 'data for testing')
 
         if self.add_demos_to_replay_buffer:
             for path in data[:M]:
@@ -289,7 +190,9 @@ class DictToMDPPathLoader:
                                use_gripper_obs=use_gripper_obs)
 
         if is_demo:
+            print('Please Check DEMO BUFFER IN HERE')
             if self.demo_train_buffer:
+                print('demo_train_buffer')
                 for path in data[:M]:
                     self.load_path(path,
                                    self.demo_train_buffer,
@@ -298,6 +201,7 @@ class DictToMDPPathLoader:
                                    use_gripper_obs=use_gripper_obs)
 
             if self.demo_test_buffer:
+                print('demo_test_buffer')
                 for path in data[M:N]:
                     self.load_path(path,
                                    self.demo_test_buffer,
