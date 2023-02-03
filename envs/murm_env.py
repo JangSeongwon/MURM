@@ -327,7 +327,8 @@ class MURMENV(PandaBaseEnv):
         act_high = np.ones(act_dim) * act_bound
         self.action_space = gym.spaces.Box(-act_high, act_high)
 
-        observation_dim = 4
+        observation_dim = 10
+        # 3 4 3
         if self.DoF > 3:
             observation_dim += 4
 
@@ -466,52 +467,59 @@ class MURMENV(PandaBaseEnv):
 
     def get_contextual_diagnostics(self, paths, contexts):
         from multiworld.multiworld.envs.env_util import create_stats_ordered_dict
+
         diagnostics = OrderedDict()
-        state_key = "state_observation"
+        state_key = "state_observation" # obj pos
         goal_key = "state_desired_goal"
         values = []
         eps1, eps2 = [], []
+
+        # print('check paths in diagnostics', paths[0])
+        # print('check contexts in diagnostics', contexts)
+        # print('length of paths = 5 ?', len(paths))
+
         for i in range(len(paths)):
-            state = paths[i]["observations"][-1][state_key][self.start_obj_ind:self.start_obj_ind + 3]
-            goal = contexts[i][goal_key][self.start_obj_ind:self.start_obj_ind + 3]
+            state = paths[i]["observations"][-1][state_key]
+            print('Final obj State', state)
+
+            goal = paths[i]["observations"][-1][goal_key]
+            print('Given Goal State', goal)
+
             distance = np.linalg.norm(state - goal)
 
-            if self.task == 'pickup':
-                values.append(state[2] > self.pickup_eps)
-            if self.task == 'goal_reaching':
-                values.append(distance)
-                eps1.append(distance < 0.05)
-                eps2.append(distance < 0.08)
+            values.append(distance)
+            eps1.append(distance < 0.03)
+            eps2.append(distance < 0.1)
 
-        if self.task == 'pickup':
-            diagnostics_key = goal_key + "/final/picked_up"
-        if self.task == 'goal_reaching':
-            diagnostics_key = goal_key + "/final/distance"
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success_0.05", eps1))
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success_0.08", eps2))
+        diagnostics_key = goal_key + "/final/distance"
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success", eps1))
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success_close", eps2))
         diagnostics.update(create_stats_ordered_dict(diagnostics_key, values))
 
         values = []
-        eps1, eps2 = [], []
+        eps1, eps2, eps3 = [], [], []
         for i in range(len(paths)):
             for j in range(len(paths[i]["observations"])):
-                state = paths[i]["observations"][j][state_key][self.start_obj_ind:self.start_obj_ind + 3]
-                goal = contexts[i][goal_key][self.start_obj_ind:self.start_obj_ind + 3]
+                state = paths[i]["observations"][j][state_key]
+                # print('state each', state)
+                state_z_pos = paths[i]["observations"][j][state_key][1]
+                print('checking z coordinates', state_z_pos)
+                initial_z_pos = np.array(1.03)
+                height = np.linalg.norm(state_z_pos-initial_z_pos)
+
+                goal = paths[i]["observations"][-1][goal_key]
+                # print('goal state each', goal)
+
                 distance = np.linalg.norm(state - goal)
+                values.append(distance)
+                eps1.append(distance < 0.03)
+                eps2.append(distance < 0.1)
+                eps3.append(height > 0.1)
 
-                if self.task == 'pickup':
-                    values.append(state[2] > self.pickup_eps)
-                if self.task == 'goal_reaching':
-                    values.append(distance)
-                    eps1.append(distance < 0.05)
-                    eps2.append(distance < 0.08)
-
-        if self.task == 'pickup':
-            diagnostics_key = goal_key + "/picked_up"
-        if self.task == 'goal_reaching':
-            diagnostics_key = goal_key + "/distance"
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/success_0.05", eps1))
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/success_0.08", eps2))
+        diagnostics_key = goal_key + "/distance"
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/success", eps1))
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/success_close", eps2))
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/checking_whether_picked_up", eps3))
 
         diagnostics.update(create_stats_ordered_dict(diagnostics_key, values))
         return diagnostics
@@ -678,16 +686,17 @@ class MURMENV(PandaBaseEnv):
         else:
             observation = np.concatenate((
                 end_effector_pos, gripper_tips_distance))
-            goal_pos = np.concatenate((
-                end_effector_pos, gripper_tips_distance,
-                self.goal_pos))
+
+            obj_observation = np.asarray(object_pos)
+
+            goal_pos = np.asarray(self.goal_pos)
             #print('DOF  @@  HERE')
 
         obs_dict = dict(
-            #observation=observation,
-            state_observation=observation,
+            state_observation=obj_observation,
+            robot_state_observation=observation,
             #desired_goal=goal_pos,
-            #state_desired_goal=goal_pos,
+            state_desired_goal=goal_pos,
             #achieved_goal=observation,
             #state_achieved_goal=observation,
             )
