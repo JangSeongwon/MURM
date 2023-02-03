@@ -54,9 +54,9 @@ Panda Robot env settings
 -Gripper Control with Distance and Robot finger's Contact  
 -RL: Give action with POS  
 
-  
 Env1: Single-view task 
       MURMENV- 9 Boxes as goals, Random initially placed objects + 3 types of shapes + Random color(rgb)  
+             - Added Diagnostics + Running for goal part  
     
 Env2: Multi-view task  
       MURMENV_m1- Similar to Env1 but global-view is hindered with a wall to goal-boxes (Global camera disadvantage)   
