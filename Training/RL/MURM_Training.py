@@ -33,12 +33,18 @@ FLAGS = flags.FLAGS
 
 def get_paths():
     data_path = '/media/jang/jang/0ubuntu/'
-    demo_paths = [#dict(path=data_path + 'demos_dataset/z_Running_test/Wall_demos_200_2.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                  # dict(path=data_path + 'demos_dataset/z_Running_test/Wall_demos_200_1.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                  # dict(path=data_path + 'demos_dataset/z_Running_test/Wall_demos_200_1.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                  # dict(path=data_path + 'demos_dataset/z_Running_test/Wall_demos_200_1.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                  # dict(path=data_path + 'demos_dataset/z_Running_test/Wall_demos_200_1.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                  dict(path=data_path + 'demos_dataset/z_Running_test/1212.pkl', obs_dict=True, is_demo=True, use_latents=True),
+    demo_paths = [
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_1.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_2.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_3.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_4.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_5.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_6.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_7.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_8.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_9.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_10.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                  # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/1313.pkl', obs_dict=True, is_demo=True, use_latents=True),
                   ]
     logging.info('data_path: %s', data_path)
     return data_path, demo_paths
@@ -62,8 +68,8 @@ def view_assign():
     return viewpoint
 
 def env_class_assign():
-    # env_class = MURMENV
-    env_class = MURMENV_m1
+    env_class = MURMENV
+    # env_class = MURMENV_m1
     # env_class = MURMENV_m2
     return env_class
 
@@ -96,6 +102,7 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
         ),
 
         env_type='SingleView',
+
         trainer_kwargs=dict(
             discount=0.995,
             policy_lr=3E-4,
@@ -116,16 +123,19 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
             max_value=None,
         ),
 
+        save_video=True,
+
         max_path_length=400,
         algo_kwargs=dict(
             batch_size=256,
             start_epoch=-1000,  # offline epochs
             num_epochs=151,  # online epochs
 
-            num_eval_steps_per_epoch=2000,
-            num_expl_steps_per_train_loop=2000,
+            #TODO: EPoch steps Fix
+            num_eval_steps_per_epoch=2000, #TODO: 2000: 400 per episode -> so 5 times eval
+            # num_expl_steps_per_train_loop=1, #2000
             num_trains_per_train_loop=1000,
-            num_online_trains_per_train_loop=2000,
+            # num_online_trains_per_train_loop=2000,
             min_num_steps_before_training=4000,
 
             eval_epoch_freq=5,
@@ -135,10 +145,10 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
         replay_buffer_kwargs=dict(
             fraction_next_context=0.1,
             fraction_future_context=0.6,
-            fraction_foresight_context=0.0,
-            fraction_perturbed_context=0.0,
+            # fraction_foresight_context=0.0,
+            # fraction_perturbed_context=0.0,
             fraction_distribution_context=0.0,
-            max_future_dt=None,
+            # max_future_dt=None,
             max_size=int(1E6),
         ),
 
@@ -148,23 +158,24 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
             reward_type='sparse',
             epsilon=2.0,
         ),
+
         online_offline_split_replay_buffer_kwargs=dict(
             online_replay_buffer_kwargs=dict(
                 fraction_next_context=0.1,
                 fraction_future_context=0.6,
-                fraction_foresight_context=0.0,
-                fraction_perturbed_context=0.0,
+                # fraction_foresight_context=0.0,
+                # fraction_perturbed_context=0.0,
                 fraction_distribution_context=0.0,
-                max_future_dt=None,
+                # max_future_dt=None,
                 max_size=int(4E5),
             ),
             offline_replay_buffer_kwargs=dict(
                 fraction_next_context=0.1,
                 fraction_future_context=0.9,
-                fraction_foresight_context=0.0,
-                fraction_perturbed_context=0.0,
+                # fraction_foresight_context=0.0,
+                # fraction_perturbed_context=0.0,
                 fraction_distribution_context=0.0,
-                max_future_dt=None,
+                # max_future_dt=None,
                 max_size=int(6E5),
             ),
             sample_online_fraction=0.6
@@ -173,18 +184,20 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
         observation_key='latent_observation',
         observation_keys=['latent_observation'],
         goal_key='latent_desired_goal',
-        save_video=True,
-        expl_save_video_kwargs=dict(
-            save_video_period=25,
-            pad_color=0,
-        ),
+
+        # expl_save_video_kwargs=dict(
+        #     save_video_period=25,
+        #     pad_color=0,
+        # ),
+
         eval_save_video_kwargs=dict(
-            save_video_period=1,
+            save_video_period=25,
             pad_color=0,
         ),
 
         reset_keys_map=dict(
-            image_observation='initial_latent_state'
+            image_global_observation='initial_latent_state',
+            image_active_observation='initial_latent_state_active',
         ),
 
         path_loader_class=EncoderDictToMDPPathLoader,
@@ -209,55 +222,55 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
         load_demos=True,
 
         evaluation_goal_sampling_mode='given_latent', #'presampled_images',
-        exploration_goal_sampling_mode='conditional_vae_prior',
+        # exploration_goal_sampling_mode='conditional_vae_prior',
         training_goal_sampling_mode='given_latent', #'presample_latents',
 
         presampled_goal_kwargs=dict(
             eval_goals='',  # HERE
             eval_goals_kwargs={},
-            expl_goals='',
-            expl_goals_kwargs={},
+            # expl_goals='',
+            # expl_goals_kwargs={},
             training_goals='',
             training_goals_kwargs={},
         ),
 
         use_expl_planner=False,
-        expl_planner_type='hierarchical',
-        expl_planner_kwargs=dict(
-            cost_mode='l2_vf_ptp',
-            prior_weight=0.01,
-            values_weight=0.001,
-            buffer_size=1000,
-        ),
-        expl_planner_scripted_goals=None,
-        expl_contextual_env_kwargs=dict(
-            num_planning_steps=8,
-            fraction_planning=1.0,
-            subgoal_timeout=30,
-            subgoal_reaching_thresh=2.0,
-            mode='o',
-        ),
+        # expl_planner_type='hierarchical',
+        # expl_planner_kwargs=dict(
+        #     cost_mode='l2_vf_ptp',
+        #     prior_weight=0.01,
+        #     values_weight=0.001,
+        #     buffer_size=1000,
+        # ),
+        # expl_planner_scripted_goals=None,
+        # expl_contextual_env_kwargs=dict(
+        #     num_planning_steps=8,
+        #     fraction_planning=1.0,
+        #     subgoal_timeout=30,
+        #     subgoal_reaching_thresh=2.0,
+        #     mode='o',
+        # ),
 
-        use_eval_planner=False,
-        eval_planner_type='hierarchical',
-        eval_planner_kwargs=dict(
-            cost_mode='l2_vf_ptp',
-            prior_weight=0.01,
-            values_weight=0.001,
-            buffer_size=1000,
-        ),
-        eval_planner_scripted_goals=None,
-        eval_contextual_env_kwargs=dict(
-            num_planning_steps=8,
-            fraction_planning=1.0,
-            subgoal_timeout=30,
-            subgoal_reaching_thresh=2.0,
-            mode='o',
-        ),
+        # use_eval_planner=False,
+        # eval_planner_type='hierarchical',
+        # eval_planner_kwargs=dict(
+        #     cost_mode='l2_vf_ptp',
+        #     prior_weight=0.01,
+        #     values_weight=0.001,
+        #     buffer_size=1000,
+        # ),
+        # eval_planner_scripted_goals=None,
+        # eval_contextual_env_kwargs=dict(
+        #     num_planning_steps=8,
+        #     fraction_planning=1.0,
+        #     subgoal_timeout=30,
+        #     subgoal_reaching_thresh=2.0,
+        #     mode='o',
+        # ),
 
         scripted_goals=None,
 
-        expl_reset_interval=0,
+        # expl_reset_interval=0,
 
         launcher_config=dict(
             unpack_variant=True,
@@ -273,7 +286,7 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
 
         pretrained_rl_path='',
         eval_seeds=14,
-        num_demos=20,
+        # num_demos=20,
         num_video_columns=5,
         save_paths=False,
     )
@@ -355,32 +368,32 @@ def process_variant(variant, data_path, env_class):  # NOQA
     else:
         eval_seed_str = ''
 
-    if variant['expl_planner_type'] == 'scripted':
-        eval_goals = os.path.join(
-            data_path,
-            f'{full_open_close_str}{env_type}_scripted_goals{eval_seed_str}.pkl')  # NOQA
-    else:
-        eval_goals = os.path.join(
-            data_path,
-            f'{full_open_close_str}{env_type}_goals{eval_seed_str}.pkl')
+    # if variant['expl_planner_type'] == 'scripted':
+    #     eval_goals = os.path.join(
+    #         data_path,
+    #         f'{full_open_close_str}{env_type}_scripted_goals{eval_seed_str}.pkl')  # NOQA
+    # else:
+    eval_goals = os.path.join(
+        data_path,
+        f'{full_open_close_str}{env_type}_goals{eval_seed_str}.pkl')
 
-    if variant['expl_planner_scripted_goals'] is not None:
-        variant['expl_planner_scripted_goals'] = os.path.join(
-            data_path, variant['expl_planner_scripted_goals'])
+    # if variant['expl_planner_scripted_goals'] is not None:
+    #     variant['expl_planner_scripted_goals'] = os.path.join(
+    #         data_path, variant['expl_planner_scripted_goals'])
 
-    if variant['eval_planner_scripted_goals'] is not None:
-        variant['eval_planner_scripted_goals'] = os.path.join(
-            data_path, variant['eval_planner_scripted_goals'])
+    # if variant['eval_planner_scripted_goals'] is not None:
+    #     variant['eval_planner_scripted_goals'] = os.path.join(
+    #         data_path, variant['eval_planner_scripted_goals'])
 
     ########################################
     # Goal sampling modes.
     ########################################
     variant['presampled_goal_kwargs']['eval_goals'] = eval_goals
-    variant['online_offline_split_replay_buffer_kwargs']['offline_replay_buffer_kwargs']['max_size'] = min(  # NOQA
-        int(6E5), int(500*75*variant['num_demos']))
-    variant['online_offline_split_replay_buffer_kwargs']['online_replay_buffer_kwargs']['max_size'] = min(  # NOQA
-        int(4/6 * 500*75*variant['num_demos']),
-        int(1E6 - variant['online_offline_split_replay_buffer_kwargs']['offline_replay_buffer_kwargs']['max_size']))  # NOQA
+    # variant['online_offline_split_replay_buffer_kwargs']['offline_replay_buffer_kwargs']['max_size'] = min(  # NOQA
+    #     int(6E5), int(500*75*variant['num_demos']))
+    # variant['online_offline_split_replay_buffer_kwargs']['online_replay_buffer_kwargs']['max_size'] = min(  # NOQA
+    #     int(4/6 * 500*75*variant['num_demos']),
+    #     int(1E6 - variant['online_offline_split_replay_buffer_kwargs']['offline_replay_buffer_kwargs']['max_size']))  # NOQA
 
     if variant['use_both_ground_truth_and_affordance_expl_goals']:
         variant['exploration_goal_sampling_mode'] = (
@@ -430,9 +443,9 @@ def process_variant(variant, data_path, env_class):  # NOQA
         variant['trainer_kwargs']['min_value'] = -1. / (
             1. - variant['trainer_kwargs']['discount'])
 
-    if variant['expl_planner_type'] != 'hierarchical':
-        variant['pretrained_vae_path'] = os.path.join(
-            variant['pretrained_vae_path'], 'dt15')
+    # if variant['expl_planner_type'] != 'hierarchical':
+    #     variant['pretrained_vae_path'] = os.path.join(
+    #         variant['pretrained_vae_path'], 'dt15')
 
     if 'std' in variant['policy_kwargs']:
         if variant['policy_kwargs']['std'] <= 0:
