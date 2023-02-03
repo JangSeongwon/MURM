@@ -9,7 +9,7 @@ import torch
 import rlkit.torch.pytorch_util as ptu
 from rlkit.core import logger
 from rlkit.data_management.contextual_replay_buffer import (
-    # ContextualRelabelingReplayBuffer,
+    ContextualRelabelingReplayBuffer,
     RemapKeyFn,
 )
 from rlkit.data_management.online_offline_split_replay_buffer import (
@@ -30,12 +30,15 @@ from rlkit.envs.contextual.latent_distributions import (
     AddGripperStateDistribution,
     PriorDistribution,
     PresamplePriorDistribution,
+    murmlatentgoalspace,
 )
 from rlkit.envs.encoder_wrappers import EncoderWrappedEnv
 from rlkit.envs.gripper_state_wrapper import GripperStateWrappedEnv
 from rlkit.envs.gripper_state_wrapper import process_gripper_state
+
 from rlkit.envs.images import EnvRenderer
 from rlkit.envs.images import EnvRenderer_active
+
 from rlkit.envs.images import InsertImageEnv
 from rlkit.demos.source.mdp_path_loader import MDPPathLoader  
 from rlkit.demos.source.encoder_dict_to_mdp_path_loader import EncoderDictToMDPPathLoader  
@@ -59,7 +62,7 @@ from rlkit.samplers.rollout_functions import contextual_rollout
 from rlkit.envs.contextual_env import ContextualEnv
 # from rlkit.envs.contextual_env import SubgoalContextualEnv
 # from rlkit.envs.contextual_env import NonEpisodicSubgoalContextualEnv
-from rlkit.learning.contextual_replay_buffer import ContextualRelabelingReplayBuffer  
+# from rlkit.learning.contextual_replay_buffer import ContextualRelabelingReplayBuffer
 from rlkit.planning.random_planner import RandomPlanner  
 from rlkit.planning.mppi_planner import MppiPlanner  
 from rlkit.planning.planner import HierarchicalPlanner  
@@ -92,7 +95,9 @@ class RewardFn:
 
         if obs_type == 'latent':
             self.obs_key = 'latent_observation'
+            self.obs_key_murm = 'latent_active_observation'
             self.goal_key = 'latent_desired_goal'
+
         elif obs_type == 'state':
             self.obs_key = 'state_observation'
             self.goal_key = 'state_desired_goal'
@@ -101,10 +106,10 @@ class RewardFn:
         self.reward_type = reward_type
         self.epsilon = epsilon
 
-        if reward_type == 'classifier':
-            self.reward_classifier = load_local_or_remote_file(
-                pretrained_reward_classifier_path)
-            self.sigmoid = torch.nn.Sigmoid()
+        # if reward_type == 'classifier':
+        #     self.reward_classifier = load_local_or_remote_file(
+        #         pretrained_reward_classifier_path)
+        #     self.sigmoid = torch.nn.Sigmoid()
 
     def process(self, obs):
         if len(obs.shape) == 1:
@@ -113,49 +118,57 @@ class RewardFn:
 
     def __call__(self, states, actions, next_states, contexts):
         s = self.process(next_states[self.obs_key])
-        c = self.process(next_states[self.obs_key])
-        #TODO: Reward Change
 
-        # c = self.process(contexts[self.goal_key])
+        '''len = 5120 in demo buffer'''
+
+        if len(contexts[self.goal_key]) == 2:
+            print('Getting MURM goals')
+            s2 = self.process(next_states[self.obs_key_murm])
+            c2 = self.process(contexts[self.goal_key][1])
+        else:
+            c = self.process(contexts[self.goal_key])
 
         terminal = np.zeros((s.shape[0], ), dtype=np.uint8)
+
+        # print('Reward Type', self.reward_type)
 
         if self.reward_type == 'dense':
             reward = -np.linalg.norm(s - c, axis=1)
 
         elif self.reward_type == 'sparse':
+            # print('epsilon', self.epsilon)
             success = np.linalg.norm(s - c, axis=1) < self.epsilon
             reward = success - 1
 
-        elif self.reward_type == 'progress':
-            s_tm1 = self.process(states[self.obs_key])
-            sd_tm1 = np.square(np.linalg.norm(s_tm1 - c, axis=1))
-            sd_t = np.square(np.linalg.norm(s - c, axis=1))
-            reward = sd_tm1 - sd_t
-
-        elif self.reward_type == 'highlevel':
-            reward = self.env.compute_reward(
-                states, actions, next_states, contexts)
-
-        elif self.reward_type == 'classifier':
-            s = ptu.from_numpy(s)
-            s = s.view(s.shape[0], 5, 12, 12)
-            c = ptu.from_numpy(c)
-            c = c.view(c.shape[0], 5, 12, 12)
-            pred = self.sigmoid(self.reward_classifier(s, c))
-            pred = ptu.get_numpy(pred)[..., 0]
-            reward = pred - 1.0
-
-        elif self.reward_type in ['sp', 'sparse_progress']:
-            success = np.linalg.norm(s - c, axis=1) < self.epsilon
-            sparse_reward = success - 1
-
-            s_tm1 = self.process(states[self.obs_key])
-            sd_tm1 = np.square(np.linalg.norm(s_tm1 - c, axis=1))
-            sd_t = np.square(np.linalg.norm(s - c, axis=1))
-            progress_reward = sd_tm1 - sd_t
-
-            reward = sparse_reward + 0.1 * progress_reward
+        # elif self.reward_type == 'progress':
+        #     s_tm1 = self.process(states[self.obs_key])
+        #     sd_tm1 = np.square(np.linalg.norm(s_tm1 - c, axis=1))
+        #     sd_t = np.square(np.linalg.norm(s - c, axis=1))
+        #     reward = sd_tm1 - sd_t
+        #
+        # elif self.reward_type == 'highlevel':
+        #     reward = self.env.compute_reward(
+        #         states, actions, next_states, contexts)
+        #
+        # elif self.reward_type == 'classifier':
+        #     s = ptu.from_numpy(s)
+        #     s = s.view(s.shape[0], 5, 12, 12)
+        #     c = ptu.from_numpy(c)
+        #     c = c.view(c.shape[0], 5, 12, 12)
+        #     pred = self.sigmoid(self.reward_classifier(s, c))
+        #     pred = ptu.get_numpy(pred)[..., 0]
+        #     reward = pred - 1.0
+        #
+        # elif self.reward_type in ['sp', 'sparse_progress']:
+        #     success = np.linalg.norm(s - c, axis=1) < self.epsilon
+        #     sparse_reward = success - 1
+        #
+        #     s_tm1 = self.process(states[self.obs_key])
+        #     sd_tm1 = np.square(np.linalg.norm(s_tm1 - c, axis=1))
+        #     sd_t = np.square(np.linalg.norm(s - c, axis=1))
+        #     progress_reward = sd_tm1 - sd_t
+        #
+        #     reward = sparse_reward + 0.1 * progress_reward
 
         else:
             raise ValueError(self.reward_type)
@@ -227,6 +240,7 @@ def murm_experiment(
         reward_kwargs=None,
         encoder_wrapper=EncoderWrappedEnv,
         observation_key='latent_observation',
+        murm_observation_adding_key='latent_active_observation',
         observation_keys=['latent_observation'],
         observation_key_reward_fn=None,
         init_key='initial_latent_state',
@@ -334,7 +348,7 @@ def murm_experiment(
 
     # Enviorment Wrapping
     logging.info('Creating the environment...')
-    renderer = EnvRenderer(init_camera=init_camera, **renderer_kwargs)
+    renderer = EnvRenderer(init_camera=None, **renderer_kwargs)
     renderer_active = EnvRenderer_active(init_camera=None, **renderer_kwargs)
 
     if goal_key_reward_fn is not None:
@@ -350,34 +364,47 @@ def murm_experiment(
         goal_sampling_mode,
         presampled_goals_path,
         num_presample,
-
-        #TODO: Extra parts
         reward_kwargs,
         presampled_goals_kwargs,
 
     ):
-        #TODO: print('encoder wrapper=EncoderWrappedEnv',encoder_wrapper)
+        if MURM_view == 'murm':
+            model_global = call_model_global
+            model_active = call_model_active
+            vqvae = model_global['vqvae']
+            vqvae_add_murm = model_active['vqvae']
+        else:
+            vqvae = model['vqvae']
+            vqvae_add_murm = None
 
-        vqvae = model['vqvae']
         state_env = get_gym_env(
             env_id,
             env_class=env_class,
             env_kwargs=env_kwargs,
         )
-        # state_env = ClipAction(state_env)
-        renderer = EnvRenderer(
-            init_camera=init_camera,
-            **renderer_kwargs)
-        img_env = InsertImageEnv(
-            state_env,
-            renderer=renderer)
 
-        # print('img_env', img_env)
+        renderer = EnvRenderer(init_camera=init_camera, **renderer_kwargs)
+        renderer_active = EnvRenderer_active(init_camera=None, **renderer_kwargs)
+
+        img_env = InsertImageEnv(state_env, renderer1=renderer, renderer2=renderer_active)
+
+        if MURM_view == 'murm':
+            step_keys = dict(image_global_observation='latent_observation',
+                             image_active_observation='latent_active_observation')
+        elif MURM_view == 'g':
+            step_keys = dict(image_global_observation='latent_observation')
+        elif MURM_view == 'a':
+            step_keys = dict(image_active_observation='latent_observation')
+        else:
+            exit()
+
 
         encoded_env = encoder_wrapper(
+            MURM_view,
             img_env,
             vqvae,
-            step_keys_map=dict(image_observation='latent_observation'),
+            vqvae_add_murm,
+            step_keys_map=step_keys,
             reset_keys_map=reset_keys_map,
         )
 
@@ -420,6 +447,7 @@ def murm_experiment(
                 distrib_goal_key,
                 num_presample=num_presample,
             )
+
             diagnostics = StateImageGoalDiagnosticsFn({}, )
 
         elif goal_sampling_mode == 'presampled_images':
@@ -499,11 +527,24 @@ def murm_experiment(
             )
             diagnostics = state_goal_env.get_contextual_diagnostics
 
+
+        #TODO: My goal distribution HERE
+
         elif goal_sampling_mode == 'given_latent':
-            latent_goal_distribution = None
+            latent_goal_distribution = murmlatentgoalspace(
+                model=vqvae,
+                env=state_env,
+                key=distrib_goal_key,
+                rep=vqvae.representation_size,
+                murm_view=MURM_view
+            )
             diagnostics = state_env.get_contextual_diagnostics
         else:
             raise ValueError
+
+
+
+
 
         # if use_gripper_observation:
         #     latent_goal_distribution = AddGripperStateDistribution(
@@ -522,6 +563,7 @@ def murm_experiment(
         else:
             contextual_diagnostics_fns = diagnostics
 
+        """ In env, goal is sampled from distribution """
         env = ContextualEnv(
                 encoded_env,
                 context_distribution=latent_goal_distribution,
@@ -549,51 +591,54 @@ def murm_experiment(
         path_loader_kwargs['active_model'] = model_active  # ['vqvae']
         print('MURM VQVAE Two Model', model_global, model_active)
 
+        path_loader_kwargs['model_g'] = model_global  # ['vqvae']
+        path_loader_kwargs['model_a'] = model_active
+
     elif MURM_view == 'g':
         model = call_model_global
         print('Global VQVAE Model', model)
+        path_loader_kwargs['model'] = model  # ['vqvae']
+
     elif MURM_view == 'a':
         model = call_model_active
         print('Active VQVAE Model', model)
+        path_loader_kwargs['model'] = model  # ['vqvae']
     else:
         exit()
 
-    path_loader_kwargs['model'] = model  # ['vqvae']
-
-
     # Environment Definitions
-    expl_env_kwargs = env_kwargs.copy()
-    expl_env_kwargs['expl'] = True
+    # expl_env_kwargs = env_kwargs.copy()
+    # expl_env_kwargs['expl'] = True
+    #
+    # exploration_goal_sampling_mode = evaluation_goal_sampling_mode
+    # presampled_goal_kwargs['expl_goals'] = (
+    #     presampled_goal_kwargs['eval_goals'])
+    # presampled_goal_kwargs['expl_goals_kwargs'] = (
+    #     presampled_goal_kwargs['eval_goals_kwargs'])
+    #
+    # logging.info('Preparing the [exploration] env and contextual distrib...')
+    # logging.info('sampling mode: %r', exploration_goal_sampling_mode)
+    # logging.info('presampled goals: %r',
+    #              presampled_goal_kwargs['expl_goals'])
+    # logging.info('presampled goals kwargs: %r',
+    #              presampled_goal_kwargs['expl_goals_kwargs'],
+    #              )
+    # logging.info('num_presample: %d', num_presample)
 
-    exploration_goal_sampling_mode = evaluation_goal_sampling_mode
-    presampled_goal_kwargs['expl_goals'] = (
-        presampled_goal_kwargs['eval_goals'])
-    presampled_goal_kwargs['expl_goals_kwargs'] = (
-        presampled_goal_kwargs['eval_goals_kwargs'])
 
-    logging.info('Preparing the [exploration] env and contextual distrib...')
-    logging.info('sampling mode: %r', exploration_goal_sampling_mode)
-    logging.info('presampled goals: %r',
-                 presampled_goal_kwargs['expl_goals'])
-    logging.info('presampled goals kwargs: %r',
-                 presampled_goal_kwargs['expl_goals_kwargs'],
-                 )
-    logging.info('num_presample: %d', num_presample)
-
-
-    expl_env, expl_context_distrib, expl_reward = (
-        contextual_env_distrib_and_reward(
-            env_id,
-            env_class,
-            env_kwargs,
-            encoder_wrapper,
-            exploration_goal_sampling_mode,
-            presampled_goal_kwargs['expl_goals'],
-            num_presample,
-            reward_kwargs=reward_kwargs,
-            presampled_goals_kwargs=(
-                presampled_goal_kwargs['expl_goals_kwargs']),
-        ))
+    # expl_env, expl_context_distrib, expl_reward = (
+    #     contextual_env_distrib_and_reward(
+    #         env_id,
+    #         env_class,
+    #         env_kwargs,
+    #         encoder_wrapper,
+    #         exploration_goal_sampling_mode,
+    #         presampled_goal_kwargs['expl_goals'],
+    #         num_presample,
+    #         reward_kwargs=reward_kwargs,
+    #         presampled_goals_kwargs=(
+    #             presampled_goal_kwargs['expl_goals_kwargs']),
+    #     ))
 
     logging.info('Preparing the [evaluation] env and contextual distrib...')
     logging.info('Preparing the eval env and contextual distrib...')
@@ -619,6 +664,8 @@ def murm_experiment(
             presampled_goals_kwargs=(
                 presampled_goal_kwargs['eval_goals_kwargs']),
         ))
+
+    print('what is ENV??== Hard to Understand...', eval_env)
 
     compare_reward_kwargs = reward_kwargs.copy()
     compare_reward_kwargs['reward_type'] = 'sparse'
@@ -658,29 +705,46 @@ def murm_experiment(
         path_loader_kwargs['demo_paths'].append(env_offpolicy_data_path)
 
     # Key Setting
+
+    #TODO: expl settings -> eval settings in env
+
     context_key = goal_key
-    obs_dim = (
-        expl_env.observation_space.spaces[observation_key].low.size
-        #+ expl_env.observation_space.spaces[context_key].low.size
-    )
-    if use_gripper_observation:
-        # obs_dim += 7 * 2
-        obs_dim += 7
-    action_dim = expl_env.action_space.low.size
+    if MURM_view == 'murm':
+        obs_dim = (
+            eval_env.observation_space.spaces[observation_key].low.size + eval_env.observation_space.spaces[observation_key].low.size
+            + eval_env.observation_space.spaces[context_key].low.size + eval_env.observation_space.spaces[context_key].low.size
+        )
+        print('obs_dim', obs_dim, '////', eval_env.observation_space)
+    else:
+        obs_dim = (
+                eval_env.observation_space.spaces[observation_key].low.size
+                + eval_env.observation_space.spaces[context_key].low.size
+        )
+        print('obs_dim', obs_dim, '////', eval_env.observation_space)
+
+    # if use_gripper_observation:
+    #     # obs_dim += 7 * 2
+    #     obs_dim += 7
+
+    action_dim = eval_env.action_space.low.size
 
     state_rewards = reward_kwargs.get('reward_type', 'dense') == 'highlevel'
 
     mapper_dict = {context_key: observation_key}
-    obs_keys = []  # [observation_key]
+    obs_keys = [observation_key]
     cont_keys = [context_key]
     cont_keys_to_save = []
 
     # if goal_key_reward_fn:
+    #     print('Delete this part')
     #     mapper_dict[goal_key_reward_fn] = observation_key_reward_fn
     #     if goal_key_reward_fn not in obs_keys:
     #         obs_keys.append(observation_key_reward_fn)
     #     if goal_key_reward_fn not in cont_keys:
     #         cont_keys.append(goal_key_reward_fn)
+
+    if MURM_view == 'murm':
+        obs_keys.append(murm_observation_adding_key)
 
     obs_keys.append(state_observation_key)
     if state_rewards:
@@ -688,12 +752,21 @@ def murm_experiment(
         obs_keys.append(state_observation_key)
         cont_keys_to_save.append(state_goal_key)
     else:
-        obs_keys.extend(list(reset_keys_map.values()))
+        if MURM_view == 'murm':
+            obs_keys.extend(list(reset_keys_map.values()))
+        elif MURM_view == 'g':
+            del reset_keys_map['image_active_observation']
+            obs_keys.extend(list(reset_keys_map.values()))
+        elif MURM_view == 'a':
+            del reset_keys_map['image_global_observation']
+            obs_keys.extend(list(reset_keys_map.values()))
+        else:
+            exit()
 
-    if use_gripper_observation:
-        # mapper_dict[gripper_goal_key] = gripper_observation_key
-        obs_keys.append(gripper_observation_key)
-        # cont_keys.append(gripper_goal_key)
+    # if use_gripper_observation:
+    #     # mapper_dict[gripper_goal_key] = gripper_observation_key
+    #     obs_keys.append(gripper_observation_key)
+    #     # cont_keys.append(gripper_goal_key)
 
     mapper = RemapKeyFn(mapper_dict)
 
@@ -719,14 +792,10 @@ def murm_experiment(
             [next_obs, context], axis=1)
         return batch
 
-
-
-
     online_replay_buffer_kwargs = online_offline_split_replay_buffer_kwargs[
         'online_replay_buffer_kwargs']
     offline_replay_buffer_kwargs = online_offline_split_replay_buffer_kwargs[
         'offline_replay_buffer_kwargs']
-
 
     for rb_kwargs in [
             online_replay_buffer_kwargs,
@@ -735,24 +804,24 @@ def murm_experiment(
             replay_buffer_kwargs['fraction_next_context'])
         rb_kwargs['fraction_future_context'] = (
             replay_buffer_kwargs['fraction_future_context'])
-        rb_kwargs['fraction_foresight_context'] = (
-            replay_buffer_kwargs['fraction_foresight_context'])
-        rb_kwargs['fraction_perturbed_context'] = (
-            replay_buffer_kwargs['fraction_perturbed_context'])
+        # rb_kwargs['fraction_foresight_context'] = (
+        #     replay_buffer_kwargs['fraction_foresight_context'])
+        # rb_kwargs['fraction_perturbed_context'] = (
+        #     replay_buffer_kwargs['fraction_perturbed_context'])
         rb_kwargs['fraction_distribution_context'] = (
             replay_buffer_kwargs['fraction_distribution_context'])
-        rb_kwargs['max_future_dt'] = (
-            replay_buffer_kwargs['max_future_dt'])
+        # rb_kwargs['max_future_dt'] = (
+        #     replay_buffer_kwargs['max_future_dt'])
 
-    if (replay_buffer_kwargs['fraction_perturbed_context'] > 0.0 or
-            replay_buffer_kwargs['fraction_foresight_context'] > 0.0):
-        for rb_kwargs in [
-                replay_buffer_kwargs,
-                online_replay_buffer_kwargs,
-                offline_replay_buffer_kwargs]:
-            rb_kwargs['vqvae'] = model['vqvae']
-            rb_kwargs['affordance'] = model['affordance']
-            rb_kwargs['noise_level'] = 0.5
+    # if (replay_buffer_kwargs['fraction_perturbed_context'] > 0.0):
+    #         # or replay_buffer_kwargs['fraction_foresight_context'] > 0.0):
+    #     for rb_kwargs in [
+    #             replay_buffer_kwargs,
+    #             online_replay_buffer_kwargs,
+    #             offline_replay_buffer_kwargs]:
+    #         rb_kwargs['vqvae'] = model['vqvae']
+    #         rb_kwargs['affordance'] = model['affordance']
+    #         rb_kwargs['noise_level'] = 0.5
 
 
 
@@ -884,34 +953,23 @@ def murm_experiment(
         combined_obs = []
 
         for k in path_collector_observation_keys:
-            if k == gripper_observation_key:
-                gripper_state = process_gripper_state(
-                    o['state_observation'])
-                combined_obs.append(gripper_state)
-            else:
-                combined_obs.append(o[k])
+            # print('checking keys finally', path_collector_observation_keys)
+            combined_obs.append(o[k])
 
-        #for k in path_collector_context_keys_for_policy:
-            # if k == gripper_goal_key:
-            #     gripper_state = process_gripper_state(
-            #         o['state_desired_goal'])
-            #     combined_obs.append(gripper_state)
-            # else:
-            #     combined_obs.append(o[k])
-            #combined_obs.append(o[k])
+        for k in path_collector_context_keys_for_policy:
+            combined_obs.append(o[k])
 
         return np.concatenate(combined_obs, axis=0)
 
-
-
     rollout = contextual_rollout
-    if use_gripper_observation:
-        rollout = add_gripper_state_obs(rollout)
+
+    # if use_gripper_observation:
+    #     rollout = add_gripper_state_obs(rollout)
 
     eval_policy = policy
 
     eval_path_collector = ContextualPathCollector(
-        eval_env,
+        eval_env, # This env is Contextual env which is called to collect data in RL batch first
         eval_policy,
         observation_keys=path_collector_observation_keys,
         context_keys_for_policy=path_collector_context_keys_for_policy,
@@ -919,19 +977,19 @@ def murm_experiment(
         rollout=rollout,
     )
 
-    expl_policy = create_exploration_policy(
-        expl_env,
-        policy,
-        **exploration_policy_kwargs)
-
-    expl_path_collector = ContextualPathCollector(
-        expl_env,
-        expl_policy,
-        observation_keys=path_collector_observation_keys,
-        context_keys_for_policy=path_collector_context_keys_for_policy,
-        obs_processor=obs_processor,
-        rollout=rollout,
-    )
+    # expl_policy = create_exploration_policy(
+    #     expl_env,
+    #     policy,
+    #     **exploration_policy_kwargs)
+    #
+    # expl_path_collector = ContextualPathCollector(
+    #     expl_env,
+    #     expl_policy,
+    #     observation_keys=path_collector_observation_keys,
+    #     context_keys_for_policy=path_collector_context_keys_for_policy,
+    #     obs_processor=obs_processor,
+    #     rollout=rollout,
+    # )
 
     if trainer_type == 'iql':
         if trainer_kwargs['use_online_beta']:
@@ -942,21 +1000,21 @@ def murm_experiment(
             if algo_kwargs['start_epoch'] == 0:
                 trainer_kwargs['quantile'] = trainer_kwargs['quantile_online']
 
-    if use_expl_planner:
-        expl_env.set_vf(vf)
+    # if use_expl_planner:
+    #     expl_env.set_vf(vf)
 
-    if use_eval_planner:
-        eval_env.set_vf(vf)
+    # if use_eval_planner:
+    #     eval_env.set_vf(vf)
 
     model['vf'] = vf
     model['qf1'] = qf1
     model['qf2'] = qf2
 
-    if use_expl_planner and expl_planner_type not in ['scripted']:
-        expl_env.set_model(model)
+    # if use_expl_planner and expl_planner_type not in ['scripted']:
+    #     expl_env.set_model(model)
 
-    if use_eval_planner and eval_planner_type not in ['scripted']:
-        eval_env.set_model(model)
+    # if use_eval_planner and eval_planner_type not in ['scripted']:
+    #     eval_env.set_model(model)
 
     # Algorithm
     if trainer_type == 'iql':
@@ -988,9 +1046,9 @@ def murm_experiment(
 
     algorithm = TorchBatchRLAlgorithm(
         trainer=trainer,
-        exploration_env=expl_env,
+        # exploration_env=expl_env,
         evaluation_env=eval_env,
-        exploration_data_collector=expl_path_collector,
+        # exploration_data_collector=expl_path_collector,
         evaluation_data_collector=eval_path_collector,  #TODO: Collect data here??
         replay_buffer=replay_buffer,
         max_path_length=max_path_length,
@@ -1028,30 +1086,30 @@ def murm_experiment(
 
     # Video Saving
     if save_video:
-        assert (num_video_columns * max_path_length <=
-                algo_kwargs['num_expl_steps_per_train_loop'])
+        # assert (num_video_columns * max_path_length <=
+        #         algo_kwargs['num_expl_steps_per_train_loop'])
 
-        expl_save_video_kwargs['include_final_goal'] = use_expl_planner
-        eval_save_video_kwargs['include_final_goal'] = use_eval_planner
+        # expl_save_video_kwargs['include_final_goal'] = use_expl_planner
+        # eval_save_video_kwargs['include_final_goal'] = use_eval_planner
 
-        expl_save_video_kwargs['decode_image_goal_key'] = 'image_decoded_goal'  
+        # expl_save_video_kwargs['decode_image_goal_key'] = 'image_decoded_goal'
         eval_save_video_kwargs['decode_image_goal_key'] = 'image_decoded_goal'  
 
-        expl_video_func = RIGVideoSaveFunction(
-            model['vqvae'],
-            expl_path_collector,
-            'train',
-            image_goal_key=image_goal_key,
-            rows=2,
-            columns=num_video_columns,
-            imsize=imsize,
-            image_format=renderer.output_image_format,
-            unnormalize=True,
-            dump_pickle=save_video_pickle,
-            dump_only_init_and_goal=True,
-            **expl_save_video_kwargs
-        )
-        algorithm.post_train_funcs.append(expl_video_func)
+        # expl_video_func = RIGVideoSaveFunction(
+        #     model['vqvae'],
+        #     expl_path_collector,
+        #     'train',
+        #     image_goal_key=image_goal_key,
+        #     rows=2,
+        #     columns=num_video_columns,
+        #     imsize=imsize,
+        #     image_format=renderer.output_image_format,
+        #     unnormalize=True,
+        #     dump_pickle=save_video_pickle,
+        #     dump_only_init_and_goal=True,
+        #     **expl_save_video_kwargs
+        # )
+        # algorithm.post_train_funcs.append(expl_video_func)
 
         if algo_kwargs['num_eval_steps_per_epoch'] > 0:
             eval_video_func = RIGVideoSaveFunction(
@@ -1087,6 +1145,7 @@ def murm_experiment(
                                         demo_test_buffer=demo_test_buffer,
                                         reward_fn=eval_reward,
                                         compare_reward_fn=compare_reward,
+                                        MURM_view=MURM_view,
                                         **path_loader_kwargs
                                         )
         path_loader.load_demos()
