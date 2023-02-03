@@ -89,12 +89,12 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/3 Analysis   
+2/4 Analysis   
 
 1. Collecting demo data with three computers    
 => OKAY  
 
-2. Pretrained VQVAE.  
+2. Pretrained VQVAE. No need active once again...   
 => OKAY - 1500 epoches = 6.5days & 2VQVAE model   
 
 3. Started training offline RL  
@@ -118,14 +118,12 @@ Env2: Multi-view task
        
         
 6. *If* success rate is satisfactory, Go for online fine-tuning as well     
-   *If not* = Need to also implement online fine-tuning and check the results again   
-            
-*The conclusion is first to think of way how to use online fine-tuning in my case*   
- We can first expect task similarity & Use GCB theory      
+   *If not* = Need to also implement online fine-tuning and check the results again      
     
 7. As additional process try images with lower-dimensional size (64x64 or 48x48 as lowest possibility)  
   
-8. Edited rollout functions and goal sampling part -> Now need diagnostics   
+8. Edited rollout functions and goal sampling part and diagnostics   
+      -> Now need to edit for murm in codes + online tuning codes + murm_env_m3 edit   
 
 --------------------------
 
