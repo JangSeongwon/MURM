@@ -26,7 +26,6 @@ class MURMENV(PandaBaseEnv):
                  reward_min=-2.5,
                  randomize=True,
                  observation_mode='state',
-
                  #TODO: Image Dimension
                  obs_img_dim=128,
                  obs_img_dim_active=128,
@@ -301,26 +300,6 @@ class MURMENV(PandaBaseEnv):
 
         return goal_global, goal_active
 
-    # def get_object_info(self):
-    #     complete_object_dict, scaling = metadata.obj_path_map, metadata.path_scaling_map
-    #     complete = self.object_subset is None
-    #     train = (self.object_subset == 'train') or (self.object_subset == 'all')
-    #     test = (self.object_subset == 'test') or (self.object_subset == 'all')
-    #
-    #     object_dict = {}
-    #     for k in complete_object_dict.keys():
-    #         in_test = (k in test_set)
-    #         in_subset = (k in self.object_subset)
-    #         if in_subset:
-    #             object_dict[k] = complete_object_dict[k]
-    #         if complete:
-    #             object_dict[k] = complete_object_dict[k]
-    #         if train and not in_test:
-    #             object_dict[k] = complete_object_dict[k]
-    #         if test and in_test:
-    #             object_dict[k] = complete_object_dict[k]
-    #     return object_dict, scaling
-
     def _set_spaces(self):
         act_dim = self.get_action_dim()
         act_bound = 1
@@ -346,16 +325,8 @@ class MURMENV(PandaBaseEnv):
         ])
 
     def _load_table(self):
-
-        # self._panda = bullet.objects.panda_robot()
         self._table = bullet.objects.table(rgba=[1, 1, 1, 1])
         self._base = bullet.objects.panda_base()
-        # shelf
-        # self._shelf1 = bullet.objects.shelf1(rgba=[.92, .85, .7, 1])
-        # self._shelf2 = bullet.objects.shelf2(rgba=[.92, .85, .7, 1])
-        # self._shelf3 = bullet.objects.shelf3(rgba=[1, 1, 1, 1])
-        # box
-        # self._box = bullet.objects.box(rgba=[1, 1, 1, 1])
         self._box1 = bullet.objects.box1()
         self._box2 = bullet.objects.box2()
         self._box3 = bullet.objects.box3()
@@ -372,71 +343,6 @@ class MURMENV(PandaBaseEnv):
 
         self._objects = {}
         self._sensors = {}
-
-    # def _set_positions(self, pos):
-    #     bullet.reset()
-    #     bullet.setup_headless(self._timestep, solver_iterations=self._solver_iterations)
-    #     self._load_table()
-    #
-    #     hand_pos = pos[:3]
-    #     gripper = pos[self.start_obj_ind - 1]
-    #     object_pos = pos[self.start_obj_ind:self.start_obj_ind + 3]
-    #     object_quat = pos[self.start_obj_ind + 4:self.start_obj_ind + 7]
-    #
-    #     # self.add_object(change_object=False, object_position=object_pos, quat=object_quat)
-    #
-    #     if self.DoF > 3:
-    #         hand_theta = pos[3:7]
-    #     else:
-    #         hand_theta = self.default_theta
-    #
-    #     self._format_state_query()
-    #     self._prev_pos = np.array(hand_pos)
-    #
-    #     bullet.position_control(self._panda, self._end_effector, self._prev_pos, self.default_theta)
-    #     action = np.array([0 for i in range(self.DoF)] + [gripper])
-    #
-    #     for _ in range(10):
-    #         self.step(action)
-
-    # def add_object(self, change_object=False, object_position=None, quat=None):
-    #     # Pick object if necessary and save information
-    #     if change_object:
-    #         self.curr_object, self.curr_id = random.choice(list(self.object_dict.items()))
-    #         self.curr_color = self.sample_object_color()
-    #
-    #     else:
-    #         self.curr_object = self._obj
-    #         self.curr_id = 'cube'
-    #         self.curr_color = self.sample_object_color()
-
-        # Generate random object position
-        # if object_position is None:
-        #     object_position = self.sample_object_location()
-            # print(object_position)
-
-        # Generate quaterion if none is given
-        # if quat is None:
-        #     quat = self.sample_quat(self.curr_object)
-
-        # Spawn object above table
-        # self._objects = {
-        #     'obj': loader.load_shapenet_object(
-        #         self.curr_id,
-        #         self.scaling,
-        #         object_position,
-        #         quat=quat,
-        #         rgba=self.curr_color)
-        #     }
-
-        # Allow the objects to land softly in low gravity
-        # p.setGravity(0, 0, -1)
-        # for _ in range(100):
-        #     bullet.step()
-        # # After landing, bring to stop
-        # p.setGravity(0, 0, -10)
-        # for _ in range(100):
-        #     bullet.step()
 
     def _format_action(self, *action):
         if self.DoF == 3:
@@ -502,8 +408,8 @@ class MURMENV(PandaBaseEnv):
             for j in range(len(paths[i]["observations"])):
                 state = paths[i]["observations"][j][state_key]
                 # print('state each', state)
-                state_z_pos = paths[i]["observations"][j][state_key][1]
-                print('checking z coordinates', state_z_pos)
+                state_z_pos = paths[i]["observations"][j][state_key][2]
+                # print('checking z coordinates', state_z_pos)
                 initial_z_pos = np.array(1.03)
                 height = np.linalg.norm(state_z_pos-initial_z_pos)
 
@@ -528,7 +434,6 @@ class MURMENV(PandaBaseEnv):
 ##############################################################################################
 
     def render_obs(self):
-
         # img_tuple1 = p.getCameraImage(width=self.obs_img_dim,
         #                  height=self.obs_img_dim,
         #                  viewMatrix=self._view_matrix_obs,
@@ -539,7 +444,6 @@ class MURMENV(PandaBaseEnv):
         # _, _, img1, depth, segmentation = img_tuple1
         #
         # img = img1[:, :, :-1]
-
         img, depth, segmentation = bullet.render(
             self.obs_img_dim, self.obs_img_dim, self._view_matrix_obs,
             self._projection_matrix_obs, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
@@ -563,7 +467,6 @@ class MURMENV(PandaBaseEnv):
             yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
         projection_matrix_obs_active = bullet.get_projection_matrix(
             self.obs_img_dim_active, self.obs_img_dim_active)
-
         # img_tuple2 = p.getCameraImage(width=self.obs_img_dim_active,
         #                  height=self.obs_img_dim_active,
         #                  viewMatrix=view_matrix_obs_active,
@@ -574,7 +477,6 @@ class MURMENV(PandaBaseEnv):
         # _, _, img2, depth2, segmentation2 = img_tuple2
         #
         # img_active = img2[:, :, :-1]
-
         img_active, depth, segmentation = bullet.render(
             self.obs_img_dim_active, self.obs_img_dim_active, view_matrix_obs_active,
             projection_matrix_obs_active, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
@@ -646,17 +548,6 @@ class MURMENV(PandaBaseEnv):
     ##################REWARD####################
     ############################################
 
-    # def get_object_deg(self):
-    #     # object_info = bullet.get_body_info(self._objects['obj'],
-    #     #                                    quat_to_deg=True)
-    #     object_info = bullet.get_body_info(self._obj,
-    #                                        quat_to_deg=True)
-    #     return object_info['theta']
-    #
-    # def get_hand_deg(self):
-    #     return bullet.get_link_state(self._panda, self._end_effector,
-    #         'theta', quat_to_deg=True)
-
     def get_observation(self):
         left_tip_pos = bullet.get_link_state(
             self._panda, 'panda_finger_joint1', keys='pos')
@@ -702,10 +593,6 @@ class MURMENV(PandaBaseEnv):
             )
 
         return obs_dict
-
-#################################################################################################
-#################################################################################################
-#################################################################################################
 
     def step(self, *action):
         # Joint Initialization Code
