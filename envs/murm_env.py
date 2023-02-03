@@ -181,10 +181,6 @@ class MURMENV(PandaBaseEnv):
             p.stepSimulation()
             time.sleep(self._timeStep)
 
-        # self._workspace = bullet.Sensor(self._panda,
-        #     xyz_min=self._pos_low, xyz_max=self._pos_high,
-        #     visualize=False, rgba=[0,1,0,.1])
-
         self._end_effector = bullet.get_index_by_attribute(
             self._panda, 'link_name', 'gripper_site')
 
@@ -308,9 +304,6 @@ class MURMENV(PandaBaseEnv):
 
         observation_dim = 10
         # 3 4 3
-        if self.DoF > 3:
-            observation_dim += 4
-
         obs_bound = 100
         obs_high = np.ones(observation_dim) * obs_bound
         state_space = gym.spaces.Box(-obs_high, obs_high)
