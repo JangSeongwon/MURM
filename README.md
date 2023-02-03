@@ -30,7 +30,7 @@ opencv-python
 
 Anaconda env = conda create -n murm python=3.8
 ```   
-Need at least 240GB space  
+Need at least 240GB space / 200GB=demos  
 For Computer2: sudo mount /dev/sda2 /media/skc/  
 
 ```
