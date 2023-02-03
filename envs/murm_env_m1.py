@@ -65,7 +65,6 @@ class MURMENV_m1(PandaBaseEnv):
         self.DoF = DoF
         self.obj_index = 0
 
-        # self.object_dict, self.scaling = self.get_object_info()
         self.curr_object = None
 
         # _obj POSITION wall
@@ -182,10 +181,6 @@ class MURMENV_m1(PandaBaseEnv):
             p.stepSimulation()
             time.sleep(self._timeStep)
 
-        # self._workspace = bullet.Sensor(self._panda,
-        #     xyz_min=self._pos_low, xyz_max=self._pos_high,
-        #     visualize=False, rgba=[0,1,0,.1])
-
         self._end_effector = bullet.get_index_by_attribute(
             self._panda, 'link_name', 'gripper_site')
 
@@ -241,25 +236,65 @@ class MURMENV_m1(PandaBaseEnv):
 
         return obj
 
-    # def get_object_info(self):
-    #     complete_object_dict, scaling = metadata.obj_path_map, metadata.path_scaling_map
-    #     complete = self.object_subset is None
-    #     train = (self.object_subset == 'train') or (self.object_subset == 'all')
-    #     test = (self.object_subset == 'test') or (self.object_subset == 'all')
-    #
-    #     object_dict = {}
-    #     for k in complete_object_dict.keys():
-    #         in_test = (k in test_set)
-    #         in_subset = (k in self.object_subset)
-    #         if in_subset:
-    #             object_dict[k] = complete_object_dict[k]
-    #         if complete:
-    #             object_dict[k] = complete_object_dict[k]
-    #         if train and not in_test:
-    #             object_dict[k] = complete_object_dict[k]
-    #         if test and in_test:
-    #             object_dict[k] = complete_object_dict[k]
-    #     return object_dict, scaling
+    def run_for_goal(self):
+        image_check_save_path="/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/Wall/"
+        a, q = p.getBasePositionAndOrientation(self._obj)
+        p.resetBasePositionAndOrientation(self._obj, self.goal_pos, q)
+
+        self.goal_positions = {
+            'panda_joint1': -1.94, 'panda_joint2': 0.427, 'panda_joint3': 0.153,
+            'panda_joint4': -2.3415, 'panda_joint5': -0.1715, 'panda_joint6': 2.7593,
+            'panda_joint7': -0.8575, 'panda_finger_joint1': 0.02, 'panda_finger_joint2': 0.02,
+        }
+
+        num_joints = p.getNumJoints(self._panda)
+        # print('joints',num_joints)
+
+        for i in range(num_joints):
+            joint_info = p.getJointInfo(self._panda, i)
+            joint_name = joint_info[1].decode("UTF-8")
+            joint_type = joint_info[2]
+
+            if joint_type is p.JOINT_REVOLUTE or joint_type is p.JOINT_PRISMATIC:
+                assert joint_name in self.initial_positions.keys()
+
+                p.resetJointState(self._panda, i, self.goal_positions[joint_name])
+                p.setJointMotorControl2(self._panda, i, p.POSITION_CONTROL,
+                                        targetPosition=self.goal_positions[joint_name],
+                                        positionGain=0.2, velocityGain=1.0)
+
+        target_pos_check = np.array(bullet.get_body_info(self._obj)['pos'])
+        ee_pos_check = self.get_end_effector_pos()
+        # print('obj, ee pos for goal', target_pos_check, ee_pos_check)
+
+        goal_global = np.uint8(self.render_obs())
+        goal_active = np.uint8(self.render_obs_active())
+
+        num_joints = p.getNumJoints(self._panda)
+        for i in range(num_joints):
+            joint_info = p.getJointInfo(self._panda, i)
+            joint_name = joint_info[1].decode("UTF-8")
+            joint_type = joint_info[2]
+
+            if joint_type is p.JOINT_REVOLUTE or joint_type is p.JOINT_PRISMATIC:
+                assert joint_name in self.initial_positions.keys()
+
+                p.resetJointState(self._panda, i, self.initial_positions[joint_name])
+                p.setJointMotorControl2(self._panda, i, p.POSITION_CONTROL,
+                                        targetPosition=self.initial_positions[joint_name],
+                                        positionGain=0.2, velocityGain=1.0)
+
+        p.resetBasePositionAndOrientation(self._obj, a, q)
+
+        reset_global = np.uint8(self.render_obs())
+        reset_active = np.uint8(self.render_obs_active())
+
+        np.save(image_check_save_path+"1.npy", goal_global)
+        np.save(image_check_save_path+"2.npy", goal_active)
+        np.save(image_check_save_path+"3.npy", reset_global)
+        np.save(image_check_save_path+"4.npy", reset_active)
+
+        return goal_global, goal_active
 
     def _set_spaces(self):
         act_dim = self.get_action_dim()
@@ -267,10 +302,8 @@ class MURMENV_m1(PandaBaseEnv):
         act_high = np.ones(act_dim) * act_bound
         self.action_space = gym.spaces.Box(-act_high, act_high)
 
-        observation_dim = 11
-        if self.DoF > 3:
-            observation_dim += 4
-
+        observation_dim = 10
+        # 3 4 3
         obs_bound = 100
         obs_high = np.ones(observation_dim) * obs_bound
         state_space = gym.spaces.Box(-obs_high, obs_high)
@@ -286,15 +319,8 @@ class MURMENV_m1(PandaBaseEnv):
 
     def _load_table(self):
 
-        # self._panda = bullet.objects.panda_robot()
         self._table = bullet.objects.table(rgba=[1, 1, 1, 1])
         self._base = bullet.objects.panda_base()
-        # shelf
-        # self._shelf1 = bullet.objects.shelf1(rgba=[.92, .85, .7, 1])
-        # self._shelf2 = bullet.objects.shelf2(rgba=[.92, .85, .7, 1])
-        # self._shelf3 = bullet.objects.shelf3(rgba=[1, 1, 1, 1])
-        # box
-        # self._box = bullet.objects.box(rgba=[1, 1, 1, 1])
         self._box1 = bullet.objects.box1()
         self._box2 = bullet.objects.box2()
         self._box3 = bullet.objects.box3()
@@ -311,71 +337,6 @@ class MURMENV_m1(PandaBaseEnv):
 
         self._objects = {}
         self._sensors = {}
-
-    # def _set_positions(self, pos):
-    #     bullet.reset()
-    #     bullet.setup_headless(self._timestep, solver_iterations=self._solver_iterations)
-    #     self._load_table()
-    #
-    #     hand_pos = pos[:3]
-    #     gripper = pos[self.start_obj_ind - 1]
-    #     object_pos = pos[self.start_obj_ind:self.start_obj_ind + 3]
-    #     object_quat = pos[self.start_obj_ind + 4:self.start_obj_ind + 7]
-    #
-    #     # self.add_object(change_object=False, object_position=object_pos, quat=object_quat)
-    #
-    #     if self.DoF > 3:
-    #         hand_theta = pos[3:7]
-    #     else:
-    #         hand_theta = self.default_theta
-    #
-    #     self._format_state_query()
-    #     self._prev_pos = np.array(hand_pos)
-    #
-    #     bullet.position_control(self._panda, self._end_effector, self._prev_pos, self.default_theta)
-    #     action = np.array([0 for i in range(self.DoF)] + [gripper])
-    #
-    #     for _ in range(10):
-    #         self.step(action)
-
-    # def add_object(self, change_object=False, object_position=None, quat=None):
-    #     # Pick object if necessary and save information
-    #     if change_object:
-    #         self.curr_object, self.curr_id = random.choice(list(self.object_dict.items()))
-    #         self.curr_color = self.sample_object_color()
-    #
-    #     else:
-    #         self.curr_object = self._obj
-    #         self.curr_id = 'cube'
-    #         self.curr_color = self.sample_object_color()
-
-        # Generate random object position
-        # if object_position is None:
-        #     object_position = self.sample_object_location()
-            # print(object_position)
-
-        # Generate quaterion if none is given
-        # if quat is None:
-        #     quat = self.sample_quat(self.curr_object)
-
-        # Spawn object above table
-        # self._objects = {
-        #     'obj': loader.load_shapenet_object(
-        #         self.curr_id,
-        #         self.scaling,
-        #         object_position,
-        #         quat=quat,
-        #         rgba=self.curr_color)
-        #     }
-
-        # Allow the objects to land softly in low gravity
-        # p.setGravity(0, 0, -1)
-        # for _ in range(100):
-        #     bullet.step()
-        # # After landing, bring to stop
-        # p.setGravity(0, 0, -10)
-        # for _ in range(100):
-        #     bullet.step()
 
     def _format_action(self, *action):
         if self.DoF == 3:
@@ -403,55 +364,61 @@ class MURMENV_m1(PandaBaseEnv):
                 raise RuntimeError('Unrecognized action: {}'.format(action))
             return np.array(delta_pos), np.array(delta_angle), gripper
 
-
     def get_contextual_diagnostics(self, paths, contexts):
-        from multiworld.envs.env_util import create_stats_ordered_dict
+        from multiworld.multiworld.envs.env_util import create_stats_ordered_dict
+
         diagnostics = OrderedDict()
-        state_key = "state_observation"
+        state_key = "state_observation" # obj pos
         goal_key = "state_desired_goal"
         values = []
         eps1, eps2 = [], []
+
+        # print('check paths in diagnostics', paths[0])
+        # print('check contexts in diagnostics', contexts)
+        # print('length of paths = 5 ?', len(paths))
+
         for i in range(len(paths)):
-            state = paths[i]["observations"][-1][state_key][self.start_obj_ind:self.start_obj_ind + 3]
-            goal = contexts[i][goal_key][self.start_obj_ind:self.start_obj_ind + 3]
+            state = paths[i]["observations"][-1][state_key]
+            print('Final obj State', state)
+
+            goal = paths[i]["observations"][-1][goal_key]
+            print('Given Goal State', goal)
+
             distance = np.linalg.norm(state - goal)
 
-            if self.task == 'pickup':
-                values.append(state[2] > self.pickup_eps)
-            if self.task == 'goal_reaching':
-                values.append(distance)
-                eps1.append(distance < 0.05)
-                eps2.append(distance < 0.08)
+            values.append(distance)
+            eps1.append(distance < 0.03)
+            eps2.append(distance < 0.1)
 
-        if self.task == 'pickup':
-            diagnostics_key = goal_key + "/final/picked_up"
-        if self.task == 'goal_reaching':
-            diagnostics_key = goal_key + "/final/distance"
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success_0.05", eps1))
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success_0.08", eps2))
+        diagnostics_key = goal_key + "/final/distance"
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success", eps1))
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success_close", eps2))
         diagnostics.update(create_stats_ordered_dict(diagnostics_key, values))
 
         values = []
-        eps1, eps2 = [], []
+        eps1, eps2, eps3 = [], [], []
         for i in range(len(paths)):
             for j in range(len(paths[i]["observations"])):
-                state = paths[i]["observations"][j][state_key][self.start_obj_ind:self.start_obj_ind + 3]
-                goal = contexts[i][goal_key][self.start_obj_ind:self.start_obj_ind + 3]
+                state = paths[i]["observations"][j][state_key]
+                # print('state each', state)
+                state_z_pos = paths[i]["observations"][j][state_key][2]
+                # print('checking z coordinates', state_z_pos)
+                initial_z_pos = np.array(1.03)
+                height = np.linalg.norm(state_z_pos-initial_z_pos)
+
+                goal = paths[i]["observations"][-1][goal_key]
+                # print('goal state each', goal)
+
                 distance = np.linalg.norm(state - goal)
+                values.append(distance)
+                eps1.append(distance < 0.03)
+                eps2.append(distance < 0.1)
+                eps3.append(height > 0.1)
 
-                if self.task == 'pickup':
-                    values.append(state[2] > self.pickup_eps)
-                if self.task == 'goal_reaching':
-                    values.append(distance)
-                    eps1.append(distance < 0.05)
-                    eps2.append(distance < 0.08)
-
-        if self.task == 'pickup':
-            diagnostics_key = goal_key + "/picked_up"
-        if self.task == 'goal_reaching':
-            diagnostics_key = goal_key + "/distance"
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/success_0.05", eps1))
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/success_0.08", eps2))
+        diagnostics_key = goal_key + "/distance"
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/success", eps1))
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/success_close", eps2))
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/checking_whether_picked_up", eps3))
 
         diagnostics.update(create_stats_ordered_dict(diagnostics_key, values))
         return diagnostics
@@ -512,7 +479,6 @@ class MURMENV_m1(PandaBaseEnv):
         if self._transpose_image:
             img_active = np.transpose(img_active, (2, 0, 1))
         return img_active
-
 
     def get_image(self, width, height, camera):
         if camera == 'global':
@@ -577,17 +543,6 @@ class MURMENV_m1(PandaBaseEnv):
     ##################REWARD####################
     ############################################
 
-    # def get_object_deg(self):
-    #     # object_info = bullet.get_body_info(self._objects['obj'],
-    #     #                                    quat_to_deg=True)
-    #     object_info = bullet.get_body_info(self._obj,
-    #                                        quat_to_deg=True)
-    #     return object_info['theta']
-    #
-    # def get_hand_deg(self):
-    #     return bullet.get_link_state(self._panda, self._end_effector,
-    #         'theta', quat_to_deg=True)
-
     def get_observation(self):
         left_tip_pos = bullet.get_link_state(
             self._panda, 'panda_finger_joint1', keys='pos')
@@ -617,25 +572,22 @@ class MURMENV_m1(PandaBaseEnv):
         else:
             observation = np.concatenate((
                 end_effector_pos, gripper_tips_distance))
-            goal_pos = np.concatenate((
-                end_effector_pos, gripper_tips_distance,
-                self.goal_pos))
-            #print('DOF  @@  HERE')
+
+            obj_observation = np.asarray(object_pos)
+
+            goal_pos = np.asarray(self.goal_pos)
+            # print('DOF  @@  HERE')
 
         obs_dict = dict(
-            #observation=observation,
-            state_observation=observation,
-            #desired_goal=goal_pos,
-            #state_desired_goal=goal_pos,
-            #achieved_goal=observation,
-            #state_achieved_goal=observation,
-            )
+            state_observation=obj_observation,
+            robot_state_observation=observation,
+            # desired_goal=goal_pos,
+            state_desired_goal=goal_pos,
+            # achieved_goal=observation,
+            # state_achieved_goal=observation,
+        )
 
         return obs_dict
-
-#################################################################################################
-#################################################################################################
-#################################################################################################
 
     def step(self, *action):
         # Joint Initialization Code
@@ -695,7 +647,7 @@ class MURMENV_m1(PandaBaseEnv):
         info = self.get_info()
         reward = self.get_reward(info)
         done = False
-        self.timeStep += 1
+        # self.timeStep += 1
 
         return observation, reward, done, info
 
