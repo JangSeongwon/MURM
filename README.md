@@ -89,23 +89,16 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/2 Analysis  
-
-Started codings on ptp-keep going, vqvae 1000 may be enough   
+2/3 Analysis   
 
 1. Collecting demo data with three computers    
-=> OKAY 
+=> OKAY  
 
 2. Pretrained VQVAE.  
-
 => OKAY - 1500 epoches = 6.5days & 2VQVAE model   
-=> Need to check Offline RL training results
 
-3. Use latent space specification method for goal sampling active camera goals  
-      - Condition active image goal to end  
-      - Global as wide  
-      - Reward global achieve as the same time active 
-      => Problem: Taking too long to sample a goal + Not working
+3. Started training offline RL  
+=> OKAY - Need to trim the codes for Replay Buffer and Path collector and RL training  
       
 4. Need to think of active-disadv task 
     - Random Goal box as solution
