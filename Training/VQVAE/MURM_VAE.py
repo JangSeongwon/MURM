@@ -30,7 +30,7 @@ if __name__ == "__main__":
                 y_values=(0, 100),
             ),
             num_epochs=1501,
-            embedding_dim=64,
+            embedding_dim=5,
             dump_skew_debug_plots=False,
             decoder_activation='sigmoid',
             use_linear_dynamics=False,
