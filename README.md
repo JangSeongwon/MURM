@@ -91,6 +91,9 @@ Env2: Multi-view task
 
 2/4 Analysis   
 
+Based on the paper, first try adding exploration   
+Next, try adding noisy demos + changing goal image itself   
+
 1. Collecting demo data with three computers    
 => OKAY  
 
