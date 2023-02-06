@@ -89,7 +89,7 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/4 Analysis   
+2/6 Analysis   
 
 Based on the paper, first try adding exploration   
 Next, try adding noisy demos + changing goal image itself   
