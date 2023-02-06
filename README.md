@@ -91,7 +91,8 @@ Env2: Multi-view task
 
 2/6 Analysis   
 
-Based on the paper, first try adding exploration   
+Based on the paper, first try adding exploration 
+Also check replay buffer (HER algorithm)  
 Next, try adding noisy demos + changing goal image itself   
 
 1. Collecting demo data with three computers    
