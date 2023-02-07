@@ -288,12 +288,15 @@ class murmlatentgoalspace(DictDistribution):
         self.dist = dist
         self.representation_size = rep
         self.murm = murm_view
+        self.goal_key = 'latent_desired_goal',
+        self.murm_goal_adding_key = 'latent_desired_goal_active',
         latent_space = Box(
             -10 * np.ones(self.representation_size),
             10 * np.ones(self.representation_size),
             dtype=np.float32,
         )
         self._spaces[key] = latent_space
+
 
     def sample(self, batch_size: int, context=None):
 
@@ -304,7 +307,13 @@ class murmlatentgoalspace(DictDistribution):
 
             sample1 = ptu.get_numpy(self.model.encode(goal_global))
             sample2 = ptu.get_numpy(self.model.encode(goal_active))
-            sample = (sample1, sample2)
+            sample = []
+            sample.append(self.goal_key)
+            sample.append(self.murm_goal_adding_key)
+            print('latent distribution sample format', sample)
+            sample[self.goal_key] = sample1
+            sample[self.murm_goal_adding_key] = sample2
+            print('latent distribution after assigning goals', sample)
 
         elif self.murm == 'g':
             goal_global, goal_active = self.env.run_for_goal()
