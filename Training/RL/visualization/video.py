@@ -389,9 +389,9 @@ def dump_paths(
             # print('check imgs', len(imgs), imgs[0])
             # imgs = imgs + get_extra_imgs(path, i_in_path, env)
 
-            if num_imgs is not None:
+            # if num_imgs is not None:
             #     print('num_imgs = None?')
-                imgs = imgs[:num_imgs]
+            #     imgs = imgs[:num_imgs]
 
             ll.append(
                 combine_images_into_grid(
@@ -425,10 +425,10 @@ def dump_paths(
         if do_timer:
             print('time', i, time.time() - start)
 
-    outputdata = reshape_for_video(frames, N, rows, columns, num_channels)
+    # outputdata = reshape_for_video(frames, N, rows, columns, num_channels)
     # print('output data ', len(outputdata))
 
-    skvideo.io.vwrite(filename, outputdata)
+    # skvideo.io.vwrite(filename, outputdata)
     # print('Saved video to from path', filename)
 
     if dump_pickle:
