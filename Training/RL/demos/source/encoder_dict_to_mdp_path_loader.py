@@ -26,7 +26,7 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
             env=None,
             demo_paths=[],  # list of dicts
             normalize=False,
-            demo_train_split=0.9,
+            demo_train_split=1,
             demo_data_split=1,
             add_demos_to_replay_buffer=True,
             condition_encoding=False,
@@ -108,7 +108,7 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                               for i in range(len(observation))])
             latents_global = self.model['vqvae'].encode_np(images_global)
             latents_active = self.model['vqvae'].encode_np(images_active)
-            # print('LATENTS G/A', latents_global.shape, latents_active.shape)
+            print('LATENTS G/A', latents_global.shape, latents_active.shape)
 
         elif self.murm == 'g':
             images = np.stack([observation[i]['image_global_observation']
@@ -233,8 +233,8 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                     ob, action, next_ob, next_ob)
                 compare_rewards.append(compare_reward)
 
-            print('obs', ob)
-            print('actions', action)
+            # print('obs', ob)
+            # print('actions', action)
 
             path_builder.add_all(
                 observations=ob,
