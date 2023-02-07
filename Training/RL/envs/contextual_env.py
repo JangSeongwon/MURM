@@ -144,7 +144,7 @@ class ContextualEnv(gym.Wrapper):
                 self.goal_latent_produced[key] = self._curr_context[0]
                 # print('goal keys check for sampling', self.goal_latent_produced)
             elif len(self._curr_context) == 2:
-                self.goal_latent_produced[key] = self._curr_context
+                self.goal_latent_produced[key] = self._curr_context[key]
                 print('goal latent produced checking for murm in contextial env', self.goal_latent_produced)
             else:
                 exit()
@@ -156,7 +156,7 @@ class ContextualEnv(gym.Wrapper):
     def step(self, action):
         obs, reward, done, info = self.env.step(action) #Todo: Sent to encoder_wrapper
         self._add_context_to_obs(obs)
-        print('obs now check', obs)
+        # print('obs now check', obs)
         new_reward = self._compute_reward(self._last_obs, action, obs, reward)
         self._last_obs = obs
         info = self._update_env_info(self, info, obs, reward, done)
