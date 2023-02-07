@@ -9,7 +9,7 @@ import torch
 import rlkit.torch.pytorch_util as ptu
 from rlkit.core import logger
 from rlkit.data_management.contextual_replay_buffer import (
-    ContextualRelabelingReplayBuffer,
+    #ContextualRelabelingReplayBuffer,
     RemapKeyFn,
 )
 from rlkit.data_management.online_offline_split_replay_buffer import (
@@ -62,29 +62,30 @@ from rlkit.samplers.rollout_functions import contextual_rollout
 from rlkit.envs.contextual_env import ContextualEnv
 # from rlkit.envs.contextual_env import SubgoalContextualEnv
 # from rlkit.envs.contextual_env import NonEpisodicSubgoalContextualEnv
-# from rlkit.learning.contextual_replay_buffer import ContextualRelabelingReplayBuffer
-from rlkit.planning.random_planner import RandomPlanner  
-from rlkit.planning.mppi_planner import MppiPlanner  
-from rlkit.planning.planner import HierarchicalPlanner  
-from rlkit.planning.scripted_planner import ScriptedPlanner  
-from rlkit.planning.scripted_planner import RandomChoicePlanner  
+from rlkit.learning.contextual_replay_buffer import ContextualRelabelingReplayBuffer
+# from rlkit.planning.random_planner import RandomPlanner
+# from rlkit.planning.mppi_planner import MppiPlanner
+# from rlkit.planning.planner import HierarchicalPlanner
+# from rlkit.planning.scripted_planner import ScriptedPlanner
+# from rlkit.planning.scripted_planner import RandomChoicePlanner
 from rlkit.utils.logging import logger as logging
 from rlkit.utils import io_util
 
 
-PLANNER_CTORS = {
-    'random': RandomPlanner,
-    'mppi': MppiPlanner,
-    'hierarchical': partial(HierarchicalPlanner,
-                            sub_planner_ctor=MppiPlanner,
-                            num_levels=3,
-                            min_dt=20,
-                            ),
-}
+# PLANNER_CTORS = {
+#     'random': RandomPlanner,
+#     'mppi': MppiPlanner,
+#     'hierarchical': partial(HierarchicalPlanner,
+#                             sub_planner_ctor=MppiPlanner,
+#                             num_levels=3,
+#                             min_dt=20,
+#                             ),
+# }
 
 
 class RewardFn:
     def __init__(self,
+                 MURM_view,
                  env,
                  obs_type='latent',
                  reward_type='dense',
@@ -97,11 +98,13 @@ class RewardFn:
             self.obs_key = 'latent_observation'
             self.obs_key_murm = 'latent_active_observation'
             self.goal_key = 'latent_desired_goal'
+            self.goal_key_murm = 'latent_desired_goal_active'
 
         elif obs_type == 'state':
             self.obs_key = 'state_observation'
             self.goal_key = 'state_desired_goal'
 
+        self.MURM_view = MURM_view
         self.env = env
         self.reward_type = reward_type
         self.epsilon = epsilon
@@ -121,10 +124,11 @@ class RewardFn:
 
         '''len = 5120 in demo buffer'''
 
-        if len(contexts[self.goal_key]) == 2:
+        if self.MURM_view == 'murm':
             print('Getting MURM goals')
             s2 = self.process(next_states[self.obs_key_murm])
-            c2 = self.process(contexts[self.goal_key][1])
+            c = self.process(contexts[self.goal_key])
+            c2 = self.process(contexts[self.goal_key_murm])
         else:
             c = self.process(contexts[self.goal_key])
 
@@ -135,10 +139,16 @@ class RewardFn:
         if self.reward_type == 'dense':
             reward = -np.linalg.norm(s - c, axis=1)
 
-        elif self.reward_type == 'sparse':
+        elif self.reward_type == 'sparse' and self.MURM_view == False:
             # print('epsilon', self.epsilon)
             success = np.linalg.norm(s - c, axis=1) < self.epsilon
             reward = success - 1
+
+        elif self.reward_type == 'sparse' and self.MURM_view == True:
+            success = np.linalg.norm(s - c, axis=1) < self.epsilon
+            success1 = np.linalg.norm(s2 - c2, axis=1) < self.epsilon
+            reward = success/2 + success1/2 - 1
+
 
         # elif self.reward_type == 'progress':
         #     s_tm1 = self.process(states[self.obs_key])
@@ -242,11 +252,14 @@ def murm_experiment(
         observation_key='latent_observation',
         murm_observation_adding_key='latent_active_observation',
         observation_keys=['latent_observation'],
+        murm_observation_adding_keys=['latent_active_observation'],
         observation_key_reward_fn=None,
         init_key='initial_latent_state',
         goal_key='latent_desired_goal',
+        murm_goal_adding_key='latent_desired_goal_active',
         goal_key_reward_fn=None,
         state_observation_key='state_observation',
+        robot_state_observation_key='robot_state_observation',
         gripper_observation_key='gripper_state_observation',
         state_goal_key='state_desired_goal',
         image_goal_key='image_desired_goal',
@@ -284,7 +297,7 @@ def murm_experiment(
         expl_save_video_kwargs=None,
         eval_save_video_kwargs=None,
         renderer_kwargs=None,
-        imsize=84,
+        imsize=128,
         pretrained_vae_path='',
         pretrained_rl_path='',
         use_pretrained_rl_path=False,
@@ -300,19 +313,18 @@ def murm_experiment(
         env_type=None,  # For plotting
         seed=None,
         multiple_goals_eval_seeds=None,
-
         expl_reset_interval=0,
 
         use_expl_planner=True,
         expl_planner_type='hierarchical',
         expl_planner_kwargs=None,
         expl_planner_scripted_goals=None,
-        expl_contextual_env_kwargs=None,
-
         use_eval_planner=False,
         eval_planner_type=None,
         eval_planner_kwargs=None,
         eval_planner_scripted_goals=None,
+
+        expl_contextual_env_kwargs=None,
         eval_contextual_env_kwargs=None,
         MURM_view=None,
         pretrained_vqvae_path='',
@@ -336,15 +348,15 @@ def murm_experiment(
     if not renderer_kwargs:
         renderer_kwargs = {}
 
-    if not expl_planner_kwargs:
-        expl_planner_kwargs = {}
-    if not expl_contextual_env_kwargs:
-        expl_contextual_env_kwargs = {}
+    # if not expl_planner_kwargs:
+    #     expl_planner_kwargs = {}
+    # if not expl_contextual_env_kwargs:
+    #     expl_contextual_env_kwargs = {}
 
-    if not eval_planner_kwargs:
-        eval_planner_kwargs = {}
-    if not eval_contextual_env_kwargs:
-        eval_contextual_env_kwargs = {}
+    # if not eval_planner_kwargs:
+    #     eval_planner_kwargs = {}
+    # if not eval_contextual_env_kwargs:
+    #     eval_contextual_env_kwargs = {}
 
     # Enviorment Wrapping
     logging.info('Creating the environment...')
@@ -362,10 +374,10 @@ def murm_experiment(
         env_kwargs,
         encoder_wrapper,
         goal_sampling_mode,
-        presampled_goals_path,
-        num_presample,
+        # presampled_goals_path,
+        # num_presample,
         reward_kwargs,
-        presampled_goals_kwargs,
+        # presampled_goals_kwargs,
 
     ):
         if MURM_view == 'murm':
@@ -410,122 +422,122 @@ def murm_experiment(
 
         # print('encoded env', encoded_env)
 
-        if use_gripper_observation:
-            encoded_env = GripperStateWrappedEnv(
-                encoded_env,
-                state_observation_key,
-                step_keys_map=dict(
-                    gripper_state_observation='gripper_state_observation')
-            )
+        # if use_gripper_observation:
+        #     encoded_env = GripperStateWrappedEnv(
+        #         encoded_env,
+        #         state_observation_key,
+        #         step_keys_map=dict(
+        #             gripper_state_observation='gripper_state_observation')
+        #     )
 
         #TODO: Latent goal distribution
 
-        if goal_sampling_mode == 'vae_prior':
+        if goal_sampling_mode == 'vae_prior_delete_later_on':
             latent_goal_distribution = PriorDistribution(
                 vqvae.representation_size,
                 goal_key,
             )
             diagnostics = StateImageGoalDiagnosticsFn({}, )
 
-        elif goal_sampling_mode == 'amortized_vae_prior':
-            latent_goal_distribution = AmortizedPriorDistribution(
-                vqvae,
-                distrib_goal_key,
-                num_presample=num_presample,
-            )
-            diagnostics = StateImageGoalDiagnosticsFn({}, )
-
-        elif goal_sampling_mode == 'conditional_vae_prior':
-            latent_goal_distribution = ConditionalPriorDistribution(
-                vqvae,
-                distrib_goal_key,
-            )
-
-        elif goal_sampling_mode == 'amortized_conditional_vae_prior':
-            latent_goal_distribution = AmortizedConditionalPriorDistribution(
-                vqvae,
-                distrib_goal_key,
-                num_presample=num_presample,
-            )
-
-            diagnostics = StateImageGoalDiagnosticsFn({}, )
-
-        elif goal_sampling_mode == 'presampled_images':
-            diagnostics = state_env.get_contextual_diagnostics
-
-            image_goal_distribution = PresampledPathDistribution(
-                presampled_goals_path,
-                vqvae.representation_size,
-            )
-
-            # Representation Check
-            add_distrib = AddLatentDistribution
-
-            # AddLatentDistribution
-            latent_goal_distribution = add_distrib(
-                image_goal_distribution,
-                input_key=image_goal_key,
-                output_key=distrib_goal_key,
-                model=vqvae,
-            )
-
-        elif goal_sampling_mode == 'multiple_goals_not_done_presampled_images':
-            diagnostics = state_env.get_contextual_diagnostics
-            image_goal_distribution = MultipleGoalsNotDonePresampledPathDistribution(  
-                presampled_goals_path,
-                vqvae.representation_size,
-                encoded_env,
-                multiple_goals_eval_seeds,
-            )
-
-            # Representation Check
-            add_distrib = AddLatentDistribution
-
-            # AddLatentDistribution
-            latent_goal_distribution = add_distrib(
-                image_goal_distribution,
-                image_goal_key,
-                distrib_goal_key,
-                vqvae,
-            )
-        elif goal_sampling_mode == 'presample_latents':
-            diagnostics = StateImageGoalDiagnosticsFn({}, )
-            # diagnostics = state_env.get_contextual_diagnostics
-            latent_goal_distribution = PresamplePriorDistribution(
-                model,
-                distrib_goal_key,
-                state_env,
-                num_presample=num_presample,
-                affordance_type='cc_vae',
-            )
-
-        elif goal_sampling_mode == 'presampled_latents':
-            diagnostics = state_env.get_contextual_diagnostics
-            latent_goal_distribution = PresampledPriorDistribution(
-                presampled_goals_path,
-                distrib_goal_key,
-            )
-
-        elif goal_sampling_mode == 'reset_of_env':
-            state_goal_env = get_gym_env(
-                env_id, env_class=env_class, env_kwargs=env_kwargs)
-            state_goal_distribution = GoalDictDistributionFromMultitaskEnv(
-                state_goal_env,
-                goal_keys=[state_goal_key],
-            )
-            image_goal_distribution = AddImageDistribution(
-                env=state_env,
-                base_distribution=state_goal_distribution,
-                image_goal_key=image_goal_key,
-                renderer=renderer,
-            )
-            latent_goal_distribution = AddLatentDistribution(
-                image_goal_distribution,
-                image_goal_key,
-                distrib_goal_key,
-                vqvae,
-            )
-            diagnostics = state_goal_env.get_contextual_diagnostics
+        # elif goal_sampling_mode == 'amortized_vae_prior':
+        #     latent_goal_distribution = AmortizedPriorDistribution(
+        #         vqvae,
+        #         distrib_goal_key,
+        #         num_presample=num_presample,
+        #     )
+        #     diagnostics = StateImageGoalDiagnosticsFn({}, )
+        #
+        # elif goal_sampling_mode == 'conditional_vae_prior':
+        #     latent_goal_distribution = ConditionalPriorDistribution(
+        #         vqvae,
+        #         distrib_goal_key,
+        #     )
+        #
+        # elif goal_sampling_mode == 'amortized_conditional_vae_prior':
+        #     latent_goal_distribution = AmortizedConditionalPriorDistribution(
+        #         vqvae,
+        #         distrib_goal_key,
+        #         num_presample=num_presample,
+        #     )
+        #
+        #     diagnostics = StateImageGoalDiagnosticsFn({}, )
+        #
+        # elif goal_sampling_mode == 'presampled_images':
+        #     diagnostics = state_env.get_contextual_diagnostics
+        #
+        #     image_goal_distribution = PresampledPathDistribution(
+        #         presampled_goals_path,
+        #         vqvae.representation_size,
+        #     )
+        #
+        #     # Representation Check
+        #     add_distrib = AddLatentDistribution
+        #
+        #     # AddLatentDistribution
+        #     latent_goal_distribution = add_distrib(
+        #         image_goal_distribution,
+        #         input_key=image_goal_key,
+        #         output_key=distrib_goal_key,
+        #         model=vqvae,
+        #     )
+        #
+        # elif goal_sampling_mode == 'multiple_goals_not_done_presampled_images':
+        #     diagnostics = state_env.get_contextual_diagnostics
+        #     image_goal_distribution = MultipleGoalsNotDonePresampledPathDistribution(
+        #         presampled_goals_path,
+        #         vqvae.representation_size,
+        #         encoded_env,
+        #         multiple_goals_eval_seeds,
+        #     )
+        #
+        #     # Representation Check
+        #     add_distrib = AddLatentDistribution
+        #
+        #     # AddLatentDistribution
+        #     latent_goal_distribution = add_distrib(
+        #         image_goal_distribution,
+        #         image_goal_key,
+        #         distrib_goal_key,
+        #         vqvae,
+        #     )
+        # elif goal_sampling_mode == 'presample_latents':
+        #     diagnostics = StateImageGoalDiagnosticsFn({}, )
+        #     # diagnostics = state_env.get_contextual_diagnostics
+        #     latent_goal_distribution = PresamplePriorDistribution(
+        #         model,
+        #         distrib_goal_key,
+        #         state_env,
+        #         num_presample=num_presample,
+        #         affordance_type='cc_vae',
+        #     )
+        #
+        # elif goal_sampling_mode == 'presampled_latents':
+        #     diagnostics = state_env.get_contextual_diagnostics
+        #     latent_goal_distribution = PresampledPriorDistribution(
+        #         presampled_goals_path,
+        #         distrib_goal_key,
+        #     )
+        #
+        # elif goal_sampling_mode == 'reset_of_env':
+        #     state_goal_env = get_gym_env(
+        #         env_id, env_class=env_class, env_kwargs=env_kwargs)
+        #     state_goal_distribution = GoalDictDistributionFromMultitaskEnv(
+        #         state_goal_env,
+        #         goal_keys=[state_goal_key],
+        #     )
+        #     image_goal_distribution = AddImageDistribution(
+        #         env=state_env,
+        #         base_distribution=state_goal_distribution,
+        #         image_goal_key=image_goal_key,
+        #         renderer=renderer,
+        #     )
+        #     latent_goal_distribution = AddLatentDistribution(
+        #         image_goal_distribution,
+        #         image_goal_key,
+        #         distrib_goal_key,
+        #         vqvae,
+        #     )
+        #     diagnostics = state_goal_env.get_contextual_diagnostics
 
 
         #TODO: My goal distribution HERE
@@ -542,10 +554,6 @@ def murm_experiment(
         else:
             raise ValueError
 
-
-
-
-
         # if use_gripper_observation:
         #     latent_goal_distribution = AddGripperStateDistribution(
         #         latent_goal_distribution,
@@ -554,6 +562,7 @@ def murm_experiment(
         #     )
 
         reward_fn = RewardFn(
+            MURM_view,
             state_env,
             **reward_kwargs
         )
@@ -607,17 +616,17 @@ def murm_experiment(
         exit()
 
     # Environment Definitions
-    # expl_env_kwargs = env_kwargs.copy()
-    # expl_env_kwargs['expl'] = True
-    #
-    # exploration_goal_sampling_mode = evaluation_goal_sampling_mode
+    expl_env_kwargs = env_kwargs.copy()
+    expl_env_kwargs['expl'] = True
+
+    exploration_goal_sampling_mode = evaluation_goal_sampling_mode
     # presampled_goal_kwargs['expl_goals'] = (
     #     presampled_goal_kwargs['eval_goals'])
     # presampled_goal_kwargs['expl_goals_kwargs'] = (
     #     presampled_goal_kwargs['eval_goals_kwargs'])
-    #
-    # logging.info('Preparing the [exploration] env and contextual distrib...')
-    # logging.info('sampling mode: %r', exploration_goal_sampling_mode)
+
+    logging.info('Preparing the [exploration] env and contextual distrib...')
+    logging.info('sampling mode: %r', exploration_goal_sampling_mode)
     # logging.info('presampled goals: %r',
     #              presampled_goal_kwargs['expl_goals'])
     # logging.info('presampled goals kwargs: %r',
@@ -626,29 +635,29 @@ def murm_experiment(
     # logging.info('num_presample: %d', num_presample)
 
 
-    # expl_env, expl_context_distrib, expl_reward = (
-    #     contextual_env_distrib_and_reward(
-    #         env_id,
-    #         env_class,
-    #         env_kwargs,
-    #         encoder_wrapper,
-    #         exploration_goal_sampling_mode,
-    #         presampled_goal_kwargs['expl_goals'],
-    #         num_presample,
-    #         reward_kwargs=reward_kwargs,
-    #         presampled_goals_kwargs=(
-    #             presampled_goal_kwargs['expl_goals_kwargs']),
-    #     ))
+    expl_env, expl_context_distrib, expl_reward = (
+        contextual_env_distrib_and_reward(
+            env_id,
+            env_class,
+            env_kwargs,
+            encoder_wrapper,
+            exploration_goal_sampling_mode,
+            # presampled_goal_kwargs['expl_goals'],
+            # num_presample,
+            reward_kwargs=reward_kwargs,
+            # presampled_goals_kwargs=(
+            #     presampled_goal_kwargs['expl_goals_kwargs']),
+        ))
 
     logging.info('Preparing the [evaluation] env and contextual distrib...')
     logging.info('Preparing the eval env and contextual distrib...')
     logging.info('sampling mode: %r', evaluation_goal_sampling_mode)
-    logging.info('presampled goals: %r',
-                 presampled_goal_kwargs['eval_goals'])
-    logging.info('presampled goals kwargs: %r',
-                 presampled_goal_kwargs['eval_goals_kwargs'],
-                 )
-    logging.info('num_presample: %d', num_presample)
+    # logging.info('presampled goals: %r',
+    #              presampled_goal_kwargs['eval_goals'])
+    # logging.info('presampled goals kwargs: %r',
+    #              presampled_goal_kwargs['eval_goals_kwargs'],
+    #              )
+    # logging.info('num_presample: %d', num_presample)
 
 
 
@@ -658,11 +667,11 @@ def murm_experiment(
             env_kwargs,
             encoder_wrapper,
             evaluation_goal_sampling_mode,
-            presampled_goal_kwargs['eval_goals'],
-            num_presample,
+            # presampled_goal_kwargs['eval_goals'],
+            # num_presample,
             reward_kwargs=reward_kwargs,
-            presampled_goals_kwargs=(
-                presampled_goal_kwargs['eval_goals_kwargs']),
+            # presampled_goals_kwargs=(
+            #     presampled_goal_kwargs['eval_goals_kwargs']),
         ))
 
     print('what is ENV??== Hard to Understand...', eval_env)
@@ -671,12 +680,12 @@ def murm_experiment(
     compare_reward_kwargs['reward_type'] = 'sparse'
     logging.info('Preparing the [training] env and contextual distrib...')
     logging.info('sampling mode: %r', training_goal_sampling_mode)
-    logging.info('presampled goals: %r',
-                 presampled_goal_kwargs['training_goals'])
-    logging.info('presampled goals kwargs: %r',
-                 presampled_goal_kwargs['training_goals_kwargs'],
-                 )
-    logging.info('num_presample: %d', num_presample)
+    # logging.info('presampled goals: %r',
+    #              presampled_goal_kwargs['training_goals'])
+    # logging.info('presampled goals kwargs: %r',
+    #              presampled_goal_kwargs['training_goals_kwargs'],
+    #              )
+    # logging.info('num_presample: %d', num_presample)
 
     _, training_context_distrib, compare_reward = (
         contextual_env_distrib_and_reward(
@@ -685,11 +694,11 @@ def murm_experiment(
             env_kwargs,
             encoder_wrapper,
             training_goal_sampling_mode,
-            presampled_goal_kwargs['training_goals'],
-            num_presample,
+            # presampled_goal_kwargs['training_goals'],
+            # num_presample,
             reward_kwargs=compare_reward_kwargs,
-            presampled_goals_kwargs=(
-                presampled_goal_kwargs['training_goals_kwargs']),
+            # presampled_goals_kwargs=(
+            #     presampled_goal_kwargs['training_goals_kwargs']),
 
         ))
 
@@ -704,17 +713,25 @@ def murm_experiment(
     if add_env_offpolicy_data:
         path_loader_kwargs['demo_paths'].append(env_offpolicy_data_path)
 
-    # Key Setting
 
-    #TODO: expl settings -> eval settings in env
+    ''' Key Setting '''
 
     context_key = goal_key
+
     if MURM_view == 'murm':
         obs_dim = (
             eval_env.observation_space.spaces[observation_key].low.size + eval_env.observation_space.spaces[observation_key].low.size
             + eval_env.observation_space.spaces[context_key].low.size + eval_env.observation_space.spaces[context_key].low.size
         )
         print('obs_dim', obs_dim, '////', eval_env.observation_space)
+
+        context_key.append(murm_goal_adding_key)
+        print('MURM context key', context_key)
+
+        observation_key.append(murm_observation_adding_key)
+        print('MURM observation key', observation_key)
+
+
     else:
         obs_dim = (
                 eval_env.observation_space.spaces[observation_key].low.size
@@ -722,16 +739,11 @@ def murm_experiment(
         )
         print('obs_dim', obs_dim, '////', eval_env.observation_space)
 
-    # if use_gripper_observation:
-    #     # obs_dim += 7 * 2
-    #     obs_dim += 7
-
     action_dim = eval_env.action_space.low.size
-
     state_rewards = reward_kwargs.get('reward_type', 'dense') == 'highlevel'
 
     mapper_dict = {context_key: observation_key}
-    obs_keys = [observation_key]
+    obs_keys = [] #[observation_key]
     cont_keys = [context_key]
     cont_keys_to_save = []
 
@@ -745,15 +757,18 @@ def murm_experiment(
 
     if MURM_view == 'murm':
         obs_keys.append(murm_observation_adding_key)
-
     obs_keys.append(state_observation_key)
+    obs_keys.append(robot_state_observation_key) #TODO: fixed
+
     if state_rewards:
         mapper_dict[state_goal_key] = state_observation_key
         obs_keys.append(state_observation_key)
         cont_keys_to_save.append(state_goal_key)
     else:
+        print('MURM obs_keys')
         if MURM_view == 'murm':
             obs_keys.extend(list(reset_keys_map.values()))
+            observation_keys.append(murm_observation_adding_keys)
         elif MURM_view == 'g':
             del reset_keys_map['image_active_observation']
             obs_keys.extend(list(reset_keys_map.values()))
@@ -763,6 +778,7 @@ def murm_experiment(
         else:
             exit()
 
+    print('obs key checking', obs_keys)
     # if use_gripper_observation:
     #     # mapper_dict[gripper_goal_key] = gripper_observation_key
     #     obs_keys.append(gripper_observation_key)
@@ -771,7 +787,6 @@ def murm_experiment(
     mapper = RemapKeyFn(mapper_dict)
 
     # Replay Buffer
-
     def concat_context_to_obs(batch,
                               replay_buffer,
                               obs_dict,
@@ -804,14 +819,14 @@ def murm_experiment(
             replay_buffer_kwargs['fraction_next_context'])
         rb_kwargs['fraction_future_context'] = (
             replay_buffer_kwargs['fraction_future_context'])
-        # rb_kwargs['fraction_foresight_context'] = (
-        #     replay_buffer_kwargs['fraction_foresight_context'])
-        # rb_kwargs['fraction_perturbed_context'] = (
-        #     replay_buffer_kwargs['fraction_perturbed_context'])
+        rb_kwargs['fraction_foresight_context'] = (
+            replay_buffer_kwargs['fraction_foresight_context'])
+        rb_kwargs['fraction_perturbed_context'] = (
+            replay_buffer_kwargs['fraction_perturbed_context'])
         rb_kwargs['fraction_distribution_context'] = (
             replay_buffer_kwargs['fraction_distribution_context'])
-        # rb_kwargs['max_future_dt'] = (
-        #     replay_buffer_kwargs['max_future_dt'])
+        rb_kwargs['max_future_dt'] = (
+            replay_buffer_kwargs['max_future_dt'])
 
     # if (replay_buffer_kwargs['fraction_perturbed_context'] > 0.0):
     #         # or replay_buffer_kwargs['fraction_foresight_context'] > 0.0):
@@ -938,22 +953,18 @@ def murm_experiment(
         )
 
 
+    #Todo: Not need to fix for murm i think
 
     # Path Collectors
     path_collector_observation_keys = [
         observation_key, ] if observation_keys is None else observation_keys
-    # path_collector_context_keys_for_policy = (
-    #     [context_key, ] if not use_gripper_observation
-    #     else [context_key, gripper_goal_key])
     path_collector_context_keys_for_policy = [context_key, ]
-
 
 
     def obs_processor(o):
         combined_obs = []
-
         for k in path_collector_observation_keys:
-            # print('checking keys finally', path_collector_observation_keys)
+            # print('checking keys finally = latent observation', path_collector_observation_keys)
             combined_obs.append(o[k])
 
         for k in path_collector_context_keys_for_policy:
@@ -977,19 +988,19 @@ def murm_experiment(
         rollout=rollout,
     )
 
-    # expl_policy = create_exploration_policy(
-    #     expl_env,
-    #     policy,
-    #     **exploration_policy_kwargs)
-    #
-    # expl_path_collector = ContextualPathCollector(
-    #     expl_env,
-    #     expl_policy,
-    #     observation_keys=path_collector_observation_keys,
-    #     context_keys_for_policy=path_collector_context_keys_for_policy,
-    #     obs_processor=obs_processor,
-    #     rollout=rollout,
-    # )
+    expl_policy = create_exploration_policy(
+        expl_env,
+        policy,
+        **exploration_policy_kwargs)
+
+    expl_path_collector = ContextualPathCollector(
+        expl_env,
+        expl_policy,
+        observation_keys=path_collector_observation_keys,
+        context_keys_for_policy=path_collector_context_keys_for_policy,
+        obs_processor=obs_processor,
+        rollout=rollout,
+    )
 
     if trainer_type == 'iql':
         if trainer_kwargs['use_online_beta']:
@@ -1046,10 +1057,10 @@ def murm_experiment(
 
     algorithm = TorchBatchRLAlgorithm(
         trainer=trainer,
-        # exploration_env=expl_env,
+        exploration_env=expl_env,
         evaluation_env=eval_env,
-        # exploration_data_collector=expl_path_collector,
-        evaluation_data_collector=eval_path_collector,  #TODO: Collect data here??
+        exploration_data_collector=expl_path_collector,
+        evaluation_data_collector=eval_path_collector,
         replay_buffer=replay_buffer,
         max_path_length=max_path_length,
         **algo_kwargs
