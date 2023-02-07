@@ -18,6 +18,7 @@ import pickle
 import gym
 from math import pi
 
+
 class MURMENV_m2(PandaBaseEnv):
 
     def __init__(self,
@@ -27,7 +28,7 @@ class MURMENV_m2(PandaBaseEnv):
                  randomize=True,
                  observation_mode='state',
 
-                 #Image Dimension
+                 #TODO: Image Dimension
                  obs_img_dim=128,
                  obs_img_dim_active=128,
                  success_threshold=0.03,
@@ -38,11 +39,10 @@ class MURMENV_m2(PandaBaseEnv):
                  random_color_p=1,
                  test_env=False,
                  env_type=None,
-                 DoF = 3,
+                 DoF=3,
                  *args,
                  **kwargs
                  ):
-        assert DoF in [3, 6, 7]
         is_set = object_subset in ['test', 'train', 'all']
         is_list = type(object_subset) == list
         assert is_set or is_list
@@ -51,7 +51,6 @@ class MURMENV_m2(PandaBaseEnv):
         self._reward_type = reward_type
         self._reward_min = reward_min
         self._randomize = randomize
-        self.pickup_eps = -0.3
         self._observation_mode = observation_mode
         self._transpose_image = transpose_image
         self._invisible_robot = invisible_robot
@@ -61,12 +60,8 @@ class MURMENV_m2(PandaBaseEnv):
         self.use_bounding_box = use_bounding_box
         self.object_subset = object_subset
         self.test_env = test_env
-        self._ddeg_scale = 5
         self.DoF = DoF
         self.obj_index = 0
-
-        # self.object_dict, self.scaling = self.get_object_info()
-        self.curr_object = None
 
         # _obj POSITION
         self._object_position_low = (0.35, -0.1, 1.03)
@@ -81,59 +76,27 @@ class MURMENV_m2(PandaBaseEnv):
         self.default_theta = bullet.deg_to_quat([180, 0, 0])
         self._success_threshold = success_threshold
 
-        #Global Camera
-        self.obs_img_dim = obs_img_dim #+.15
-        #Active Camera
+        # Global Camera
+        self.obs_img_dim = obs_img_dim  # +.15
+        # Active Camera
         self.obs_img_dim_active = obs_img_dim_active
-
         self.dt = 0.1
         super().__init__(*args, **kwargs)
         self._max_force = 100
         self._timeStep = 1. / 240.
 
         self._view_matrix_obs = bullet.get_view_matrix(
-            target_pos=[0.7, -0.2, 1.3], distance=0.4, # [0.8, 0, 1.5], distance=0.8,
+            target_pos=[0.7, -0.2, 1.3], distance=0.4,  # [0.8, 0, 1.5], distance=0.8,
             yaw=90, pitch=-20, roll=0, up_axis_index=2)
         self._projection_matrix_obs = bullet.get_projection_matrix(
             self.obs_img_dim, self.obs_img_dim)
 
-    def random_goal_generation(self):
-        boxesgoals = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        chosen_box = random.choice(boxesgoals)
-
-        if chosen_box == 1:
-            goal = np.array([-0.05, -0.4, 1.05])
-        elif chosen_box == 2:
-            goal = np.array([0.1, -0.4, 1.05])
-        elif chosen_box == 3:
-            goal = np.array([0.25, -0.4, 1.05])
-
-        elif chosen_box == 4:
-            goal = np.array([-0.05, -0.55, 1.05])
-        elif chosen_box == 5:
-            goal = np.array([0.1, -0.55, 1.05])
-        elif chosen_box == 6:
-            goal = np.array([0.25, -0.55, 1.05])
-
-        elif chosen_box == 7:
-            goal = np.array([-0.05, -0.7, 1.05])
-        elif chosen_box == 8:
-            goal = np.array([0.1, -0.7, 1.05])
-        elif chosen_box == 9:
-            goal = np.array([0.25, -0.7, 1.05])
-
-        return goal
-
     def randombox_goal_generation(self):
-
-        # rdbox = bullet.objects.box1()
         self._goal = np.array(bullet.get_body_info(self._rdbox)['pos'])
-        # print(self._goal)
+        print(self._goal)
         return self._goal
 
-
     def reset(self, change_object=False):
-
         # Load Enviorment
         bullet.reset()
         bullet.setup_headless(self._timestep, solver_iterations=self._solver_iterations)
@@ -143,10 +106,11 @@ class MURMENV_m2(PandaBaseEnv):
         self._floor = bullet.objects.marble_floor()
         self.goal_near = 0
 
-        #Robot
+        # Robot
         flags = p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES | p.URDF_USE_INERTIA_FROM_FILE | p.URDF_USE_SELF_COLLISION
-        self._panda = p.loadURDF(os.path.join('/home/mservo/PycharmProjects/murm_env/roboverse/envs/assets/Panda_robot/urdf/panda.urdf'),
-                                   basePosition=self._pos_init, useFixedBase=True, flags=flags)
+        self._panda = p.loadURDF(
+            os.path.join('/home/mservo/PycharmProjects/murm_env/roboverse/envs/assets/Panda_robot/urdf/panda.urdf'),
+            basePosition=self._pos_init, useFixedBase=True, flags=flags)
         assert self._panda is not None, "Failed to load the panda model"
 
         # reset joints to home position
@@ -180,10 +144,6 @@ class MURMENV_m2(PandaBaseEnv):
             p.stepSimulation()
             time.sleep(self._timeStep)
 
-        # self._workspace = bullet.Sensor(self._panda,
-        #     xyz_min=self._pos_low, xyz_max=self._pos_high,
-        #     visualize=False, rgba=[0,1,0,.1])
-
         self._end_effector = bullet.get_index_by_attribute(
             self._panda, 'link_name', 'gripper_site')
 
@@ -196,27 +156,27 @@ class MURMENV_m2(PandaBaseEnv):
         p.changeVisualShape(self._obj, -1, rgbaColor=rgba)
         self._format_state_query()
 
-        #Goal Generation Process
+        # Goal Generation Process
         self.goal_pos = self.randombox_goal_generation()
-        #self.goal_pos = np.array([0.25, -0.7, 1.05]) #Fixed goal for demo video
-        # print('Printing Goal:', self.goal_pos)
+        # self.goal_pos = np.array([0.25, -0.7, 1.05]) #Fixed goal for demo video
+        print('Printing Goal:', self.goal_pos)
 
         return self.get_observation()
 
     def sample_object_location(self):
         if self.obj_index == 0 or self.obj_index == 1:
             initial_random_pos = np.random.uniform(low=self._object_position_low, high=self._object_position_high)
-            #print('Initial pos', initial_random_pos)
+            print('Initial pos', initial_random_pos)
         elif self.obj_index == 2:
             initial_random_pos = np.random.uniform(low=self._object_position_low1, high=self._object_position_high1)
-            #print('Initial pos', initial_random_pos)
+            print('Initial pos', initial_random_pos)
         else:
             print('No Obj')
         return initial_random_pos
 
     def sample_object_color(self):
         a = list(np.random.choice(range(256), size=3) / 255.0) + [1]
-        #print('color', a)
+        # print('color', a)
         return a
 
     def random_obj_generation(self):
@@ -224,7 +184,7 @@ class MURMENV_m2(PandaBaseEnv):
         chosen_shape = random.choice(random_shape)
 
         # chosen_shape = 'rectangularprism2' #Bottle
-        #chosen_shape='cube'
+        # chosen_shape='cube'
         if chosen_shape == 'cube':
             self.obj_index = 0
             obj = bullet.objects.cube(pos=self.sample_object_location())
@@ -241,39 +201,93 @@ class MURMENV_m2(PandaBaseEnv):
         # print(self.obj_index)
 
         return obj
+    def run_for_goal(self):
+        image_check_save_path="/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
+        a, q = p.getBasePositionAndOrientation(self._obj)
+        p.resetBasePositionAndOrientation(self._obj, self.goal_pos, q)
 
+        self.goal_positions = {
+            'panda_joint1': -1.94, 'panda_joint2': 0.427, 'panda_joint3': 0.153,
+            'panda_joint4': -2.3415, 'panda_joint5': -0.1715, 'panda_joint6': 2.7593,
+            'panda_joint7': -0.8575, 'panda_finger_joint1': 0.02, 'panda_finger_joint2': 0.02,
+        }
 
+        num_joints = p.getNumJoints(self._panda)
+        # print('joints',num_joints)
+
+        for i in range(num_joints):
+            joint_info = p.getJointInfo(self._panda, i)
+            joint_name = joint_info[1].decode("UTF-8")
+            joint_type = joint_info[2]
+
+            if joint_type is p.JOINT_REVOLUTE or joint_type is p.JOINT_PRISMATIC:
+                assert joint_name in self.initial_positions.keys()
+
+                p.resetJointState(self._panda, i, self.goal_positions[joint_name])
+                p.setJointMotorControl2(self._panda, i, p.POSITION_CONTROL,
+                                        targetPosition=self.goal_positions[joint_name],
+                                        positionGain=0.2, velocityGain=1.0)
+
+        target_pos_check = np.array(bullet.get_body_info(self._obj)['pos'])
+        ee_pos_check = self.get_end_effector_pos()
+        # print('obj, ee pos for goal', target_pos_check, ee_pos_check)
+
+        goal_global = np.uint8(self.render_obs())
+        goal_active = np.uint8(self.render_obs_active())
+
+        num_joints = p.getNumJoints(self._panda)
+        for i in range(num_joints):
+            joint_info = p.getJointInfo(self._panda, i)
+            joint_name = joint_info[1].decode("UTF-8")
+            joint_type = joint_info[2]
+
+            if joint_type is p.JOINT_REVOLUTE or joint_type is p.JOINT_PRISMATIC:
+                assert joint_name in self.initial_positions.keys()
+
+                p.resetJointState(self._panda, i, self.initial_positions[joint_name])
+                p.setJointMotorControl2(self._panda, i, p.POSITION_CONTROL,
+                                        targetPosition=self.initial_positions[joint_name],
+                                        positionGain=0.2, velocityGain=1.0)
+
+        p.resetBasePositionAndOrientation(self._obj, a, q)
+
+        reset_global = np.uint8(self.render_obs())
+        reset_active = np.uint8(self.render_obs_active())
+
+        np.save(image_check_save_path+"m3_1.npy", goal_global)
+        np.save(image_check_save_path+"m3_2.npy", goal_active)
+        np.save(image_check_save_path+"m3_3.npy", reset_global)
+        np.save(image_check_save_path+"m3_4.npy", reset_active)
+
+        return goal_global, goal_active
+    
     def _set_spaces(self):
         act_dim = self.get_action_dim()
         act_bound = 1
         act_high = np.ones(act_dim) * act_bound
         self.action_space = gym.spaces.Box(-act_high, act_high)
 
-        observation_dim = 11
-        if self.DoF > 3:
-            observation_dim += 4
-
+        observation_dim = 3
+        observation_dim1 = 4
         obs_bound = 100
         obs_high = np.ones(observation_dim) * obs_bound
         state_space = gym.spaces.Box(-obs_high, obs_high)
 
+        obs_high1 = np.ones(observation_dim1) * obs_bound
+        state_space1 = gym.spaces.Box(-obs_high1, obs_high1)
+
         self.observation_space = Dict([
-            ('observation', state_space),
             ('state_observation', state_space),
-            ('desired_goal', state_space),
+            ('robot_state_observation', state_space1),
             ('state_desired_goal', state_space),
-            ('achieved_goal', state_space),
-            ('state_achieved_goal', state_space),
         ])
 
     def _load_table(self):
-
         self._table = bullet.objects.table(rgba=[1, 1, 1, 1])
         self._base = bullet.objects.panda_base()
         self._rdbox = bullet.objects.multi_box_goal(
             pos=[np.random.uniform(low=0.15, high=0.3), np.random.uniform(low=-0.55, high=-0.4),
                  np.random.uniform(low=1.1, high=1.3)])
-
         self._objects = {}
         self._sensors = {}
 
@@ -303,61 +317,66 @@ class MURMENV_m2(PandaBaseEnv):
                 raise RuntimeError('Unrecognized action: {}'.format(action))
             return np.array(delta_pos), np.array(delta_angle), gripper
 
-
     def get_contextual_diagnostics(self, paths, contexts):
-        from multiworld.envs.env_util import create_stats_ordered_dict
+        from multiworld.multiworld.envs.env_util import create_stats_ordered_dict
+
         diagnostics = OrderedDict()
-        state_key = "state_observation"
+        state_key = "state_observation" # obj pos
         goal_key = "state_desired_goal"
         values = []
         eps1, eps2 = [], []
+
+        # print('check paths in diagnostics', paths[0])
+        # print('check contexts in diagnostics', contexts)
+        # print('length of paths = 5 ?', len(paths))
+
         for i in range(len(paths)):
-            state = paths[i]["observations"][-1][state_key][self.start_obj_ind:self.start_obj_ind + 3]
-            goal = contexts[i][goal_key][self.start_obj_ind:self.start_obj_ind + 3]
+            state = paths[i]["observations"][-1][state_key]
+            print('Final obj State', state)
+
+            goal = paths[i]["observations"][-1][goal_key]
+            print('Given Goal State', goal)
+
             distance = np.linalg.norm(state - goal)
 
-            if self.task == 'pickup':
-                values.append(state[2] > self.pickup_eps)
-            if self.task == 'goal_reaching':
-                values.append(distance)
-                eps1.append(distance < 0.05)
-                eps2.append(distance < 0.08)
+            values.append(distance)
+            eps1.append(distance < 0.03)
+            eps2.append(distance < 0.1)
 
-        if self.task == 'pickup':
-            diagnostics_key = goal_key + "/final/picked_up"
-        if self.task == 'goal_reaching':
-            diagnostics_key = goal_key + "/final/distance"
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success_0.05", eps1))
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success_0.08", eps2))
+        diagnostics_key = goal_key + "/final/distance"
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success", eps1))
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/final/success_close", eps2))
         diagnostics.update(create_stats_ordered_dict(diagnostics_key, values))
 
         values = []
-        eps1, eps2 = [], []
+        eps1, eps2, eps3 = [], [], []
         for i in range(len(paths)):
             for j in range(len(paths[i]["observations"])):
-                state = paths[i]["observations"][j][state_key][self.start_obj_ind:self.start_obj_ind + 3]
-                goal = contexts[i][goal_key][self.start_obj_ind:self.start_obj_ind + 3]
+                state = paths[i]["observations"][j][state_key]
+                # print('state each', state)
+                state_z_pos = paths[i]["observations"][j][state_key][2]
+                # print('checking z coordinates', state_z_pos)
+                initial_z_pos = np.array(1.03)
+                height = np.linalg.norm(state_z_pos-initial_z_pos)
+
+                goal = paths[i]["observations"][-1][goal_key]
+                # print('goal state each', goal)
+
                 distance = np.linalg.norm(state - goal)
+                values.append(distance)
+                eps1.append(distance < 0.03)
+                eps2.append(distance < 0.1)
+                eps3.append(height > 0.1)
 
-                if self.task == 'pickup':
-                    values.append(state[2] > self.pickup_eps)
-                if self.task == 'goal_reaching':
-                    values.append(distance)
-                    eps1.append(distance < 0.05)
-                    eps2.append(distance < 0.08)
-
-        if self.task == 'pickup':
-            diagnostics_key = goal_key + "/picked_up"
-        if self.task == 'goal_reaching':
-            diagnostics_key = goal_key + "/distance"
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/success_0.05", eps1))
-            diagnostics.update(create_stats_ordered_dict(goal_key + "/success_0.08", eps2))
+        diagnostics_key = goal_key + "/distance"
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/success", eps1))
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/success_close", eps2))
+        diagnostics.update(create_stats_ordered_dict(goal_key + "/checking_whether_picked_up", eps3))
 
         diagnostics.update(create_stats_ordered_dict(diagnostics_key, values))
         return diagnostics
-
-######################################## "RENDERDING" ########################################
-##############################################################################################
+    ######################################## "RENDERDING" ########################################
+    ##############################################################################################
 
     def render_obs(self):
 
@@ -381,17 +400,19 @@ class MURMENV_m2(PandaBaseEnv):
 
     def render_obs_active(self):
         eef_pos_for_active_camera = self.get_end_effector_pos()
-        eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.15),float(eef_pos_for_active_camera[1]),float(eef_pos_for_active_camera[2])]
+        eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0] + 0.15), float(eef_pos_for_active_camera[1]),
+                                     float(eef_pos_for_active_camera[2])]
         eef_theta_for_active_camera = self.get_end_effector_theta()
-        #print(eef_pos_for_active_camera)
-        #print('Total',eef_theta_for_active_camera)
+        # print(eef_pos_for_active_camera)
+        # print('Total',eef_theta_for_active_camera)
         # print('x',eef_theta_for_active_camera[0])
         # print('y',eef_theta_for_active_camera[1])
         # print('z',eef_theta_for_active_camera[2])
 
         view_matrix_obs_active = bullet.get_view_matrix(
             target_pos=eef_pos_for_active_camera, distance=0.35,
-            yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
+            yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1] - 90,
+            roll=eef_theta_for_active_camera[2] - 270, up_axis_index=2)
         projection_matrix_obs_active = bullet.get_projection_matrix(
             self.obs_img_dim_active, self.obs_img_dim_active)
 
@@ -413,7 +434,6 @@ class MURMENV_m2(PandaBaseEnv):
             img_active = np.transpose(img_active, (2, 0, 1))
         return img_active
 
-
     def get_image(self, width, height, camera):
         if camera == 'global':
             image = np.float32(self.render_obs())
@@ -421,16 +441,13 @@ class MURMENV_m2(PandaBaseEnv):
             image = np.float32(self.render_obs_active())
         return image
 
-######################################## "RENDERDING" ########################################
-
-    def set_goal(self, goal):
-        self.goal_pos = goal['state_desired_goal'][self.start_obj_ind:self.start_obj_ind + 3]
-
-    def format_obs(self, obs):
-        if len(obs.shape) == 1:
-            return obs.reshape(1, -1)
-        return obs
-
+    # def set_goal(self, goal):
+    #     self.goal_pos = goal['state_desired_goal'][self.start_obj_ind:self.start_obj_ind + 3]
+    # 
+    # def format_obs(self, obs):
+    #     if len(obs.shape) == 1:
+    #         return obs.reshape(1, -1)
+    #     return obs
     ############################################
     ##################REWARD####################
 
@@ -438,56 +455,12 @@ class MURMENV_m2(PandaBaseEnv):
         object_pos = np.asarray(bullet.get_body_info(self._obj)['pos'])
         object_goal_distance = np.linalg.norm(object_pos - self.goal_pos)
         object_goal_success = int(object_goal_distance < self._success_threshold)
-        #print('goal distance',object_goal_distance)
+        # print('goal distance',object_goal_distance)
         info = {'Goal_success': object_goal_success}
         return info
 
     def get_reward(self, info):
         return info['Goal_success'] - 1
-
-
-    def compute_reward_pu(self, obs, actions, next_obs, contexts):
-        obj_state = self.format_obs(next_obs['state_observation'])[:, self.start_obj_ind:self.start_obj_ind + 3]
-        height = obj_state[:, 2]
-        reward = (height > self.pickup_eps) - 1
-        return reward
-
-    def compute_reward_gr(self, obs, actions, next_obs, contexts):
-        obj_state = self.format_obs(next_obs['state_observation'])[:, self.start_obj_ind:self.start_obj_ind + 3]
-        obj_goal = self.format_obs(contexts['state_desired_goal'])[:, self.start_obj_ind:self.start_obj_ind + 3]
-        object_goal_distance = np.linalg.norm(obj_state - obj_goal, axis=1)
-        object_goal_success = object_goal_distance < self._success_threshold
-        return object_goal_success - 1
-
-
-    def compute_reward_pp(self, obs, actions, next_obs, contexts):
-        obj_state = self.format_obs(next_obs['state_observation'])[:, self.start_obj_ind:self.start_obj_ind + 3]
-        obj_goal = self.format_obs(contexts['state_desired_goal'])[:, self.start_obj_ind:self.start_obj_ind + 3]
-        object_goal_distance = np.linalg.norm(obj_state - obj_goal, axis=1)
-        Goal_Success = object_goal_distance < self._success_threshold
-        return Goal_Success - 1
-
-    def compute_reward(self, obs, actions, next_obs, contexts):
-        if self.task == 'goal_reaching':
-            return self.compute_reward_gr(obs, actions, next_obs, contexts)
-        elif self.task == 'pickup':
-            return self.compute_reward_pu(obs, actions, next_obs, contexts)
-        elif self.task == 'Pick and Place':
-            return self.compute_reward_pp(obs, actions, next_obs, contexts)
-
-    ##################REWARD####################
-    ############################################
-
-    # def get_object_deg(self):
-    #     # object_info = bullet.get_body_info(self._objects['obj'],
-    #     #                                    quat_to_deg=True)
-    #     object_info = bullet.get_body_info(self._obj,
-    #                                        quat_to_deg=True)
-    #     return object_info['theta']
-    #
-    # def get_hand_deg(self):
-    #     return bullet.get_link_state(self._panda, self._end_effector,
-    #         'theta', quat_to_deg=True)
 
     def get_observation(self):
         left_tip_pos = bullet.get_link_state(
@@ -497,52 +470,35 @@ class MURMENV_m2(PandaBaseEnv):
         left_tip_pos = np.asarray(left_tip_pos)
         right_tip_pos = np.asarray(right_tip_pos)
         hand_theta = bullet.get_link_state(self._panda, self._end_effector,
-            'theta', quat_to_deg=False)
-        #print('obs_ hand theta',hand_theta)
+                                           'theta', quat_to_deg=False)
+        # print('obs_ hand theta',hand_theta)
         gripper_tips_distance = [np.linalg.norm(
             left_tip_pos - right_tip_pos)]
         end_effector_pos = self.get_end_effector_pos()
 
-        #Spawning random objects code
+        # Spawning random objects code
         # object_info = bullet.get_body_info(self._objects['obj'],
         #                                    quat_to_deg=False)
 
         # Cube code
         object_info = bullet.get_body_info(self._obj, quat_to_deg=False)
-        #print(' cube',object_info)
+        # print(' cube',object_info)
         object_pos = object_info['pos']
-        #object_theta = object_info['theta']
+        # object_theta = object_info['theta']
 
-        if self.DoF > 3:
-            observation = np.concatenate((
-                end_effector_pos, hand_theta, gripper_tips_distance,
-                object_pos))
-            goal_pos = np.concatenate((
-                 hand_theta, gripper_tips_distance,
-                self.goal_pos))
-            
-        else:
-            observation = np.concatenate((
-                end_effector_pos, gripper_tips_distance))
-            goal_pos = np.concatenate((
-                end_effector_pos, gripper_tips_distance,
-                self.goal_pos))
-            # print('DOF  @@  HERE')
+        observation = np.concatenate((
+            end_effector_pos, gripper_tips_distance))
+        obj_observation = np.asarray(object_pos)
+        goal_pos = np.asarray(self.goal_pos)
+        #print('DOF  @@  HERE')
 
         obs_dict = dict(
-            # observation=observation,
-            state_observation=observation,
-            # desired_goal=goal_pos,
-            # state_desired_goal=goal_pos,
-            # achieved_goal=observation,
-            # state_achieved_goal=observation,
-        )
+            state_observation=obj_observation,
+            robot_state_observation=observation,
+            state_desired_goal=goal_pos,
+            )
 
         return obs_dict
-
-#################################################################################################
-#################################################################################################
-#################################################################################################
 
     def step(self, *action):
         # Joint Initialization Code
@@ -556,19 +512,19 @@ class MURMENV_m2(PandaBaseEnv):
         # print('jointinfo0', a0, a1, a2, a3, a4, a5, a6)
 
         pos = bullet.get_link_state(self._panda, self._end_effector, 'pos')
-        #theta = p.getLinkState(self._panda, self.end_eff_idx)[5][:3]
+        # theta = p.getLinkState(self._panda, self.end_eff_idx)[5][:3]
         # a = theta[0]*pi
         # b = theta[1]*pi
         # c = theta[2]*pi
         # theta = np.array([a, b, c])
-        #print('theta',theta)
-        theta = [m.pi, 0, 0] # Theta Fixed to pi
+        # print('theta',theta)
+        theta = [m.pi, 0, 0]  # Theta Fixed to pi
 
-        #print('action_before format', action)
+        # print('action_before format', action)
         # delta_pos, delta_angle, gripper = self._format_action(*action)
         delta_pos, gripper = self._format_action(*action)
 
-        #print('gripper',gripper)
+        # print('gripper',gripper)
         if gripper == -1:
             self.pre_grasp()
             p.stepSimulation()
@@ -583,19 +539,19 @@ class MURMENV_m2(PandaBaseEnv):
         pos += delta_pos * adjustment
 
         # pos = np.clip(pos, self._pos_low, self._pos_high)
-        #print(delta_angle)
+        # print(delta_angle)
 
         # theta_adjustment = 0.2
         # theta += delta_angle*theta_adjustment
-        #print('delta_action', pos, theta)
+        # print('delta_action', pos, theta)
 
         pos_and_theta = np.append(pos, theta)
-        #print('action_to_apply', pos_and_theta)
+        # print('action_to_apply', pos_and_theta)
 
         self.apply_action(pos_and_theta)
 
         p.stepSimulation()
-        #print('eef_pos with action', pos)
+        # print('eef_pos with action', pos)
 
         # Get tuple information
         observation = self.get_observation()
@@ -627,8 +583,8 @@ class MURMENV_m2(PandaBaseEnv):
         action, done = self.my_action(self.goal_pos)
         self.done = done or self.done
         action = np.append(action, [self.grip])
-        #action = np.append(action, [self.action_theta])
-        #action = np.random.normal(action, 0.1)
+        # action = np.append(action, [self.action_theta])
+        # action = np.random.normal(action, 0.1)
         action = np.clip(action, a_min=-3.14, a_max=3.14)
         return action
 
@@ -636,7 +592,7 @@ class MURMENV_m2(PandaBaseEnv):
         ee_pos = self.get_end_effector_pos()
         # print(self._obj)
         target_pos = np.array(bullet.get_body_info(self._obj)['pos'])
-        adjustment = np.array([0, 0, 0.014])  #height adj
+        adjustment = np.array([0, 0, 0.014])  # height adj
         adjustment1 = np.array([0, 0, 0.1])
         adjustment2 = np.array([0, 0, 0.01])
         if self.obj_index == 2:
@@ -647,10 +603,10 @@ class MURMENV_m2(PandaBaseEnv):
 
         ee_set_pos = np.array([0.1, -0.55, 1.5])
         # checking_pos = np.array([-0.1, -0.5, goal[2]+0.095])
-        #checking_pos = np.array([goal[0]*0.8, goal[1]*0.8, goal[2] + 0.095])
-        checking_pos = np.array([goal[0]-0.1, goal[1], goal[2] + 0.1])
-        #print('cube', target_pos)
-        #print('eef', ee_pos)
+        # checking_pos = np.array([goal[0]*0.8, goal[1]*0.8, goal[2] + 0.095])
+        checking_pos = np.array([goal[0] - 0.1, goal[1], goal[2] + 0.1])
+        # print('cube', target_pos)
+        # print('eef', ee_pos)
 
         aligned = np.linalg.norm(target_pos[:2] - ee_pos[:2]) < 0.005
         if self.obj_index == 2:
@@ -667,16 +623,16 @@ class MURMENV_m2(PandaBaseEnv):
         # check = self.check_contact_fingertips(self._obj)
         # print('check', check)
         grasp = int(self.check_contact_fingertips(self._obj)[0]) == 2
-        #print('Check Grasp',grasp)
+        # print('Check Grasp',grasp)
 
-        #print(self.shelf_chosen)
+        # print(self.shelf_chosen)
         o_angle = ([pi, 0, 0])
         curr_angle = np.array(p.getLinkState(self._panda, self.end_eff_idx)[5][:3])
-        ori_angle = ([0, 0, 0]) #= (o_angle - curr_angle)*5
-        turn_angle = np.array([ori_angle[0]/2, ori_angle[1]/2, -pi/2*3])
-        turned = p.getLinkState(self._panda, self.end_eff_idx)[5][2] > pi*1.4
-        #print('theta', turned)
-        #print('trigger',self.trigger)
+        ori_angle = ([0, 0, 0])  # = (o_angle - curr_angle)*5
+        turn_angle = np.array([ori_angle[0] / 2, ori_angle[1] / 2, -pi / 2 * 3])
+        turned = p.getLinkState(self._panda, self.end_eff_idx)[5][2] > pi * 1.4
+        # print('theta', turned)
+        # print('trigger',self.trigger)
         #
         # if self.timeStep > 200:
         #     print('time', self.timeStep)
@@ -685,7 +641,7 @@ class MURMENV_m2(PandaBaseEnv):
         self.grip = 1
 
         if done and self.goal_near == 1 and self.achieve_check == 0:
-            #print('Finished')
+            # print('Finished')
             action = np.array([0, 0, 0])
             # action = np.append(action, ori_angle)
             self.grip = -1
@@ -704,22 +660,22 @@ class MURMENV_m2(PandaBaseEnv):
 
         if not grasp and self.goal_near == 0:
             if not aligned and not on_top:
-                #print('Stage 1: Approaching')
+                # print('Stage 1: Approaching')
                 action = target_pos2 - ee_pos
                 self.z += 0.1
-                #print('z', self.z)
-                action *= self.z*1.5
+                # print('z', self.z)
+                action *= self.z * 1.5
                 # action = np.append(action, ori_angle)
                 self.grip = -1
 
             elif aligned and not on_top:
-                #print('Stage 2: Not on top')
+                # print('Stage 2: Not on top')
                 action = np.array([0., 0., -0.3])
                 # action = np.append(action, ori_angle)
                 self.grip = -1
 
             elif not aligned and on_top:
-                #print('Stage 2: Aligning')
+                # print('Stage 2: Aligning')
                 action = target_pos - ee_pos
                 action[2] = 0
                 action *= 0.5
@@ -727,7 +683,7 @@ class MURMENV_m2(PandaBaseEnv):
                 self.grip = -1
 
             elif aligned and on_top:
-                #print('Stage 4: Grasping')
+                # print('Stage 4: Grasping')
                 action = np.array([0., 0., 0])
                 # action = np.append(action, ori_angle)
                 self.grip = 1
@@ -742,7 +698,7 @@ class MURMENV_m2(PandaBaseEnv):
                 # print('Stage 5: Going to Placing(up)')
                 action = np.array([0., 0., 0.1])
                 self.up += 0.1
-                action *= self.up*0.8
+                action *= self.up * 0.8
                 # action = np.append(action, ori_angle)
                 self.grip = 1
             if on_drop_height:
@@ -753,13 +709,13 @@ class MURMENV_m2(PandaBaseEnv):
                 action = goal - target_pos
                 action[2] = 0
                 self.y += 0.1
-                action *= self.y * 1 #TODO: Decrease speed here
+                action *= self.y * 1  # TODO: Decrease speed here
                 # action = np.append(action, ori_angle)
                 self.grip = 1
 
             if placing_near and not done and self.trigger == 1:
                 self.goal_near = 1
-                #print('Stage 9: Dropping to Goal')
+                # print('Stage 9: Dropping to Goal')
                 if self.obj_index == 2:
                     action = np.array([0., 0., -0.2])
                 else:
