@@ -41,7 +41,6 @@ class MURMENV(PandaBaseEnv):
                  *args,
                  **kwargs
                  ):
-        assert DoF in [3, 6, 7]
         is_set = object_subset in ['test', 'train', 'all']
         is_list = type(object_subset) == list
         assert is_set or is_list
@@ -50,7 +49,6 @@ class MURMENV(PandaBaseEnv):
         self._reward_type = reward_type
         self._reward_min = reward_min
         self._randomize = randomize
-        self.pickup_eps = -0.3
         self._observation_mode = observation_mode
         self._transpose_image = transpose_image
         self._invisible_robot = invisible_robot
@@ -59,13 +57,8 @@ class MURMENV(PandaBaseEnv):
         self.random_color_p = random_color_p
         self.use_bounding_box = use_bounding_box
         self.object_subset = object_subset
-        self.test_env = test_env
-        self._ddeg_scale = 5
         self.DoF = DoF
         self.obj_index = 0
-
-        # self.object_dict, self.scaling = self.get_object_info()
-        self.curr_object = None
 
         # _obj POSITION wall
         # self._object_position_low = (0.35, -0.1, 1.03)
@@ -85,7 +78,6 @@ class MURMENV(PandaBaseEnv):
         self._object_position_low1 = (0.4, -0.1, 1.048)
         self._object_position_high1 = (0.5, 0.1, 1.048)
 
-        self.start_obj_ind = 4 if (self.DoF == 4) else 8
         self.default_theta = bullet.deg_to_quat([180, 0, 0])
         self._success_threshold = success_threshold
 
@@ -93,7 +85,6 @@ class MURMENV(PandaBaseEnv):
         self.obs_img_dim = obs_img_dim #+.15
         #Active Camera
         self.obs_img_dim_active = obs_img_dim_active
-
         self.dt = 0.1
 
         super().__init__(*args, **kwargs)
@@ -135,7 +126,7 @@ class MURMENV(PandaBaseEnv):
 
     def reset(self, change_object=False):
 
-        # Load Enviorment
+        # Load Environment
         bullet.reset()
         bullet.setup_headless(self._timestep, solver_iterations=self._solver_iterations)
         p.setGravity(0, 0, -9.8)
@@ -201,10 +192,10 @@ class MURMENV(PandaBaseEnv):
     def sample_object_location(self):
         if self.obj_index == 0 or self.obj_index == 1:
             initial_random_pos = np.random.uniform(low=self._object_position_low, high=self._object_position_high)
-            #print('Initial pos', initial_random_pos)
+            print('Initial pos', initial_random_pos)
         elif self.obj_index == 2:
             initial_random_pos = np.random.uniform(low=self._object_position_low1, high=self._object_position_high1)
-            #print('Initial pos', initial_random_pos)
+            print('Initial pos', initial_random_pos)
         else:
             print('No Obj')
         return initial_random_pos
@@ -289,10 +280,10 @@ class MURMENV(PandaBaseEnv):
         reset_global = np.uint8(self.render_obs())
         reset_active = np.uint8(self.render_obs_active())
 
-        np.save(image_check_save_path+"1.npy", goal_global)
-        np.save(image_check_save_path+"2.npy", goal_active)
-        np.save(image_check_save_path+"3.npy", reset_global)
-        np.save(image_check_save_path+"4.npy", reset_active)
+        np.save(image_check_save_path+"m1_1.npy", goal_global)
+        np.save(image_check_save_path+"m1_2.npy", goal_active)
+        np.save(image_check_save_path+"m1_3.npy", reset_global)
+        np.save(image_check_save_path+"m1_4.npy", reset_active)
 
         return goal_global, goal_active
 
@@ -302,19 +293,19 @@ class MURMENV(PandaBaseEnv):
         act_high = np.ones(act_dim) * act_bound
         self.action_space = gym.spaces.Box(-act_high, act_high)
 
-        observation_dim = 10
-        # 3 4 3
+        observation_dim = 3
+        observation_dim1 = 4
         obs_bound = 100
         obs_high = np.ones(observation_dim) * obs_bound
         state_space = gym.spaces.Box(-obs_high, obs_high)
 
+        obs_high1 = np.ones(observation_dim1) * obs_bound
+        state_space1 = gym.spaces.Box(-obs_high1, obs_high1)
+
         self.observation_space = Dict([
-            ('observation', state_space),
             ('state_observation', state_space),
-            ('desired_goal', state_space),
+            ('robot_state_observation', state_space1),
             ('state_desired_goal', state_space),
-            ('achieved_goal', state_space),
-            ('state_achieved_goal', state_space),
         ])
 
     def _load_table(self):
@@ -331,9 +322,7 @@ class MURMENV(PandaBaseEnv):
         self._box9 = bullet.objects.box9()
 
         #self._wall = bullet.objects.wall()
-        #self._wall2 = bullet.objects.wall2()
         # Wall color Thick Brown "0.55 0.35 0.17 1"
-
         self._objects = {}
         self._sensors = {}
 
@@ -485,16 +474,12 @@ class MURMENV(PandaBaseEnv):
             image = np.float32(self.render_obs_active())
         return image
 
-######################################## "RENDERDING" ########################################
-
-    def set_goal(self, goal):
-        self.goal_pos = goal['state_desired_goal'][self.start_obj_ind:self.start_obj_ind + 3]
-
-    def format_obs(self, obs):
-        if len(obs.shape) == 1:
-            return obs.reshape(1, -1)
-        return obs
-
+    # def set_goal(self, goal):
+    #     self.goal_pos = goal['state_desired_goal'][self.start_obj_ind:self.start_obj_ind + 3]
+    # def format_obs(self, obs):
+    #     if len(obs.shape) == 1:
+    #         return obs.reshape(1, -1)
+    #     return obs
     ############################################
     ##################REWARD####################
 
@@ -507,39 +492,6 @@ class MURMENV(PandaBaseEnv):
 
     def get_reward(self, info):
         return info['Goal_success'] - 1
-
-
-    def compute_reward_pu(self, obs, actions, next_obs, contexts):
-        obj_state = self.format_obs(next_obs['state_observation'])[:, self.start_obj_ind:self.start_obj_ind + 3]
-        height = obj_state[:, 2]
-        reward = (height > self.pickup_eps) - 1
-        return reward
-
-    def compute_reward_gr(self, obs, actions, next_obs, contexts):
-        obj_state = self.format_obs(next_obs['state_observation'])[:, self.start_obj_ind:self.start_obj_ind + 3]
-        obj_goal = self.format_obs(contexts['state_desired_goal'])[:, self.start_obj_ind:self.start_obj_ind + 3]
-        object_goal_distance = np.linalg.norm(obj_state - obj_goal, axis=1)
-        object_goal_success = object_goal_distance < self._success_threshold
-        return object_goal_success - 1
-
-
-    def compute_reward_pp(self, obs, actions, next_obs, contexts):
-        obj_state = self.format_obs(next_obs['state_observation'])[:, self.start_obj_ind:self.start_obj_ind + 3]
-        obj_goal = self.format_obs(contexts['state_desired_goal'])[:, self.start_obj_ind:self.start_obj_ind + 3]
-        object_goal_distance = np.linalg.norm(obj_state - obj_goal, axis=1)
-        Goal_Success = object_goal_distance < self._success_threshold
-        return Goal_Success - 1
-
-    def compute_reward(self, obs, actions, next_obs, contexts):
-        if self.task == 'goal_reaching':
-            return self.compute_reward_gr(obs, actions, next_obs, contexts)
-        elif self.task == 'pickup':
-            return self.compute_reward_pu(obs, actions, next_obs, contexts)
-        elif self.task == 'Pick and Place':
-            return self.compute_reward_pp(obs, actions, next_obs, contexts)
-
-    ##################REWARD####################
-    ############################################
 
     def get_observation(self):
         left_tip_pos = bullet.get_link_state(
@@ -559,30 +511,16 @@ class MURMENV(PandaBaseEnv):
         object_pos = object_info['pos']
         #object_theta = object_info['theta']
 
-        if self.DoF > 3:
-            observation = np.concatenate((
-                end_effector_pos, hand_theta, gripper_tips_distance,
-                object_pos))
-            goal_pos = np.concatenate((
-                 hand_theta, gripper_tips_distance,
-                self.goal_pos))
-
-        else:
-            observation = np.concatenate((
-                end_effector_pos, gripper_tips_distance))
-
-            obj_observation = np.asarray(object_pos)
-
-            goal_pos = np.asarray(self.goal_pos)
-            #print('DOF  @@  HERE')
+        observation = np.concatenate((
+            end_effector_pos, gripper_tips_distance))
+        obj_observation = np.asarray(object_pos)
+        goal_pos = np.asarray(self.goal_pos)
+        #print('DOF  @@  HERE')
 
         obs_dict = dict(
             state_observation=obj_observation,
             robot_state_observation=observation,
-            #desired_goal=goal_pos,
             state_desired_goal=goal_pos,
-            #achieved_goal=observation,
-            #state_achieved_goal=observation,
             )
 
         return obs_dict
@@ -673,6 +611,8 @@ class MURMENV(PandaBaseEnv):
         #action = np.append(action, [self.action_theta])
         #action = np.random.normal(action, 0.1)
         action = np.clip(action, a_min=-3.14, a_max=3.14)
+
+        # print('action', action)
         return action
 
     def my_action(self, goal):
