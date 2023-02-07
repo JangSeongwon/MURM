@@ -228,7 +228,7 @@ class MURMENV(PandaBaseEnv):
         return obj
 
     def run_for_goal(self):
-        image_check_save_path="/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
+        image_check_save_path = "/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
         a, q = p.getBasePositionAndOrientation(self._obj)
         p.resetBasePositionAndOrientation(self._obj, self.goal_pos, q)
 
