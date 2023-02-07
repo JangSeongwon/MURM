@@ -34,17 +34,22 @@ FLAGS = flags.FLAGS
 def get_paths():
     data_path = '/media/jang/jang/0ubuntu/'
     demo_paths = [
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_1.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_2.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_3.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_4.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_5.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_6.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_7.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_8.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_9.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_10.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                  # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/1313.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_1.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_2.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_3.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_4.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_5.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_6.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_7.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_8.pkl', obs_dict=True, is_demo=True, use_latents=True),
+
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_1.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_2.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_3.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_4.pkl', obs_dict=True, is_demo=True, use_latents=True),
+
+                #   dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/1313.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                #   dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/1414.pkl', obs_dict=True, is_demo=True, use_latents=True),
                   ]
     logging.info('data_path: %s', data_path)
     return data_path, demo_paths
@@ -128,14 +133,14 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
         max_path_length=400,
         algo_kwargs=dict(
             batch_size=256,
-            start_epoch=-1000,  # offline epochs
-            num_epochs=151,  # online epochs
+            start_epoch=-200,  # offline epochs
+            num_epochs=251,  # online epochs
 
             #TODO: EPoch steps Fix
             num_eval_steps_per_epoch=2000, #TODO: 2000: 400 per episode -> so 5 times eval
-            # num_expl_steps_per_train_loop=1, #2000
+            num_expl_steps_per_train_loop=2000, #2000
             num_trains_per_train_loop=1000,
-            # num_online_trains_per_train_loop=2000,
+            num_online_trains_per_train_loop=2000,
             min_num_steps_before_training=4000,
 
             eval_epoch_freq=5,
@@ -145,14 +150,14 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
         replay_buffer_kwargs=dict(
             fraction_next_context=0.1,
             fraction_future_context=0.6,
-            # fraction_foresight_context=0.0,
-            # fraction_perturbed_context=0.0,
+            fraction_foresight_context=0.0,
+            fraction_perturbed_context=0.0,
             fraction_distribution_context=0.0,
-            # max_future_dt=None,
+            max_future_dt=None,
             max_size=int(1E6),
         ),
 
-        online_offline_split=False,
+        online_offline_split=True,
 
         reward_kwargs=dict(
             reward_type='sparse',
@@ -163,19 +168,19 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
             online_replay_buffer_kwargs=dict(
                 fraction_next_context=0.1,
                 fraction_future_context=0.6,
-                # fraction_foresight_context=0.0,
-                # fraction_perturbed_context=0.0,
+                fraction_foresight_context=0.0,
+                fraction_perturbed_context=0.0,
                 fraction_distribution_context=0.0,
-                # max_future_dt=None,
+                max_future_dt=None,
                 max_size=int(4E5),
             ),
             offline_replay_buffer_kwargs=dict(
                 fraction_next_context=0.1,
                 fraction_future_context=0.9,
-                # fraction_foresight_context=0.0,
-                # fraction_perturbed_context=0.0,
+                fraction_foresight_context=0.0,
+                fraction_perturbed_context=0.0,
                 fraction_distribution_context=0.0,
-                # max_future_dt=None,
+                max_future_dt=None,
                 max_size=int(6E5),
             ),
             sample_online_fraction=0.6
@@ -222,17 +227,17 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
         load_demos=True,
 
         evaluation_goal_sampling_mode='given_latent', #'presampled_images',
-        # exploration_goal_sampling_mode='conditional_vae_prior',
+        exploration_goal_sampling_mode='given_latent',
         training_goal_sampling_mode='given_latent', #'presample_latents',
 
-        presampled_goal_kwargs=dict(
-            eval_goals='',  # HERE
-            eval_goals_kwargs={},
-            # expl_goals='',
-            # expl_goals_kwargs={},
-            training_goals='',
-            training_goals_kwargs={},
-        ),
+        # presampled_goal_kwargs=dict(
+        #     eval_goals='',  # HERE
+        #     eval_goals_kwargs={},
+        #     expl_goals='',
+        #     expl_goals_kwargs={},
+        #     training_goals='',
+        #     training_goals_kwargs={},
+        # ),
 
         use_expl_planner=False,
         # expl_planner_type='hierarchical',
@@ -306,7 +311,7 @@ def get_search_space():
         'use_pretrained_rl_path': [False],
         # Negative epochs are pretraining.
         # For only finetuning, set start_epoch=0.
-        'algo_kwargs.start_epoch': [-1000],
+        'algo_kwargs.start_epoch': [-100],
 
         'trainer_kwargs.bc': [False],  # Run BC experiment
         # Reset environment every 'reset_interval' episodes
@@ -340,7 +345,7 @@ def get_search_space():
 
         # Goals
         'use_both_ground_truth_and_affordance_expl_goals': [False],
-        'affordance_sampling_prob': [1],
+        # 'affordance_sampling_prob': [1],
         'ground_truth_expl_goals': [True],
         'only_not_done_goals': [False],
     }
@@ -388,24 +393,24 @@ def process_variant(variant, data_path, env_class):  # NOQA
     ########################################
     # Goal sampling modes.
     ########################################
-    variant['presampled_goal_kwargs']['eval_goals'] = eval_goals
+    # variant['presampled_goal_kwargs']['eval_goals'] = eval_goals
     # variant['online_offline_split_replay_buffer_kwargs']['offline_replay_buffer_kwargs']['max_size'] = min(  # NOQA
     #     int(6E5), int(500*75*variant['num_demos']))
     # variant['online_offline_split_replay_buffer_kwargs']['online_replay_buffer_kwargs']['max_size'] = min(  # NOQA
     #     int(4/6 * 500*75*variant['num_demos']),
     #     int(1E6 - variant['online_offline_split_replay_buffer_kwargs']['offline_replay_buffer_kwargs']['max_size']))  # NOQA
 
-    if variant['use_both_ground_truth_and_affordance_expl_goals']:
-        variant['exploration_goal_sampling_mode'] = (
-            'conditional_vae_prior_and_not_done_presampled_images')
+    # if variant['use_both_ground_truth_and_affordance_expl_goals']:
+        # variant['exploration_goal_sampling_mode'] = (
+        #     'conditional_vae_prior_and_not_done_presampled_images')
         #variant['training_goal_sampling_mode'] = 'presample_latents'
-        variant['presampled_goal_kwargs']['expl_goals'] = eval_goals
-        variant['presampled_goal_kwargs']['expl_goals_kwargs']['affordance_sampling_prob'] = variant['affordance_sampling_prob']  # NOQA
-    elif variant['ground_truth_expl_goals']:
-        variant['exploration_goal_sampling_mode'] = 'presampled_images'
+        # variant['presampled_goal_kwargs']['expl_goals'] = eval_goals
+        # variant['presampled_goal_kwargs']['expl_goals_kwargs']['affordance_sampling_prob'] = variant['affordance_sampling_prob']  # NOQA
+    # elif variant['ground_truth_expl_goals']:
+        # variant['exploration_goal_sampling_mode'] = 'presampled_images'
         #variant['training_goal_sampling_mode'] = 'presampled_images'
-        variant['presampled_goal_kwargs']['expl_goals'] = eval_goals
-        variant['presampled_goal_kwargs']['training_goals'] = eval_goals
+        # variant['presampled_goal_kwargs']['expl_goals'] = eval_goals
+        # variant['presampled_goal_kwargs']['training_goals'] = eval_goals
 
     if variant['only_not_done_goals']:
         _old_mode = 'presampled_images'
@@ -426,13 +431,13 @@ def process_variant(variant, data_path, env_class):  # NOQA
     ########################################
     # Gripper Observation.
     ########################################
-    if variant['use_gripper_observation']:
-
-        variant['observation_keys'] = [
-            'latent_observation',
-            'gripper_state_observation']
-        for demo_path in variant['path_loader_kwargs']['demo_paths']:
-            demo_path['use_gripper_obs'] = True
+    # if variant['use_gripper_observation']:
+    #
+    #     variant['observation_keys'] = [
+    #         'latent_observation',
+    #         'gripper_state_observation']
+    #     for demo_path in variant['path_loader_kwargs']['demo_paths']:
+    #         demo_path['use_gripper_obs'] = True
 
 
     ########################################
