@@ -53,10 +53,11 @@ class ObsDictReplayBuffer(ReplayBuffer):
         if internal_keys is None:
             internal_keys = []
 
-        print('KEYS KNOW', ob_keys_to_save,'hh', observation_keys, internal_keys)
+        print('KEYS KNOW', ob_keys_to_save, 'hh', observation_keys, internal_keys)
         self.internal_keys = internal_keys
         assert isinstance(env.observation_space, Dict)
         self.max_size = max_size
+        # print('max size', self.max_size)
         self.env = env
         self.observation_keys = observation_keys
         self.save_data_in_snapshot = save_data_in_snapshot
@@ -76,9 +77,10 @@ class ObsDictReplayBuffer(ReplayBuffer):
         self._obs = {}
         self._next_obs = {}
         self.ob_spaces = self.env.observation_space.spaces
-        for key in observation_keys:
+        for key in observation_keys: #latent observation adding if none
             if key not in ob_keys_to_save:
                 ob_keys_to_save.append(key)
+
         for key in ob_keys_to_save + internal_keys:
             assert key in self.ob_spaces, \
                 "Key not found in the observation space: %s" % key
@@ -163,12 +165,16 @@ class ObsDictReplayBuffer(ReplayBuffer):
             self._actions[slc] = actions
             self._terminals[slc] = terminals
             self._rewards[slc] = rewards
+            print('key check add path internal / keys to save', self.internal_keys, self.ob_keys_to_save)
+            print('obs_dict_replay_buffer obs keys', obs)
+            # print('Being stored obs stacking with 274', self._top, '///', self._obs)
 
-            #TODO: obs fix here
+            for a in self._obs.values():
+                print('shape curious', a.shape)
 
-            # for key in self.ob_keys_to_save + self.internal_keys:
-                # self._obs[key][slc] = obs[key]
-                # self._next_obs[key][slc] = next_obs[key]
+            for key in self.ob_keys_to_save + self.internal_keys:
+                self._obs[key][slc] = obs[key]
+                self._next_obs[key][slc] = next_obs[key]
             for i in range(self._top, self._top + path_len):
                 self._idx_to_future_obs_idx[i] = [i, self._top + path_len]
                 self._idx_to_num_steps[i] = i - self._top
@@ -177,6 +183,7 @@ class ObsDictReplayBuffer(ReplayBuffer):
         self._size = min(self._size + path_len, self.max_size)
 
     def _sample_indices(self, batch_size, min_dt=None):
+        # print('Size', self._size)
         return np.random.randint(0, self._size, batch_size)
 
     def random_batch(self, batch_size):
