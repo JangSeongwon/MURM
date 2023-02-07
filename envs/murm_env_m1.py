@@ -308,7 +308,7 @@ class MURMENV_m1(PandaBaseEnv):
             ('robot_state_observation', state_space1),
             ('state_desired_goal', state_space),
         ])
-        
+
     def _load_table(self):
         self._table = bullet.objects.table(rgba=[1, 1, 1, 1])
         self._base = bullet.objects.panda_base()
@@ -479,7 +479,7 @@ class MURMENV_m1(PandaBaseEnv):
 
     # def set_goal(self, goal):
     #     self.goal_pos = goal['state_desired_goal'][self.start_obj_ind:self.start_obj_ind + 3]
-    # 
+    #
     # def format_obs(self, obs):
     #     if len(obs.shape) == 1:
     #         return obs.reshape(1, -1)
