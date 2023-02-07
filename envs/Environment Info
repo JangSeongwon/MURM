@@ -1,3 +1,9 @@
+
+observation space = 3 4 3 {state_observation: obj pos, robot_state_observation: robot pos + gripper distance, state_desired_goal: goal pos}   
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
 cube: 
       Coordinate X on Table: 0.45
       Coordinate Y on Table: 0
