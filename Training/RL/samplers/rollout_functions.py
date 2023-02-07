@@ -40,7 +40,7 @@ def rollout(
     print('Right before env reset from Contextual env in *rollout function*')
     o = env.reset() # Contextual env: def-reset()
 
-    # print('Initial o from contextual env', o)
+    print('Initial o from contextual env', o)
 
     if reset_callback:
         print('NO')
