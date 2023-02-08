@@ -185,7 +185,7 @@ class MURMENV(PandaBaseEnv):
         #Goal Generation Process
         self.goal_pos = self.random_goal_generation()
         #self.goal_pos = np.array([0.25, -0.7, 1.05]) #Fixed goal for demo video
-        # print('Printing Goal:', self.goal_pos)
+        print('Printing Goal:', self.goal_pos)
 
         return self.get_observation()
 
