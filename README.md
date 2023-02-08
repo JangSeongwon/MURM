@@ -74,56 +74,46 @@ Env2: Multi-view task
    * Fixed 9 goal boxes VS Random 1 goal box   
    * Random initial position(In range) of the object
    * Random Action POS in demos
-
-2. Online Tuning needed - Add Exploration to finetune MURM thus increase final success rate   
   
-3. Replay Buffer
-
-4. Action diversity => Only 4-DOF 
-
-5. Method:  
+2. Method:  
     *With Demo and VQVAE, train in offline RL   
-    *Design reward function computed with global-view first and active-view next  
-    *Use Robot state information as further work  
-    *Compare percentage of what not to do + expert dataset size  
+    *Design reward function computed with global-view first and active-view next   
+    *Check whether increading demos have meaningful effect as further work   
+    *Use Robot state information as further work   
+    *Compare percentage of what not to do + expert dataset size   
             
 -------------------------- 
 
 2/8 Analysis   
 
 Training time offline = maybe 300 (14hours)  
-Training time online = maybe 250 (??)   
+Training time online = maybe 250 (24 hours)   
 
-1. Collecting demo data with three computers    
+1. Collecting demo data with third computer    
 => OKAY  
 
 2. Pretrained VQVAE. No need active once again...   
-=> OKAY - 1500 epoches = 6.5days & 2VQVAE model   
+=> OKAY - 1500 epoches = 6.5days & 2VQVAE model / but 1000 looks enough    
 
 3. Started training offline RL  
-=> OKAY - Need to trim the codes for Replay Buffer and Path collector and RL training  
+=> OKAY   
       
 4. Need to think of active-disadv task 
     - Random Goal box as solution
 
 5. Offline RL framework implementation   
-    - USE PtP Analysis     
-    - IQL algorithm
     
     *Primary Concern*  
-    - How to use two latent vectors efficiently??  (5120 + 5120latent space)      
+    - How to use two latent vectors efficiently??  (5120 + 5120 latent space)      
            Images: Simply Concatenate features as in Lookcloser   
            Reward:  
              
     - Point1: Do I have to add noisy dataset??  
-    - Point2: How much offline demo data??   
-    - Point3: Add robot state information  
-       
-        
-6. *If* success rate is satisfactory, Go for online fine-tuning as well     
-   *If not* = Need to also implement online fine-tuning and check the results again      
-    
-7. As additional process try images with lower-dimensional size (64x64 or 48x48 as lowest possibility)  
+    - Point2: How much offline demo data = 1000 as standard     
+    - Point3: Add robot state information        
+      
+     
+7. As additional process try images with lower-dimensional size (64x64 or 48x48 as lowest possibility = too much time consuming)   
   
 8. Edited rollout functions and goal sampling part and diagnostics   
       -> Now need to edit for murm in codes + online tuning codes + murm_env_m3 edit   
