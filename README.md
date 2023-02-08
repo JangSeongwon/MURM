@@ -89,11 +89,10 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/6 Analysis   
+2/8 Analysis   
 
-Based on the paper, first try adding exploration 
-Also check replay buffer (HER algorithm)  
-Next, try adding noisy demos + changing goal image itself   
+Training time offline = maybe 300 (14hours)  
+Training time online = maybe 250 (??)   
 
 1. Collecting demo data with three computers    
 => OKAY  
