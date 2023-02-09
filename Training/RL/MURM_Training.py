@@ -30,26 +30,25 @@ flags.DEFINE_bool('script', False, '')
 flags.DEFINE_multi_string('arg_binding', None, 'Variant binding to pass through.')
 FLAGS = flags.FLAGS
 
-
 def get_paths():
     data_path = '/media/jang/jang/0ubuntu/'
     demo_paths = [
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_1.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_2.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_3.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_4.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_5.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_6.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_7.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_8.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_1.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_2.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_3.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_4.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_5.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_6.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_7.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/Singleview_demos_100_8.pkl', obs_dict=True, is_demo=True, use_latents=True),
 
                 # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_1.pkl', obs_dict=True, is_demo=True, use_latents=True),
                 # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_2.pkl', obs_dict=True, is_demo=True, use_latents=True),
                 # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_3.pkl', obs_dict=True, is_demo=True, use_latents=True),
                 # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/Singleview_demos_100_4.pkl', obs_dict=True, is_demo=True, use_latents=True),
 
-                #   dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/1313.pkl', obs_dict=True, is_demo=True, use_latents=True),
-                #   dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/1414.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                  dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_state_as_robot/1313.pkl', obs_dict=True, is_demo=True, use_latents=True),
+                  # dict(path=data_path + 'demos_dataset/SingleView/demo_singleview_final/1414.pkl', obs_dict=True, is_demo=True, use_latents=True),
                   ]
     logging.info('data_path: %s', data_path)
     return data_path, demo_paths
@@ -60,7 +59,7 @@ def vqvae_assign(data_path):
 
 def view_assign():
     #TODO: Assign camera view
-    camera = 1
+    camera = 0
     if camera == 0:
         viewpoint = 'murm'
     elif camera == 1:
@@ -81,7 +80,6 @@ def env_class_assign():
 def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
 
     default_variant = dict(
-        # TODO: VQVAE Path
         pretrained_vqvae_path=vqvae_path,
         method_name='murm',
         MURM_view=viewpoint,
@@ -128,17 +126,15 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
             max_value=None,
         ),
 
-        save_video=True,
-
         max_path_length=400,
         algo_kwargs=dict(
             batch_size=256,
-            start_epoch=-200,  # offline epochs
-            num_epochs=251,  # online epochs
+            start_epoch=-500,
+            num_epochs=551,
 
-            #TODO: EPoch steps Fix
+            #TODO: Epoch steps Fix
             num_eval_steps_per_epoch=2000, #TODO: 2000: 400 per episode -> so 5 times eval
-            num_expl_steps_per_train_loop=2000, #2000
+            num_expl_steps_per_train_loop=2000,
             num_trains_per_train_loop=1000,
             num_online_trains_per_train_loop=2000,
             min_num_steps_before_training=4000,
@@ -162,6 +158,7 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
         reward_kwargs=dict(
             reward_type='sparse',
             epsilon=2.0,
+            epsilon_murm=1.0,
         ),
 
         online_offline_split_replay_buffer_kwargs=dict(
@@ -190,20 +187,20 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
         observation_keys=['latent_observation'],
         goal_key='latent_desired_goal',
 
-        # expl_save_video_kwargs=dict(
-        #     save_video_period=25,
-        #     pad_color=0,
-        # ),
-
+        save_video=True,
+        expl_save_video_kwargs=dict(
+            save_video_period=10,
+            pad_color=0,
+        ),
         eval_save_video_kwargs=dict(
-            save_video_period=25,
+            save_video_period=10,
             pad_color=0,
         ),
 
-        reset_keys_map=dict(
-            image_global_observation='initial_latent_state',
-            image_active_observation='initial_latent_state_active',
-        ),
+        # reset_keys_map=dict(
+        #     image_global_observation='initial_latent_state',
+        #     image_active_observation='initial_latent_state_active',
+        # ),
 
         path_loader_class=EncoderDictToMDPPathLoader,
         path_loader_kwargs=dict(
@@ -226,55 +223,11 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
 
         load_demos=True,
 
-        evaluation_goal_sampling_mode='given_latent', #'presampled_images',
+        evaluation_goal_sampling_mode='given_latent',
         exploration_goal_sampling_mode='given_latent',
-        training_goal_sampling_mode='given_latent', #'presample_latents',
-
-        # presampled_goal_kwargs=dict(
-        #     eval_goals='',  # HERE
-        #     eval_goals_kwargs={},
-        #     expl_goals='',
-        #     expl_goals_kwargs={},
-        #     training_goals='',
-        #     training_goals_kwargs={},
-        # ),
-
-        use_expl_planner=False,
-        # expl_planner_type='hierarchical',
-        # expl_planner_kwargs=dict(
-        #     cost_mode='l2_vf_ptp',
-        #     prior_weight=0.01,
-        #     values_weight=0.001,
-        #     buffer_size=1000,
-        # ),
-        # expl_planner_scripted_goals=None,
-        # expl_contextual_env_kwargs=dict(
-        #     num_planning_steps=8,
-        #     fraction_planning=1.0,
-        #     subgoal_timeout=30,
-        #     subgoal_reaching_thresh=2.0,
-        #     mode='o',
-        # ),
-
-        # use_eval_planner=False,
-        # eval_planner_type='hierarchical',
-        # eval_planner_kwargs=dict(
-        #     cost_mode='l2_vf_ptp',
-        #     prior_weight=0.01,
-        #     values_weight=0.001,
-        #     buffer_size=1000,
-        # ),
-        # eval_planner_scripted_goals=None,
-        # eval_contextual_env_kwargs=dict(
-        #     num_planning_steps=8,
-        #     fraction_planning=1.0,
-        #     subgoal_timeout=30,
-        #     subgoal_reaching_thresh=2.0,
-        #     mode='o',
-        # ),
+        training_goal_sampling_mode='given_latent',
 
         scripted_goals=None,
-
         # expl_reset_interval=0,
 
         launcher_config=dict(
@@ -289,11 +242,12 @@ def get_default_variant(data_path, demo_paths, vqvae_path, viewpoint):
         trainer_type='iql',
         network_version=None,
 
-        pretrained_rl_path='',
+        pretrained_rl_path='', #'/media/jang/jang/0ubuntu/pretrained_rl/it0.pt',
         eval_seeds=14,
         # num_demos=20,
         num_video_columns=5,
         save_paths=False,
+
     )
 
     return default_variant
@@ -309,9 +263,9 @@ def get_search_space():
 
         # Load up existing policy/q-network/value network vs train a new one
         'use_pretrained_rl_path': [False],
-        # Negative epochs are pretraining.
+
         # For only finetuning, set start_epoch=0.
-        'algo_kwargs.start_epoch': [-100],
+        # 'algo_kwargs.start_epoch': [0],
 
         'trainer_kwargs.bc': [False],  # Run BC experiment
         # Reset environment every 'reset_interval' episodes
@@ -373,23 +327,6 @@ def process_variant(variant, data_path, env_class):  # NOQA
     else:
         eval_seed_str = ''
 
-    # if variant['expl_planner_type'] == 'scripted':
-    #     eval_goals = os.path.join(
-    #         data_path,
-    #         f'{full_open_close_str}{env_type}_scripted_goals{eval_seed_str}.pkl')  # NOQA
-    # else:
-    eval_goals = os.path.join(
-        data_path,
-        f'{full_open_close_str}{env_type}_goals{eval_seed_str}.pkl')
-
-    # if variant['expl_planner_scripted_goals'] is not None:
-    #     variant['expl_planner_scripted_goals'] = os.path.join(
-    #         data_path, variant['expl_planner_scripted_goals'])
-
-    # if variant['eval_planner_scripted_goals'] is not None:
-    #     variant['eval_planner_scripted_goals'] = os.path.join(
-    #         data_path, variant['eval_planner_scripted_goals'])
-
     ########################################
     # Goal sampling modes.
     ########################################
@@ -412,16 +349,16 @@ def process_variant(variant, data_path, env_class):  # NOQA
         # variant['presampled_goal_kwargs']['expl_goals'] = eval_goals
         # variant['presampled_goal_kwargs']['training_goals'] = eval_goals
 
-    if variant['only_not_done_goals']:
-        _old_mode = 'presampled_images'
-        _new_mode = 'not_done_presampled_images'
-
-        if variant['training_goal_sampling_mode'] == _old_mode:
-            variant['training_goal_sampling_mode'] = _new_mode
-        if variant['exploration_goal_sampling_mode'] == _old_mode:
-            variant['exploration_goal_sampling_mode'] = _new_mode
-        if variant['evaluation_goal_sampling_mode'] == _old_mode:
-            variant['evaluation_goal_sampling_mode'] = _new_mode
+    # if variant['only_not_done_goals']:
+    #     _old_mode = 'presampled_images'
+    #     _new_mode = 'not_done_presampled_images'
+    #
+    #     if variant['training_goal_sampling_mode'] == _old_mode:
+    #         variant['training_goal_sampling_mode'] = _new_mode
+    #     if variant['exploration_goal_sampling_mode'] == _old_mode:
+    #         variant['exploration_goal_sampling_mode'] = _new_mode
+    #     if variant['evaluation_goal_sampling_mode'] == _old_mode:
+    #         variant['evaluation_goal_sampling_mode'] = _new_mode
 
     ########################################
     # Environments.
@@ -447,10 +384,6 @@ def process_variant(variant, data_path, env_class):  # NOQA
         variant['trainer_kwargs']['max_value'] = 0.0
         variant['trainer_kwargs']['min_value'] = -1. / (
             1. - variant['trainer_kwargs']['discount'])
-
-    # if variant['expl_planner_type'] != 'hierarchical':
-    #     variant['pretrained_vae_path'] = os.path.join(
-    #         variant['pretrained_vae_path'], 'dt15')
 
     if 'std' in variant['policy_kwargs']:
         if variant['policy_kwargs']['std'] <= 0:
