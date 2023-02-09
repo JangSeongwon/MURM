@@ -17,8 +17,7 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
             demo_train_buffer,
             demo_test_buffer,
             model=None,
-            model_global=None,
-            model_active=None,
+            model_murm=None,
             model_path=None,
             reward_fn=None,
             compare_reward_fn=None,
@@ -77,8 +76,8 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
         else:
             assert model_path is None
             if MURM_view == 'murm':
-                self.model_global = model_global
-                self.model_active = model_active
+                self.model = model
+                self.model_murm = model_murm
             else:
                 self.model = model
                 # print(self.model)
@@ -107,20 +106,20 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
             images_active = np.stack([observation[i]['image_active_observation']
                               for i in range(len(observation))])
             latents_global = self.model['vqvae'].encode_np(images_global)
-            latents_active = self.model['vqvae'].encode_np(images_active)
-            print('LATENTS G/A', latents_global.shape, latents_active.shape)
+            latents_active = self.model_murm['vqvae'].encode_np(images_active)
+            # print('LATENTS G/A', latents_global.shape, latents_active.shape)
 
         elif self.murm == 'g':
             images = np.stack([observation[i]['image_global_observation']
                                       for i in range(len(observation))])
             latents = self.model['vqvae'].encode_np(images)
-            print('LATENTS G', latents.shape)
+            # print('LATENTS G', latents.shape)
 
         elif self.murm == 'a':
             images = np.stack([observation[i]['image_active_observation']
                                       for i in range(len(observation))])
             latents = self.model['vqvae'].encode_np(images)
-            print('LATENTS A', latents.shape)
+            # print('LATENTS A', latents.shape)
 
         else:
             exit()
@@ -131,8 +130,8 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                 # observation[i]['initial_latent_state_active'] = latents_active[0]
                 observation[i]['latent_observation'] = latents_global[i]
                 observation[i]['latent_desired_goal'] = latents_global[-1]
-                observation[i]['latent_observation_active'] = latents_active[i]
-                observation[i]['latent_desired_goal_active'] = latents_active[-1]
+                observation[i]['latent_observation_murm'] = latents_active[i]
+                observation[i]['latent_desired_goal_murm'] = latents_active[-1]
 
             elif self.murm == 'g':
                 observation[i]['latent_observation'] = latents[i]
@@ -176,8 +175,6 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
                   obs_dict=None,
                   use_latents=True,
                   use_gripper_obs=False):
-
-        # print('Correct Latent Changing')
 
         # Filter data #
         if not self.data_filter_fn(path):
@@ -248,13 +245,13 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
         self.demo_trajectory_rewards.append(rewards)
         path = path_builder.get_all_stacked()
         replay_buffer.add_path(path)
-        print('length of obs and action', len(
-            path['observations']), len(path['actions']))
+        # print('length of obs and action', len(
+        #     path['observations']), len(path['actions']))
         # print('actions', np.min(path['actions']), np.max(path['actions'])) #TODO: Due to Gripper: -1, 1 are min and max
         # print('rewards', np.min(rewards), np.max(rewards))
         # print('path sum rewards', sum(rewards), len(rewards))
         if self.compare_reward_fn:
-            print('Min / Max rewards',
-                  np.min(compare_rewards), np.max(compare_rewards))
+            # print('Min / Max rewards',
+            #       np.min(compare_rewards), np.max(compare_rewards))
             print('Sum rewards',
                   sum(compare_rewards), len(compare_rewards))
