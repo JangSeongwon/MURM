@@ -21,6 +21,9 @@ def train_vae(variant, return_data=False):
     beta = variant["beta"]
     representation_size = variant.get("representation_size",
         variant.get("latent_sizes", variant.get("embedding_dim", None)))
+
+    print('Representation Size', representation_size)
+
     variant['algo_kwargs']['num_epochs'] = variant['num_epochs']
     generate_vae_dataset_fctn = variant.get('generate_vae_data_fctn',
                                             generate_vae_dataset)
@@ -46,38 +49,38 @@ def train_vae(variant, return_data=False):
         decoder_activation = torch.nn.Sigmoid()
     else:
         decoder_activation = identity
+
     architecture = variant['vae_kwargs'].get('architecture', None)
-    if not architecture and variant.get('imsize') == 84:
-        architecture = conv_vae.imsize84_default_architecture
-    elif not architecture and variant.get('imsize') == 48:
-        architecture = conv_vae.imsize48_default_architecture
     variant['vae_kwargs']['architecture'] = architecture
     variant['vae_kwargs']['imsize'] = variant.get('imsize')
+    img_size1 = variant.get('imsize')
+    print('img_size',img_size1)
 
-    vae_class = variant.get('vae_class', ConvVAE)
-    model = vae_class(representation_size, decoder_output_activation=decoder_activation, **variant['vae_kwargs'])
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print('GPU Checking in Trainer Class', device)
+
+    vae_class = variant.get('vae_class')
+    model = vae_class(representation_size, device=device, decoder_output_activation=decoder_activation, **variant['vae_kwargs'])
 
     model.to(ptu.device)
 
     #print('model currently vqvae', model)
-    vae_trainer_class = variant.get('vae_trainer_class', ConvVAETrainer)
+    vae_trainer_class = variant.get('vae_trainer_class')
     #print('VAE class ', vae_trainer_class)
 
     trainer = vae_trainer_class(model, beta=beta,
                        beta_schedule=beta_schedule,
                        **variant['algo_kwargs'])
 
-    save_period = variant['save_period']
-
     dump_skew_debug_plots = variant.get('dump_skew_debug_plots', False)
 
     #######################################  TRAINING PROCESS ############################################
 
     for epoch in range(variant['num_epochs']):
-        print('epoch & save_period',epoch, save_period)
+        print('epoch & save_period', epoch)
         #IMAGE SHOWING PROCESS
         # should_save_imgs = (epoch % save_period == 0)
-        should_save_imgs = (epoch % 1 == 0)
+        should_save_imgs = (epoch % 10 == 0)
         trainer.train_epoch(epoch, train_dataset)
 
         print('Train Epoch GO')
