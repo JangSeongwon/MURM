@@ -288,15 +288,17 @@ class murmlatentgoalspace(DictDistribution):
         self.dist = dist
         self.representation_size = rep
         self.murm = murm_view
-        self.goal_key = 'latent_desired_goal',
-        self.murm_goal_adding_key = 'latent_desired_goal_active',
+        self.goal_key = 'latent_desired_goal'
+        self.murm_goal_adding_key = 'latent_desired_goal_murm'
         latent_space = Box(
             -10 * np.ones(self.representation_size),
             10 * np.ones(self.representation_size),
-            dtype=np.float32,
-        )
-        self._spaces[key] = latent_space
-
+            dtype=np.float32, )
+        if self.murm == 'murm':
+            self._spaces[key] = latent_space
+            self._spaces[self.murm_goal_adding_key] = latent_space
+        else:
+            self._spaces[key] = latent_space
 
     def sample(self, batch_size: int, context=None):
 
@@ -307,23 +309,23 @@ class murmlatentgoalspace(DictDistribution):
 
             sample1 = ptu.get_numpy(self.model.encode(goal_global))
             sample2 = ptu.get_numpy(self.model.encode(goal_active))
-            sample = []
-            sample.append(self.goal_key)
-            sample.append(self.murm_goal_adding_key)
-            print('latent distribution sample format', sample)
+            sample = {}
             sample[self.goal_key] = sample1
             sample[self.murm_goal_adding_key] = sample2
-            print('latent distribution after assigning goals', sample)
+            # print('latent distribution after assigning goals', sample)
 
         elif self.murm == 'g':
+            # print('Global Goal')
             goal_global, goal_active = self.env.run_for_goal()
             goal_global = ptu.from_numpy(goal_global.transpose().flatten() / 255.0)
 
             # print('goal global at first', goal_global.shape)
             sample = ptu.get_numpy(self.model.encode(goal_global))
             # print('goal global after vqvae', sample.shape)
+            # print('latent distribution after assigning goals', sample)
 
         elif self.murm == 'a':
+            # print('Active Goal')
             goal_global, goal_active = self.env.run_for_goal()
             goal_active = ptu.from_numpy(goal_active.transpose().flatten() / 255.0)
 
