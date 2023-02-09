@@ -65,7 +65,7 @@ class BatchRLAlgorithm(BaseRLAlgorithm):
             return OrderedDict(), done
 
         if self.epoch == 0 and self.min_num_steps_before_training > 0:
-            print('Exploration Start')
+            print('Exploration Data Initial Data Collecting = +10')
             init_expl_paths = self.expl_data_collector.collect_new_paths(
                 self.max_path_length,
                 self.min_num_steps_before_training,
@@ -93,7 +93,7 @@ class BatchRLAlgorithm(BaseRLAlgorithm):
                 if self.expl_data_collector is not None:
                     timer.start_timer('exploration sampling', unique=False)
                     if self.epoch >= 0 or self.epoch % self._offline_expl_epoch_freq == 0:
-                        print('Exploration Sampling')
+                        print('Exploration Data Collecting = +5')
                         new_expl_paths = self.expl_data_collector.collect_new_paths(
                             self.max_path_length,
                             self.num_expl_steps_per_train_loop,
@@ -103,8 +103,9 @@ class BatchRLAlgorithm(BaseRLAlgorithm):
 
                     timer.start_timer(
                         'replay buffer data storing', unique=False)
-                    # if not self.offline_rl:
-                    #     self.replay_buffer.add_paths(new_expl_paths)
+                    if not self.offline_rl:
+                        print('Adding Exp new data')
+                        self.replay_buffer.add_paths(new_expl_paths)
                     timer.stop_timer('replay buffer data storing')
 
 
@@ -121,14 +122,13 @@ class BatchRLAlgorithm(BaseRLAlgorithm):
                     # print('check batch size here', self.batch_size)
                     train_data = self.replay_buffer.random_batch(
                         batch_size=self.batch_size)
-                    print('train data', train_data)
+                    # print('train data', train_data)
                     self.trainer.train(train_data) #TODO: To torch_rl_algorithm
                 timer.stop_timer('training')
 
                 #TODO: Evaluation 10 times as default here
                 if self.eval_replay_buffer is not None:
                     print('Evaluation', self.num_evals_per_train_loop)
-
                     timer.start_timer('validation', unique=False)
                     num_evals = self.num_evals_per_train_loop
                     for _ in range(num_evals):
