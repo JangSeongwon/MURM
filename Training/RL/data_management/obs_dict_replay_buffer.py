@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 from gym.spaces import Dict, Discrete
-
+import torch
 from rlkit.data_management.replay_buffer import ReplayBuffer
 import rlkit.data_management.images as image_np
 
@@ -53,7 +53,10 @@ class ObsDictReplayBuffer(ReplayBuffer):
         if internal_keys is None:
             internal_keys = []
 
-        print('KEYS KNOW', ob_keys_to_save, 'hh', observation_keys, internal_keys)
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = device
+
+        print('Keys Saved:', ob_keys_to_save, 'Keys Used to Train: ', observation_keys, 'internal: ', internal_keys)
         self.internal_keys = internal_keys
         assert isinstance(env.observation_space, Dict)
         self.max_size = max_size
@@ -77,7 +80,9 @@ class ObsDictReplayBuffer(ReplayBuffer):
         self._obs = {}
         self._next_obs = {}
         self.ob_spaces = self.env.observation_space.spaces
+        # print('spaces', self.ob_spaces)
         for key in observation_keys: #latent observation adding if none
+            # print('error', key)
             if key not in ob_keys_to_save:
                 ob_keys_to_save.append(key)
 
@@ -165,12 +170,13 @@ class ObsDictReplayBuffer(ReplayBuffer):
             self._actions[slc] = actions
             self._terminals[slc] = terminals
             self._rewards[slc] = rewards
-            print('key check add path internal / keys to save', self.internal_keys, self.ob_keys_to_save)
-            print('obs_dict_replay_buffer obs keys', obs)
+            # print('key check add path internal / keys to save', self.internal_keys, self.ob_keys_to_save)
+            # print('obs_dict_replay_buffer obs keys', obs)
             # print('Being stored obs stacking with 274', self._top, '///', self._obs)
 
-            for a in self._obs.values():
-                print('shape curious', a.shape)
+            # for a in self._obs.values():
+            #     print('shape curious / shouldnt we remove initial state for RAM', a.shape)
+                # print('obs_dict_Replay_Buffer')
 
             for key in self.ob_keys_to_save + self.internal_keys:
                 self._obs[key][slc] = obs[key]
