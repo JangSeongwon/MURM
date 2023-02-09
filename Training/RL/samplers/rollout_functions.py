@@ -37,10 +37,10 @@ def rollout(
 
     '''print('AGENT == GaussianPolicy', agent)'''
     agent.reset()
-    print('Right before env reset from Contextual env in *rollout function*')
-    o = env.reset() # Contextual env: def-reset()
-
-    print('Initial o from contextual env', o)
+    # print('Right before env reset from Contextual env in *rollout function*')
+    o = env.reset() #Contextual env: def-reset()
+    print('Collecting in Rollouts')
+    # print('Initial o from contextual env in rollout', o)
 
     if reset_callback:
         print('NO')
@@ -81,6 +81,10 @@ def rollout(
         if done:
             break
         o = next_o
+
+        # if path_length == 273:
+        #     see = env.checking_final_pos_obj()
+        #     print('checking final obj pos',see)
     actions = np.array(actions)
 
     if len(actions.shape) == 1:
