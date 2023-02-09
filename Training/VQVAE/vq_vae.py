@@ -16,8 +16,6 @@ import torch.nn.functional as F
 from torch.distributions.normal import Normal
 from torch.distributions import kl_divergence
 
-from rlkit.torch.vae.MURM_modules import all_reduce as murm_m1
-
 class Residual(nn.Module):
     def __init__(self, in_channels, num_hiddens, num_residual_hiddens):
         super(Residual, self).__init__()
@@ -75,6 +73,7 @@ class Encoder1(nn.Module):
             num_residual_hiddens=num_residual_hiddens)
 
     def forward(self, inputs, ):
+
         x = self._conv_1(inputs)
         x = F.relu(x)
 
@@ -260,247 +259,6 @@ class VectorQuantizerEMA(nn.Module):
         return loss, quantized.permute(0, 3, 1,
             2).contiguous(), perplexity, encoding_indices
 
-#
-# class Decoder(nn.Module):
-#     def __init__(
-#         self, in_channel, out_channel, channel, n_res_block, n_res_channel, stride
-#     ):
-#         super().__init__()
-#
-#         blocks = [nn.Conv2d(in_channel, channel, 3, padding=1)]
-#
-#         for i in range(n_res_block):
-#             blocks.append(ResBlock(channel, n_res_channel))
-#
-#         blocks.append(nn.ReLU(inplace=True))
-#
-#         if stride == 4:
-#             blocks.extend(
-#                 [
-#                     nn.ConvTranspose2d(channel, channel // 2, 4, stride=2, padding=1),
-#                     nn.ReLU(inplace=True),
-#                     nn.ConvTranspose2d(
-#                         channel // 2, out_channel, 4, stride=2, padding=1
-#                     ),
-#                 ]
-#             )
-#
-#         elif stride == 2:
-#             blocks.append(
-#                 nn.ConvTranspose2d(channel, out_channel, 4, stride=2, padding=1)
-#             )
-#
-#         self.blocks = nn.Sequential(*blocks)
-#
-#     def forward(self, input):
-#         return self.blocks(input)
-#
-#
-# class Encoder(nn.Module):
-#     def __init__(self, in_channel, channel, n_res_block, n_res_channel, stride):
-#         super().__init__()
-#
-#         if stride == 4:
-#             blocks = [
-#                 nn.Conv2d(in_channel, channel // 2, 4, stride=2, padding=1),
-#                 nn.ReLU(inplace=True),
-#                 nn.Conv2d(channel // 2, channel, 4, stride=2, padding=1),
-#                 nn.ReLU(inplace=True),
-#                 nn.Conv2d(channel, channel, 3, padding=1),
-#             ]
-#
-#         elif stride == 2:
-#             blocks = [
-#                 nn.Conv2d(in_channel, channel // 2, 4, stride=2, padding=1),
-#                 nn.ReLU(inplace=True),
-#                 nn.Conv2d(channel // 2, channel, 3, padding=1),
-#             ]
-#
-#         for i in range(n_res_block):
-#             blocks.append(ResBlock(channel, n_res_channel))
-#
-#         blocks.append(nn.ReLU(inplace=True))
-#
-#         self.blocks = nn.Sequential(*blocks)
-#
-#     def forward(self, input):
-#         return self.blocks(input)
-#
-#
-# class ResBlock(nn.Module):
-#     def __init__(self, in_channel, channel):
-#         super().__init__()
-#
-#         self.conv = nn.Sequential(
-#             nn.ReLU(),
-#             nn.Conv2d(in_channel, channel, 3, padding=1),
-#             nn.ReLU(inplace=True),
-#             nn.Conv2d(channel, in_channel, 1),
-#         )
-#
-#     def forward(self, input):
-#         out = self.conv(input)
-#         out += input
-#
-#         return out
-#
-#
-# class Quantize(nn.Module):
-#     def __init__(self, dim, n_embed, decay=0.99, eps=1e-5):
-#         super().__init__()
-#
-#         self.dim = dim
-#         self.n_embed = n_embed
-#         self.decay = decay
-#         self.eps = eps
-#
-#         embed = torch.randn(dim, n_embed)
-#         self.register_buffer("embed", embed)
-#         self.register_buffer("cluster_size", torch.zeros(n_embed))
-#         self.register_buffer("embed_avg", embed.clone())
-#
-#     def forward(self, input):
-#
-#         #input = input.permute(0, 2, 3, 1).contiguous()
-#
-#         flatten = input.reshape(-1, self.dim)
-#         dist = (
-#             flatten.pow(2).sum(1, keepdim=True)
-#             - 2 * flatten @ self.embed
-#             + self.embed.pow(2).sum(0, keepdim=True)
-#         )
-#         _, embed_ind = (-dist).max(1)
-#         embed_onehot = F.one_hot(embed_ind, self.n_embed).type(flatten.dtype)
-#         embed_ind = embed_ind.view(*input.shape[:-1])
-#         quantize = self.embed_code(embed_ind)
-#
-#         if self.training:
-#             embed_onehot_sum = embed_onehot.sum(0)
-#             embed_sum = flatten.transpose(0, 1) @ embed_onehot
-#
-#             murm_m1(embed_onehot_sum)
-#             murm_m1(embed_sum)
-#
-#             self.cluster_size.data.mul_(self.decay).add_(
-#                 embed_onehot_sum, alpha=1 - self.decay
-#             )
-#             self.embed_avg.data.mul_(self.decay).add_(embed_sum, alpha=1 - self.decay)
-#             n = self.cluster_size.sum()
-#             cluster_size = (
-#                 (self.cluster_size + self.eps) / (n + self.n_embed * self.eps) * n
-#             )
-#             embed_normalized = self.embed_avg / cluster_size.unsqueeze(0)
-#             self.embed.data.copy_(embed_normalized)
-#
-#         diff = (quantize.detach() - input).pow(2).mean()
-#         quantize = input + (quantize - input).detach()
-#
-#         return quantize, diff, embed_ind
-#
-#     def embed_code(self, embed_id):
-#         return F.embedding(embed_id, self.embed.transpose(0, 1))
-
-#
-# class VQVAE2(nn.Module):
-#     def __init__(
-#             self,
-#             embedding_dim=64,
-#             input_channels=3,
-#             channel=128,
-#             n_res_block=2,
-#             n_res_channel=32,
-#
-#             n_embed=512,
-#             decay=0.99,
-#             architecture=None,
-#             imsize=128,
-#
-#             decoder_output_activation=None,):
-#
-#         super(VQVAE2, self).__init__()
-#         self.input_channels = input_channels
-#         self.imsize = imsize
-#
-#         self.imlength = imsize * imsize * input_channels
-#         self.embedding_dim = embedding_dim
-#         self.representation_size = self.embedding_dim * self.embedding_dim
-#         print('representation size CLASS VQVAE2', self.representation_size)
-#
-#
-#         self.enc_b = Encoder(self.input_channels, channel, n_res_block, n_res_channel, stride=4)
-#         self.enc_t = Encoder(channel, channel, n_res_block, n_res_channel, stride=2)
-#         self.quantize_conv_t = nn.Conv2d(channel, embedding_dim, 1)
-#         self.quantize_t = Quantize(embedding_dim, n_embed)
-#         self.dec_t = Decoder(
-#             embedding_dim, embedding_dim, channel, n_res_block, n_res_channel, stride=2
-#         )
-#         self.quantize_conv_b = nn.Conv2d(embedding_dim + channel, embedding_dim, 1)
-#         self.quantize_b = Quantize(embedding_dim, n_embed)
-#         self.upsample_t = nn.ConvTranspose2d(
-#             embedding_dim, embedding_dim, 4, stride=2, padding=1
-#         )
-#         self.dec = Decoder(
-#             embedding_dim + embedding_dim,
-#             self.input_channels,
-#             channel,
-#             n_res_block,
-#             n_res_channel,
-#             stride=4,
-#         )
-#
-#     def compute_loss(self, inputs):
-#         inputs = inputs.view(-1,
-#             self.input_channels,
-#             self.imsize,
-#             self.imsize)
-#
-#         quant_t, quant_b, vq_loss, _, _ = self.encode(inputs)
-#
-#         recon = self.decode(quant_t, quant_b)
-#         recon_error = F.mse_loss(recon, inputs)
-#
-#         perplexity = 0
-#
-#         return vq_loss, recon, recon_error
-#
-#     def encode(self, input):
-#         print('Checking VQVAE2')
-#         enc_b = self.enc_b(input)
-#         enc_t = self.enc_t(enc_b)
-#
-#         quant_t = self.quantize_conv_t(enc_t).permute(0, 2, 3, 1)
-#         quant_t, diff_t, id_t = self.quantize_t(quant_t)
-#         quant_t = quant_t.permute(0, 3, 1, 2)
-#         diff_t = diff_t.unsqueeze(0)
-#
-#         dec_t = self.dec_t(quant_t)
-#         enc_b = torch.cat([dec_t, enc_b], 1)
-#
-#         quant_b = self.quantize_conv_b(enc_b).permute(0, 2, 3, 1)
-#         quant_b, diff_b, id_b = self.quantize_b(quant_b)
-#         quant_b = quant_b.permute(0, 3, 1, 2)
-#         diff_b = diff_b.unsqueeze(0)
-#
-#         return quant_t, quant_b, diff_t + diff_b, id_t, id_b
-#
-#     def decode(self, quant_t, quant_b):
-#         upsample_t = self.upsample_t(quant_t)
-#         quant = torch.cat([upsample_t, quant_b], 1)
-#         dec = self.dec(quant)
-#
-#         return dec
-#
-#     def decode_code(self, code_t, code_b):
-#         quant_t = self.quantize_t.embed_code(code_t)
-#         quant_t = quant_t.permute(0, 3, 1, 2)
-#         quant_b = self.quantize_b.embed_code(code_b)
-#         quant_b = quant_b.permute(0, 3, 1, 2)
-#
-#         dec = self.decode(quant_t, quant_b)
-#
-#         return dec
-
-
 class VQ_VAE(nn.Module):
     def __init__(
             self,
@@ -516,7 +274,8 @@ class VQ_VAE(nn.Module):
             imsize=128,
             decay=0.0):
         super(VQ_VAE, self).__init__()
-        print('VQVAE Original')
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        print('VQVAE running with device:', device)
         self.imsize = imsize
         self.embedding_dim = embedding_dim
         self.pixel_cnn = None
@@ -526,25 +285,25 @@ class VQ_VAE(nn.Module):
 
         self._encoder = Encoder1(input_channels, num_hiddens,
             num_residual_layers,
-            num_residual_hiddens)
+            num_residual_hiddens).to(device)
 
         self._pre_vq_conv = nn.Conv2d(in_channels=num_hiddens,
             out_channels=self.embedding_dim,
             kernel_size=1,
-            stride=1)
+            stride=1).to(device)
 
         if decay > 0.0:
             self._vq_vae = VectorQuantizerEMA(num_embeddings,
                 self.embedding_dim,
-                commitment_cost, decay)
+                commitment_cost, decay).to(device)
         else:
             self._vq_vae = VectorQuantizer(num_embeddings, self.embedding_dim,
-                commitment_cost)
+                commitment_cost).to(device)
 
         self._decoder = Decoder1(self.embedding_dim,
             num_hiddens,
             num_residual_layers,
-            num_residual_hiddens)
+            num_residual_hiddens).to(device)
 
         # Calculate latent sizes
         if imsize == 32:
