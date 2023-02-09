@@ -98,6 +98,7 @@ class RIGVideoSaveFunction:
                  data_collector,
                  tag,
                  save_video_period,
+                 video=None,
                  # image_goal_key=None,
                  decode_image_goal_key=None,
                  reconstruction_key=None,
@@ -109,6 +110,8 @@ class RIGVideoSaveFunction:
                  final_image_goal_key='final_goal',
                  **kwargs
                  ):
+        self.video = video
+        print('exp / eval video', self.video)
         self.model = model
         self.data_collector = data_collector
         self.tag = tag
@@ -161,6 +164,7 @@ class RIGVideoSaveFunction:
             dump_paths(None,
                        filename,
                        paths,
+                       self.video,
                        self.keys,
                        self.epoch,
                        **self.dump_video_kwargs,
@@ -332,6 +336,7 @@ def dump_paths(
         env,
         filename,
         paths,
+        video,
         keys,
         epoch,
         rows=3,
@@ -339,6 +344,7 @@ def dump_paths(
         do_timer=True,
         dirname_to_save_images=True,
         subdirname='rollouts/',
+        subdirname_exp='rollouts_exp/',
         imsize=128,
         imwidth=None,
         imheight=None,
@@ -409,7 +415,11 @@ def dump_paths(
 
         if dirname_to_save_images:
             a = logger.get_snapshot_dir()
-            rollout_dir = osp.join(a, subdirname, '{epoch}'.format(epoch=epoch))
+            print('exp 0/ eval 1', video)
+            if video == 0:
+                rollout_dir = osp.join(a, subdirname_exp, '{epoch}'.format(epoch=epoch))
+            else:
+                rollout_dir = osp.join(a, subdirname, '{epoch}'.format(epoch=epoch))
             os.makedirs(rollout_dir, exist_ok=True)
 
             # rollout_frames = frames[-1:]
@@ -418,7 +428,7 @@ def dump_paths(
             # goal_img = np.array(rollout_frames[0][:imsize, :imsize, :])
             # imageio.imwrite(rollout_dir + '/goal.png', goal_img)
             if len(frames) == 2000:
-                for j in range(0, len(frames), 5):
+                for j in range(0, len(frames), 20):
                     img = np.array(frames[j][:imsize, :imsize, :])
                     imageio.imwrite(rollout_dir + '/' + str(j) + '.png', img)
 
