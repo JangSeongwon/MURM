@@ -69,8 +69,8 @@ class EncoderWrappedEnv(ProxyEnv):
         spaces = self.wrapped_env.observation_space.spaces
         for value in self.step_keys_map.values():
             spaces[value] = latent_space
-        for value in self.reset_keys_map.values():
-            spaces[value] = latent_space
+        # for value in self.reset_keys_map.values():
+        #     spaces[value] = latent_space
 
         self.observation_space = Dict(spaces)
         self.reset_obs = {}
@@ -85,24 +85,24 @@ class EncoderWrappedEnv(ProxyEnv):
         self.model.eval()
         for key in self.step_keys_map:
             value = self.step_keys_map[key]
-            # print('keys in step keys', value)
+            # print('keys in step keys', value, key)
             obs[value] = self.model.encode_one_np(obs[key])
-            # del obs[key]
-            # del obs['image_active_observation']
-        obs = {**obs, **self.reset_obs}
+        del obs['image_active_observation'] #Global Needed for video
+
+        obs = {**obs}
+        # obs = {**obs, **self.reset_obs} #original with initial
         # print('obs in steps', obs)
         # print('lets check step key left', self.step_keys_map)
-
         return obs
 
     def reset(self): #TODO: Giving obs to contextual env
         self.model.eval()
         obs = self.wrapped_env.reset()
         # print('lets check reset key left', self.reset_keys_map)
-        for key in self.reset_keys_map:
-            value = self.reset_keys_map[key]
-            # print('reset keys = initial latent state + initial latent state active', value)
-            self.reset_obs[value] = self.model.encode_one_np(obs[key])
+        # for key in self.reset_keys_map:
+        #     value = self.reset_keys_map[key]
+        #     print('reset keys = initial latent state + initial latent state active', value)
+        #     self.reset_obs[value] = self.model.encode_one_np(obs[key])
         obs = self._update_obs(obs)
         return obs
 
@@ -110,92 +110,6 @@ class EncoderWrappedEnv(ProxyEnv):
         obs = self.wrapped_env.get_observation()
         self._update_obs(obs)
         return obs
-
-
-
-class PresamplingEncoderWrappedEnv(ProxyEnv):
-    def __init__(self,
-                 wrapped_env,
-                 model: Encoder,
-                 step_keys_map=None,
-                 reset_keys_map=None,
-                 num_sample_on_reset=25,
-                 samples_per_trans=1,
-                 ):
-        super().__init__(wrapped_env)
-        self.model = model
-        self.representation_size = self.model.representation_size
-        latent_space = Box(
-            -10 * np.ones(self.representation_size),
-            10 * np.ones(self.representation_size),
-            dtype=np.float32,
-        )
-
-        if step_keys_map is None:
-            step_keys_map = {}
-        if reset_keys_map is None:
-            reset_keys_map = {}
-        self.step_keys_map = step_keys_map
-        self.reset_keys_map = reset_keys_map
-        spaces = self.wrapped_env.observation_space.spaces
-        for value in self.step_keys_map.values():
-            spaces[value] = latent_space
-        for value in self.reset_keys_map.values():
-            spaces[value] = latent_space
-
-        ##### PRESAMPLING CODE #####
-        self.num_sample_on_reset = num_sample_on_reset
-        self.samples_per_trans = samples_per_trans
-        assert samples_per_trans == 1  # Currently supporting just one, but easy change
-        presampled_latent_space = Box(
-            -10 * np.ones(self.samples_per_trans * model.representation_size),
-            10 * np.ones(self.samples_per_trans * model.representation_size),
-            dtype=np.float32,
-        )
-        spaces['presampled_latent_goals'] = presampled_latent_space
-        ##### PRESAMPLING CODE #####
-
-        self.observation_space = Dict(spaces)
-        self.reset_obs = {}
-        self.presampled_goals = None
-        self.timestep = None
-
-    def step(self, action):
-        self.timestep += 1
-        self.model.eval()
-        obs, reward, done, info = self.wrapped_env.step(action)
-        new_obs = self._update_obs(obs)
-        return new_obs, reward, done, info
-
-    def _update_obs(self, obs):
-        self.model.eval()
-        for key in self.step_keys_map:
-            value = self.step_keys_map[key]
-            obs[value] = self.model.encode_one_np(obs[key])
-        obs = {**obs, **self.reset_obs}
-        # obs['presampled_latent_goals'] = self.presampled_goals[self.timestep % self.num_sample_on_reset]
-        return obs
-
-    def presample_goals(self, obs):
-        # import ipdb; ipdb.set_trace()
-        self.model.eval()
-        latent_goals = self.model.sample_prior(
-            self.num_sample_on_reset, cond=obs['image_observation'], image_cond=True)
-        self.presampled_goals = latent_goals
-
-    def reset(self):
-        self.timestep = 0
-        self.model.eval()
-        obs = self.wrapped_env.reset()
-        # self.presample_goals(obs)
-
-        for key in self.reset_keys_map:
-            value = self.reset_keys_map[key]
-            self.reset_obs[value] = self.model.encode_one_np(obs[key])
-        obs = self._update_obs(obs)
-
-        return obs
-
 
 class DictEncoder(object, metaclass=abc.ABCMeta):
 
@@ -213,7 +127,6 @@ class DictEncoder(object, metaclass=abc.ABCMeta):
 
     def train(self):
         pass
-
 
 class ConditionalEncoderWrappedEnv(ProxyEnv):
     def __init__(self,
