@@ -185,17 +185,17 @@ class MURMENV(PandaBaseEnv):
         #Goal Generation Process
         self.goal_pos = self.random_goal_generation()
         #self.goal_pos = np.array([0.25, -0.7, 1.05]) #Fixed goal for demo video
-        print('Printing Goal:', self.goal_pos)
+        # print('Printing Goal:', self.goal_pos)
 
         return self.get_observation()
 
     def sample_object_location(self):
         if self.obj_index == 0 or self.obj_index == 1:
             initial_random_pos = np.random.uniform(low=self._object_position_low, high=self._object_position_high)
-            print('Initial pos', initial_random_pos)
+            # print('Initial pos', initial_random_pos)
         elif self.obj_index == 2:
             initial_random_pos = np.random.uniform(low=self._object_position_low1, high=self._object_position_high1)
-            print('Initial pos', initial_random_pos)
+            # print('Initial pos', initial_random_pos)
         else:
             print('No Obj')
         return initial_random_pos
@@ -226,6 +226,12 @@ class MURMENV(PandaBaseEnv):
             exit()
 
         return obj
+
+    def checking_final_pos_obj(self):
+        object_info = bullet.get_body_info(self._obj, quat_to_deg=False)
+        object_pos = object_info['pos']
+        obj_observation = np.asarray(object_pos)
+        return obj_observation
 
     def run_for_goal(self):
         image_check_save_path = "/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
@@ -287,27 +293,6 @@ class MURMENV(PandaBaseEnv):
 
         return goal_global, goal_active
 
-    def _set_spaces(self):
-        act_dim = self.get_action_dim()
-        act_bound = 1
-        act_high = np.ones(act_dim) * act_bound
-        self.action_space = gym.spaces.Box(-act_high, act_high)
-
-        observation_dim = 3
-        observation_dim1 = 4
-        obs_bound = 100
-        obs_high = np.ones(observation_dim) * obs_bound
-        state_space = gym.spaces.Box(-obs_high, obs_high)
-
-        obs_high1 = np.ones(observation_dim1) * obs_bound
-        state_space1 = gym.spaces.Box(-obs_high1, obs_high1)
-
-        self.observation_space = Dict([
-            ('state_observation', state_space),
-            ('robot_state_observation', state_space1),
-            ('state_desired_goal', state_space),
-        ])
-
     def _load_table(self):
         self._table = bullet.objects.table(rgba=[1, 1, 1, 1])
         self._base = bullet.objects.panda_base()
@@ -352,12 +337,65 @@ class MURMENV(PandaBaseEnv):
                 raise RuntimeError('Unrecognized action: {}'.format(action))
             return np.array(delta_pos), np.array(delta_angle), gripper
 
+    def _set_spaces(self):
+        act_dim = self.get_action_dim()
+        act_bound = 1
+        act_high = np.ones(act_dim) * act_bound
+        self.action_space = gym.spaces.Box(-act_high, act_high)
+
+        observation_dim = 4 #3
+        observation_dim1 = 3
+        obs_bound = 100
+        obs_high = np.ones(observation_dim) * obs_bound
+        state_space = gym.spaces.Box(-obs_high, obs_high)
+
+        obs_high1 = np.ones(observation_dim1) * obs_bound
+        state_space1 = gym.spaces.Box(-obs_high1, obs_high1)
+
+        self.observation_space = Dict([
+            ('state_observation', state_space),
+            ('robot_state_observation', state_space1),
+            ('state_desired_goal', state_space),
+        ])
+
+    def get_observation(self):
+        left_tip_pos = bullet.get_link_state(
+            self._panda, 'panda_finger_joint1', keys='pos')
+        right_tip_pos = bullet.get_link_state(
+            self._panda, 'panda_finger_joint2', keys='pos')
+        left_tip_pos = np.asarray(left_tip_pos)
+        right_tip_pos = np.asarray(right_tip_pos)
+        hand_theta = bullet.get_link_state(self._panda, self._end_effector,
+            'theta', quat_to_deg=False)
+        #print('obs_ hand theta',hand_theta)
+        gripper_tips_distance = [np.linalg.norm(
+            left_tip_pos - right_tip_pos)]
+        end_effector_pos = self.get_end_effector_pos()
+
+        object_info = bullet.get_body_info(self._obj, quat_to_deg=False)
+        object_pos = object_info['pos']
+        #object_theta = object_info['theta']
+
+        observation = np.concatenate((
+            end_effector_pos, gripper_tips_distance))
+        obj_observation = np.asarray(object_pos)
+        goal_pos = np.asarray(self.goal_pos)
+        #print('DOF  @@  HERE')
+
+        obs_dict = dict(
+            state_observation1=obj_observation,  #todo: fix
+            state_observation=observation,
+            robot_state_observation=observation,
+            state_desired_goal=goal_pos,
+            )
+
+        return obs_dict
 
     def get_contextual_diagnostics(self, paths, contexts):
         from multiworld.multiworld.envs.env_util import create_stats_ordered_dict
-
+        print('Get Diagnostics')
         diagnostics = OrderedDict()
-        state_key = "state_observation" # obj pos
+        state_key = "state_observation1" # obj pos   #todo: fix
         goal_key = "state_desired_goal"
         values = []
         eps1, eps2 = [], []
@@ -367,6 +405,9 @@ class MURMENV(PandaBaseEnv):
         # print('length of paths = 5 ?', len(paths))
 
         for i in range(len(paths)):
+            ini_state = paths[i]["observations"][0][state_key]
+            print('Initial obj State', ini_state)
+
             state = paths[i]["observations"][-1][state_key]
             print('Final obj State', state)
 
@@ -492,38 +533,6 @@ class MURMENV(PandaBaseEnv):
 
     def get_reward(self, info):
         return info['Goal_success'] - 1
-
-    def get_observation(self):
-        left_tip_pos = bullet.get_link_state(
-            self._panda, 'panda_finger_joint1', keys='pos')
-        right_tip_pos = bullet.get_link_state(
-            self._panda, 'panda_finger_joint2', keys='pos')
-        left_tip_pos = np.asarray(left_tip_pos)
-        right_tip_pos = np.asarray(right_tip_pos)
-        hand_theta = bullet.get_link_state(self._panda, self._end_effector,
-            'theta', quat_to_deg=False)
-        #print('obs_ hand theta',hand_theta)
-        gripper_tips_distance = [np.linalg.norm(
-            left_tip_pos - right_tip_pos)]
-        end_effector_pos = self.get_end_effector_pos()
-
-        object_info = bullet.get_body_info(self._obj, quat_to_deg=False)
-        object_pos = object_info['pos']
-        #object_theta = object_info['theta']
-
-        observation = np.concatenate((
-            end_effector_pos, gripper_tips_distance))
-        obj_observation = np.asarray(object_pos)
-        goal_pos = np.asarray(self.goal_pos)
-        #print('DOF  @@  HERE')
-
-        obs_dict = dict(
-            state_observation=obj_observation,
-            robot_state_observation=observation,
-            state_desired_goal=goal_pos,
-            )
-
-        return obs_dict
 
     def step(self, *action):
         # Joint Initialization Code
