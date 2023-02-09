@@ -114,13 +114,13 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
             images = np.stack([observation[i]['image_global_observation']
                                       for i in range(len(observation))])
             latents = self.model['vqvae'].encode_np(images)
-            # print('LATENTS G', latents.shape)
+            print('LATENTS G', latents.shape)
 
         elif self.murm == 'a':
             images = np.stack([observation[i]['image_active_observation']
                                       for i in range(len(observation))])
             latents = self.model['vqvae'].encode_np(images)
-            # print('LATENTS A', latents.shape)
+            print('LATENTS A', latents.shape)
 
         else:
             exit()
@@ -128,23 +128,19 @@ class EncoderDictToMDPPathLoader(DictToMDPPathLoader):
         for i in range(len(observation)):
             if self.murm == 'murm':
                 # observation[i]['initial_latent_state'] = latents_global[0]
+                # observation[i]['initial_latent_state_active'] = latents_active[0]
                 observation[i]['latent_observation'] = latents_global[i]
                 observation[i]['latent_desired_goal'] = latents_global[-1]
-                # observation[i]['initial_latent_state_active'] = latents_active[0]
                 observation[i]['latent_observation_active'] = latents_active[i]
                 observation[i]['latent_desired_goal_active'] = latents_active[-1]
 
             elif self.murm == 'g':
-                # observation[i]['initial_latent_state'] = latents[0]
                 observation[i]['latent_observation'] = latents[i]
                 observation[i]['latent_desired_goal'] = latents[-1]
-                # observation[i]['initial_latent_state_active'] = [0]
 
             elif self.murm == 'a':
-                # observation[i]['initial_latent_state'] = latents[0]
                 observation[i]['latent_observation'] = latents[i]
                 observation[i]['latent_desired_goal'] = latents[-1]
-                # observation[i]['initial_latent_state_active'] = [0] #Just needed for murm code to run
             else:
                 exit()
 
