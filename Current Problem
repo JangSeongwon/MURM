@@ -1,7 +1,9 @@
 
-1. Shouldn't we delete image_observations from obs before RL??   
-
-2. MURM settings done??  
-
-
+1. We might need to change final goal version  
+  
+Resukt example:   
+Initial obj State [ 0.41503179 -0.08217251  1.048 ]   
+Final obj State [ 0.08799309 -0.56611653  1.07046936 ]   
+Given Goal State [ 0.1  -0.4   1.05 ]   
+  
 
