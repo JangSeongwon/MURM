@@ -84,20 +84,20 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/8 Analysis   
+2/10 Analysis   
 
-Training time offline = maybe 300 (14hours)  
-Training time online = maybe 250 (24 hours)   
+Training time offline = maybe 300 (14 hours), 500 (22 hours)  
+Training time online = maybe 250 (24 hours), 100 (9 hours)   
 
 1. Collecting demo data with third computer    
 => OKAY  
-
-2. Pretrained VQVAE. No need active once again...   
-=> OKAY - 1500 epoches = 6.5days & 2VQVAE model / but 1000 looks enough    
-
+   
+2. Pretrained VQVAE  
+=> OKAY -1500 epoches = 6.5days & 2VQVAE model / but 1000 looks enough 
+   
 3. Started training offline RL  
 => OKAY   
-      
+       
 4. Need to think of active-disadv task 
     - Random Goal box as solution
 
@@ -116,7 +116,8 @@ Training time online = maybe 250 (24 hours)
 7. As additional process try images with lower-dimensional size (64x64 or 48x48 as lowest possibility = too much time consuming)   
   
 8. Edited rollout functions and goal sampling part and diagnostics   
-      -> Now need to edit for murm in codes + online tuning codes + murm_env_m3 edit   
+      -> Edited murm in codes + online tuning codes  
+      -> Now need to edit murm_env_m3 edit + Final goal image changing env     
 
 --------------------------
 
