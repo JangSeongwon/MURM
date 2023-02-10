@@ -123,13 +123,6 @@ def contextual_rollout(
     if context_keys_for_policy is None:
         context_keys_for_policy = ['context']
     # print('Going through here')
-    # if not obs_processor:
-    #     print('How about here??')
-    #     def obs_processor(o):
-    #         combined_obs = [o[k] for k in observation_keys]
-    #         for k in context_keys_for_policy:
-    #             combined_obs.append(o[k])
-    #         return np.concatenate(combined_obs, axis=0)
     paths = rollout(
         env,
         agent,
