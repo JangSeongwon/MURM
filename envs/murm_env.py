@@ -343,8 +343,8 @@ class MURMENV(PandaBaseEnv):
         act_high = np.ones(act_dim) * act_bound
         self.action_space = gym.spaces.Box(-act_high, act_high)
 
-        observation_dim = 4 #3
-        observation_dim1 = 3
+        observation_dim = 3
+        observation_dim1 = 4
         obs_bound = 100
         obs_high = np.ones(observation_dim) * obs_bound
         state_space = gym.spaces.Box(-obs_high, obs_high)
@@ -383,8 +383,8 @@ class MURMENV(PandaBaseEnv):
         #print('DOF  @@  HERE')
 
         obs_dict = dict(
-            state_observation1=obj_observation,  #todo: fix
-            state_observation=observation,
+            state_observation=obj_observation, 
+            # state_observation=observation,
             robot_state_observation=observation,
             state_desired_goal=goal_pos,
             )
@@ -395,7 +395,7 @@ class MURMENV(PandaBaseEnv):
         from multiworld.multiworld.envs.env_util import create_stats_ordered_dict
         print('Get Diagnostics')
         diagnostics = OrderedDict()
-        state_key = "state_observation1" # obj pos   #todo: fix
+        state_key = "state_observation" #obj pos
         goal_key = "state_desired_goal"
         values = []
         eps1, eps2 = [], []
