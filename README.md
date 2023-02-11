@@ -15,6 +15,10 @@ ptu.set_gpu_mode(True)
 RAM check  
 sar -r 1
 ```
+  
+```  
+sudo mount /dev/sda2 /media/skc/
+```  
 --------------------------
 
 ## Installation Needed
