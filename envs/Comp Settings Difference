@@ -1,9 +1,7 @@
 
 comp2  
 
-
-
-data_colelctor.py    
+data_collector.py    
 
 path = "/media/skc/home/mservo/data_jang/demos/SingleView/"  
 
