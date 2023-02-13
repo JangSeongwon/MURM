@@ -1,0 +1,24 @@
+
+comp2  
+
+
+
+data_colelctor.py    
+
+path = "/media/skc/home/mservo/data_jang/demos/SingleView/"  
+
+
+murm_env.py  
+  
+/home/skc/PycharmProjects/murm_env/  
+
+objects.py  
+  
+cur_path = os.path.dirname(os.path.realpath(__file__))  
+ASSET_PATH = os.path.join('/home/skc/PycharmProjects/murm_env/roboverse/envs/assets/bulletobjects')  
+ASSET_PATH_ORI = os.path.join('/home/skc/PycharmProjects/murm_env/roboverse/envs/assets')  
+PDATA_PATH = pdata.getDataPath()  
+Robot_path = os.path.join('/home/skc/PycharmProjects/murm_env/roboverse/envs/assets/Panda_robot/urdf/panda.urdf')   
+  
+----------------------------------------------------------------------------------------------------------
+
