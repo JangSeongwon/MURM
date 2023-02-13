@@ -1,37 +1,79 @@
 import numpy as np
 from rlkit.util.io import load_local_or_remote_file
 
-path = "/media/jang/jang/0ubuntu/image_dataset/Running_test/128_600_Single/"
+# path = "/media/jang/jang/0ubuntu/image_dataset/RandomBox/Combined/"
+path = "/media/jang/jang/0ubuntu/image_dataset/Combined_For_VQVAE/"
 
-path1 = "/media/jang/jang/0ubuntu/image_dataset/SingleView/128_150_4/1/"
-path2 = "/media/jang/jang/0ubuntu/image_dataset/SingleView/128_150_4/2/"
-path3 = "/media/jang/jang/0ubuntu/image_dataset/SingleView/128_150_4/3/"
-path4 = "/media/jang/jang/0ubuntu/image_dataset/SingleView/128_150_4/4/"
+path1 = "/media/jang/jang/0ubuntu/image_dataset/RandomBox/Combined/"
+path2 = "/media/jang/jang/0ubuntu/image_dataset/SingleView/Combined/"
+path3 = "/media/jang/jang/0ubuntu/image_dataset/Wall/Combined/"
 
-data_path1 = path1 + 'singleview_active_images1.npy'
-data_path2 = path2 + 'singleview_active_images2.npy'
-data_path3 = path3 + 'singleview_active_images3.npy'
-data_path4 = path4 + 'singleview_active_images4.npy'
+data_path1 = path1 + 'RandomBox_Combined_900_Global.npy'
+data_path2 = path2 + 'Singleview_Combined_600_Global.npy'
+data_path3 = path3 + 'Wall_Combined_600_Global.npy'
+
+# path1 = "/media/jang/jang/0ubuntu/image_dataset/RandomBox/128_300_1/"
+# path2 = "/media/jang/jang/0ubuntu/image_dataset/RandomBox/128_300_2/"
+# path3 = "/media/jang/jang/0ubuntu/image_dataset/RandomBox/128_300_3/"
+
+# path1 = "/media/jang/jang/0ubuntu/image_dataset/Wall/128_150_1/"
+# path2 = "/media/jang/jang/0ubuntu/image_dataset/Wall/128_150_2/"
+# path3 = "/media/jang/jang/0ubuntu/image_dataset/Wall/128_150_3/"
+# path4 = "/media/jang/jang/0ubuntu/image_dataset/Wall/128_150_4/"
+
+# path1 = "/media/jang/jang/0ubuntu/image_dataset/SingleView/128_150_n/"
+# path2 = "/media/jang/jang/0ubuntu/image_dataset/SingleView/128_150_n/"
+# path3 = "/media/jang/jang/0ubuntu/image_dataset/SingleView/128_150_n/"
+# path4 = "/media/jang/jang/0ubuntu/image_dataset/SingleView/128_150_n/"
+
+# data_path1 = path1 + 'randombox_active_300_1.npy'
+# data_path2 = path2 + 'randombox_active_300_2.npy'
+# data_path3 = path3 + 'randombox_active_300_3.npy'
+
+# data_path1 = path1 + 'randombox_global_300_1.npy'
+# data_path2 = path2 + 'randombox_global_300_2.npy'
+# data_path3 = path3 + 'randombox_global_300_3.npy'
+
+# data_path1 = path1 + 'singleview_active_images1.npy'
+# data_path2 = path2 + 'singleview_active_images2.npy'
+# data_path3 = path3 + 'singleview_active_images3.npy'
+# data_path4 = path4 + 'singleview_active_images4.npy'
+
+# data_path1 = path1 + 'singleview_global_images1.npy'
+# data_path2 = path2 + 'singleview_global_images2.npy'
+# data_path3 = path3 + 'singleview_global_images3.npy'
+# data_path4 = path4 + 'singleview_global_images4.npy'
+
+# data_path1 = path1 + 'multiview_active_images1.npy'
+# data_path2 = path2 + 'multiview_active_images2.npy'
+# data_path3 = path3 + 'multiview_active_images3.npy'
+# data_path4 = path4 + 'multiview_active_images4.npy'
+#
+# data_path1 = path1 + 'multiview_global_images1.npy'
+# data_path2 = path2 + 'multiview_global_images2.npy'
+# data_path3 = path3 + 'multiview_global_images3.npy'
+# data_path4 = path4 + 'multiview_global_images4.npy'
 
 image1 = load_local_or_remote_file(data_path1)
 image2 = load_local_or_remote_file(data_path2)
 image3 = load_local_or_remote_file(data_path3)
-image4 = load_local_or_remote_file(data_path4)
+# image4 = load_local_or_remote_file(data_path4)
 
 # print('IMAGE1', image1, type(image1))
 # print('IMAGE2', image2)
 dataset1 = image1.item()
 dataset2 = image2.item()
 dataset3 = image3.item()
-dataset4 = image4.item()
+# dataset4 = image4.item()
 
-x = dataset1.get('initial env')
-y = dataset2.get('initial env')
-z = dataset3.get('initial env')
-q = dataset4.get('initial env')
-print('X', x, 'Y', y, 'Z', z, 'Q', q)
+x = dataset1.get('observations')
+y = dataset2.get('observations')
+z = dataset3.get('observations')
+# q = dataset4.get('observations')
 
-num_episodes = 150
+print('X', x.shape, 'Y', y.shape, 'Z', z.shape)
+
+num_episodes = 300
 num_timesteps = 275
 imlength = 128*128*3
 
@@ -48,29 +90,30 @@ obs = np.zeros((num_episodes, num_timesteps, imlength), dtype=np.uint8)
 obs = np.append(obs, dataset1['observations'], axis=0)
 obs = np.append(obs, dataset2['observations'], axis=0)
 obs = np.append(obs, dataset3['observations'], axis=0)
-obs = np.append(obs, dataset4['observations'], axis=0)
-obs = np.delete(obs, np.s_[0:150], axis=0)
+# obs = np.append(obs, dataset4['observations'], axis=0)
+obs = np.delete(obs, np.s_[0:300], axis=0)
 
-ini = np.zeros((num_episodes, imlength), dtype=np.uint8)
-ini = np.append(ini, dataset1['initial env'], axis=0)
-ini = np.append(ini, dataset2['initial env'], axis=0)
-ini = np.append(ini, dataset3['initial env'], axis=0)
-ini = np.append(ini, dataset4['initial env'], axis=0)
-ini = np.delete(ini, np.s_[0:150], axis=0)
-
-fin = np.zeros((num_episodes, imlength), dtype=np.uint8)
-fin = np.append(fin, dataset1['final env'], axis=0)
-fin = np.append(fin, dataset2['final env'], axis=0)
-fin = np.append(fin, dataset3['final env'], axis=0)
-fin = np.append(fin, dataset4['final env'], axis=0)
-fin = np.delete(fin, np.s_[0:150], axis=0)
+# ini = np.zeros((num_episodes, imlength), dtype=np.uint8)
+# ini = np.append(ini, dataset1['initial env'], axis=0)
+# ini = np.append(ini, dataset2['initial env'], axis=0)
+# ini = np.append(ini, dataset3['initial env'], axis=0)
+# ini = np.append(ini, dataset4['initial env'], axis=0)
+# ini = np.delete(ini, np.s_[0:150], axis=0)
+#
+# fin = np.zeros((num_episodes, imlength), dtype=np.uint8)
+# fin = np.append(fin, dataset1['final env'], axis=0)
+# fin = np.append(fin, dataset2['final env'], axis=0)
+# fin = np.append(fin, dataset3['final env'], axis=0)
+# fin = np.append(fin, dataset4['final env'], axis=0)
+# fin = np.delete(fin, np.s_[0:150], axis=0)
 
 Image_For_Training = {
     'observations': obs,
-    'initial env': ini,
-    'final env': fin,
 }
 
 np.save(path + "train_images.npy", Image_For_Training)
-print('Image_For_Training', Image_For_Training.keys(), Image_For_Training.values())
+a = Image_For_Training.values()
+for observations in a:
+    print(observations.shape)
+print('Image_For_Training_VQVAE', Image_For_Training.keys())
 
