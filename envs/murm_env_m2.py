@@ -182,10 +182,10 @@ class MURMENV_m2(PandaBaseEnv):
 
     def random_obj_generation(self):
         random_shape = ['cube', 'rectangularprism1', 'rectangularprism2']
-        # chosen_shape = random.choice(random_shape)
+        chosen_shape = random.choice(random_shape)
 
         # chosen_shape = 'rectangularprism2' #Bottle
-        chosen_shape='cube'
+        # chosen_shape='cube'
         if chosen_shape == 'cube':
             self.obj_index = 0
             obj = bullet.objects.cube(pos=self.sample_object_location())
