@@ -182,10 +182,10 @@ class MURMENV_m2(PandaBaseEnv):
 
     def random_obj_generation(self):
         random_shape = ['cube', 'rectangularprism1', 'rectangularprism2']
-        chosen_shape = random.choice(random_shape)
+        # chosen_shape = random.choice(random_shape)
 
         # chosen_shape = 'rectangularprism2' #Bottle
-        # chosen_shape='cube'
+        chosen_shape='cube'
         if chosen_shape == 'cube':
             self.obj_index = 0
             obj = bullet.objects.cube(pos=self.sample_object_location())
@@ -274,7 +274,7 @@ class MURMENV_m2(PandaBaseEnv):
         # }
         quaternion = p.getQuaternionFromEuler([m.pi, 0, 0])
         # print('quaternion', quaternion)
-        final_pos = self.goal_pos + np.array([-0.1, 0, 0.075])
+        final_pos = self.goal_pos + np.array([-0.1, 0, 0.1])
         IK = p.calculateInverseKinematics(self._panda, 11, final_pos, targetOrientation=quaternion, maxNumIterations=500, residualThreshold=0.001)
         # for i in range(15):
         #     print('link', p.getLinkState(self._panda, i))
@@ -361,8 +361,6 @@ class MURMENV_m2(PandaBaseEnv):
         self._rdbox = bullet.objects.multi_box_goal(
             pos=[np.random.uniform(low=0.15, high=0.3), np.random.uniform(low=-0.55, high=-0.4),
                  np.random.uniform(low=1.1, high=1.3)])
-        # self._rdbox = bullet.objects.multi_box_goal(
-        #     pos=[0.15, -0.4, 1.1])
         self._objects = {}
         self._sensors = {}
 
@@ -721,10 +719,6 @@ class MURMENV_m2(PandaBaseEnv):
             action = np.array([0, 0, 0.15])
             self.grip = -1
             self.achieve_check += 0.15
-
-        # if done and self.achieve_check > 1:
-        #     action = np.array([-0.1, 0, 0])
-        #     self.grip = -1
 
         if done and self.achieve_check > 1:
             action = checking_pos - ee_pos
