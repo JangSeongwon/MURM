@@ -100,7 +100,7 @@ class MURMENV(PandaBaseEnv):
     def random_goal_generation(self):
         boxesgoals = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         chosen_box = random.choice(boxesgoals)
-        # chosen_box = 9
+        # chosen_box = 6
 
         if chosen_box == 1:
             goal = np.array([-0.05, -0.4, 1.05])
@@ -208,10 +208,10 @@ class MURMENV(PandaBaseEnv):
 
     def random_obj_generation(self):
         random_shape = ['cube', 'rectangularprism1', 'rectangularprism2']
-        # chosen_shape = random.choice(random_shape)
+        chosen_shape = random.choice(random_shape)
 
         # chosen_shape = 'rectangularprism1' #Bottle
-        chosen_shape = 'cube'
+        # chosen_shape = 'cube'
         if chosen_shape == 'cube':
             self.obj_index = 0
             obj = bullet.objects.cube(pos=self.sample_object_location())
@@ -710,7 +710,7 @@ class MURMENV(PandaBaseEnv):
         target_pos2 = np.array(bullet.get_body_info(self._obj)['pos']) + adjustment1
 
         ee_set_pos = np.array([0.1, -0.55, 1.5])
-        checking_pos = np.array([-0.1, -0.5, 1.25])
+        checking_pos = self.goal_pos+np.array([-0.1, 0, 0.075])
         #print('cube', target_pos)
         #print('eef', ee_pos)
 
@@ -750,16 +750,16 @@ class MURMENV(PandaBaseEnv):
             self.grip = -1
             self.time_add += 1
 
-        if done and 15 > self.time_add > 7:
-            action = np.array([0, 0, 0.3])
+        if done and 12 > self.time_add > 7:
+            action = np.array([0, 0, 0.1])
             self.grip = -1
-            self.achieve_check += 0.15
+            self.achieve_check += 0.21
 
         if done and self.achieve_check > 1:
             action = checking_pos - ee_pos
             action *= self.xx * 1.5
             self.grip = -1
-            self.xx += 0.1
+            self.xx += 0.3
 
         if not grasp and self.goal_near == 0:
             if not aligned and not on_top:
