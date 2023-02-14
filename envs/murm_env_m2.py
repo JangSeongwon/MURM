@@ -261,7 +261,7 @@ class MURMENV_m2(PandaBaseEnv):
         np.save(image_check_save_path+"m3_4.npy", reset_active)
 
         return goal_global, goal_active
-    
+
     def run_for_goal2(self):
         image_check_save_path = "/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
         a, q = p.getBasePositionAndOrientation(self._obj)
@@ -361,6 +361,8 @@ class MURMENV_m2(PandaBaseEnv):
         self._rdbox = bullet.objects.multi_box_goal(
             pos=[np.random.uniform(low=0.15, high=0.3), np.random.uniform(low=-0.55, high=-0.4),
                  np.random.uniform(low=1.1, high=1.3)])
+        # self._rdbox = bullet.objects.multi_box_goal(
+        #     pos=[0.15, -0.4, 1.1])
         self._objects = {}
         self._sensors = {}
 
@@ -626,7 +628,7 @@ class MURMENV_m2(PandaBaseEnv):
         info = self.get_info()
         reward = self.get_reward(info)
         done = False
-        self.timeStep += 1
+        # self.timeStep += 1
 
         return observation, reward, done, info
 
@@ -716,9 +718,13 @@ class MURMENV_m2(PandaBaseEnv):
             self.time_add += 1
 
         if done and 15 > self.time_add > 7:
-            action = np.array([0, 0, 0.35])
+            action = np.array([0, 0, 0.15])
             self.grip = -1
             self.achieve_check += 0.15
+
+        # if done and self.achieve_check > 1:
+        #     action = np.array([-0.1, 0, 0])
+        #     self.grip = -1
 
         if done and self.achieve_check > 1:
             action = checking_pos - ee_pos
