@@ -100,6 +100,7 @@ class MURMENV(PandaBaseEnv):
     def random_goal_generation(self):
         boxesgoals = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         chosen_box = random.choice(boxesgoals)
+        # chosen_box = 9
 
         if chosen_box == 1:
             goal = np.array([-0.05, -0.4, 1.05])
@@ -207,10 +208,10 @@ class MURMENV(PandaBaseEnv):
 
     def random_obj_generation(self):
         random_shape = ['cube', 'rectangularprism1', 'rectangularprism2']
-        chosen_shape = random.choice(random_shape)
+        # chosen_shape = random.choice(random_shape)
 
-        #chosen_shape = 'rectangularprism2' #Bottle
-        #chosen_shape='cube'
+        # chosen_shape = 'rectangularprism1' #Bottle
+        chosen_shape = 'cube'
         if chosen_shape == 'cube':
             self.obj_index = 0
             obj = bullet.objects.cube(pos=self.sample_object_location())
@@ -286,10 +287,82 @@ class MURMENV(PandaBaseEnv):
         reset_global = np.uint8(self.render_obs())
         reset_active = np.uint8(self.render_obs_active())
 
-        np.save(image_check_save_path+"m1_1.npy", goal_global)
-        np.save(image_check_save_path+"m1_2.npy", goal_active)
-        np.save(image_check_save_path+"m1_3.npy", reset_global)
-        np.save(image_check_save_path+"m1_4.npy", reset_active)
+        np.save(image_check_save_path+"v1_1.npy", goal_global)
+        np.save(image_check_save_path+"v1_2.npy", goal_active)
+        np.save(image_check_save_path+"v1_3.npy", reset_global)
+        np.save(image_check_save_path+"v1_4.npy", reset_active)
+
+        return goal_global, goal_active
+
+    def run_for_goal2(self):
+        image_check_save_path = "/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
+        a, q = p.getBasePositionAndOrientation(self._obj)
+        p.resetBasePositionAndOrientation(self._obj, self.goal_pos, q)
+
+        # self.goal_positions = {
+        #     'panda_joint1': -1.94, 'panda_joint2': 0.427, 'panda_joint3': 0.153,
+        #     'panda_joint4': -2.3415, 'panda_joint5': -0.1715, 'panda_joint6': 2.7593,
+        #     'panda_joint7': -0.8575, 'panda_finger_joint1': 0.02, 'panda_finger_joint2': 0.02,
+        # }
+        quaternion = p.getQuaternionFromEuler([m.pi, 0, 0])
+        # print('quaternion', quaternion)
+        final_pos = self.goal_pos + np.array([-0.1, 0, 0.075])
+        IK = p.calculateInverseKinematics(self._panda, 11, final_pos, targetOrientation=quaternion, maxNumIterations=500, residualThreshold=0.001)
+        # for i in range(15):
+        #     print('link', p.getLinkState(self._panda, i))
+
+        # print('IK', IK)
+        self.goal_positions = {
+             'panda_joint1': IK[0], 'panda_joint2': IK[1], 'panda_joint3': IK[2],
+             'panda_joint4': IK[3], 'panda_joint5': IK[4], 'panda_joint6': IK[5],
+             'panda_joint7': IK[6], 'panda_finger_joint1': 0.02, 'panda_finger_joint2': 0.02,}
+
+        num_joints = p.getNumJoints(self._panda)
+        # print('joints',num_joints)
+
+        for i in range(num_joints):
+            joint_info = p.getJointInfo(self._panda, i)
+            joint_name = joint_info[1].decode("UTF-8")
+            joint_type = joint_info[2]
+
+            if joint_type is p.JOINT_REVOLUTE or joint_type is p.JOINT_PRISMATIC:
+                assert joint_name in self.initial_positions.keys()
+
+                p.resetJointState(self._panda, i, self.goal_positions[joint_name])
+                p.setJointMotorControl2(self._panda, i, p.POSITION_CONTROL,
+                                        targetPosition=self.goal_positions[joint_name],
+                                        positionGain=0.2, velocityGain=1.0)
+
+        target_pos_check = np.array(bullet.get_body_info(self._obj)['pos'])
+        ee_pos_check = self.get_end_effector_pos()
+        # print('obj, ee pos for goal', target_pos_check, ee_pos_check)
+
+        goal_global = np.uint8(self.render_obs())
+        goal_active = np.uint8(self.render_obs_active())
+
+        num_joints = p.getNumJoints(self._panda)
+        for i in range(num_joints):
+            joint_info = p.getJointInfo(self._panda, i)
+            joint_name = joint_info[1].decode("UTF-8")
+            joint_type = joint_info[2]
+
+            if joint_type is p.JOINT_REVOLUTE or joint_type is p.JOINT_PRISMATIC:
+                assert joint_name in self.initial_positions.keys()
+
+                p.resetJointState(self._panda, i, self.initial_positions[joint_name])
+                p.setJointMotorControl2(self._panda, i, p.POSITION_CONTROL,
+                                        targetPosition=self.initial_positions[joint_name],
+                                        positionGain=0.2, velocityGain=1.0)
+
+        p.resetBasePositionAndOrientation(self._obj, a, q)
+
+        reset_global = np.uint8(self.render_obs())
+        reset_active = np.uint8(self.render_obs_active())
+
+        np.save(image_check_save_path+"v2_1.npy", goal_global)
+        np.save(image_check_save_path+"v2_2.npy", goal_active)
+        np.save(image_check_save_path+"v2_3.npy", reset_global)
+        np.save(image_check_save_path+"v2_4.npy", reset_active)
 
         return goal_global, goal_active
 
@@ -383,7 +456,7 @@ class MURMENV(PandaBaseEnv):
         #print('DOF  @@  HERE')
 
         obs_dict = dict(
-            state_observation=obj_observation, 
+            state_observation=obj_observation,
             # state_observation=observation,
             robot_state_observation=observation,
             state_desired_goal=goal_pos,
@@ -434,7 +507,7 @@ class MURMENV(PandaBaseEnv):
                 state_z_pos = paths[i]["observations"][j][state_key][2]
                 # print('checking z coordinates', state_z_pos)
                 initial_z_pos = np.array(1.03)
-                height = np.linalg.norm(state_z_pos-initial_z_pos)
+                height = np.array(state_z_pos-initial_z_pos)
 
                 goal = paths[i]["observations"][-1][goal_key]
                 # print('goal state each', goal)
@@ -477,7 +550,7 @@ class MURMENV(PandaBaseEnv):
 
     def render_obs_active(self):
         eef_pos_for_active_camera = self.get_end_effector_pos()
-        eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.15),float(eef_pos_for_active_camera[1]),float(eef_pos_for_active_camera[2])]
+        eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.085),float(eef_pos_for_active_camera[1]),float(eef_pos_for_active_camera[2])]
         eef_theta_for_active_camera = self.get_end_effector_theta()
         #print(eef_pos_for_active_camera)
         #print('Total',eef_theta_for_active_camera)
@@ -486,7 +559,7 @@ class MURMENV(PandaBaseEnv):
         # print('z',eef_theta_for_active_camera[2])
 
         view_matrix_obs_active = bullet.get_view_matrix(
-            target_pos=eef_pos_for_active_camera, distance=0.35,
+            target_pos=eef_pos_for_active_camera, distance=0.2,
             yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
         projection_matrix_obs_active = bullet.get_projection_matrix(
             self.obs_img_dim_active, self.obs_img_dim_active)
