@@ -45,7 +45,7 @@ path: /media/jang/jang/0ubuntu/
                         demos
       800 / 800 / 400 
         
-      2100 episodes of images(900,600,600) = 577.5K
+      2100 episodes of images(900,600,600) = 577.5K, same for 64 images   
   
 ```
 
@@ -88,10 +88,16 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/10 Analysis   
+2/14 Analysis   
 
+128*128  
 Training time offline = maybe 300 (14 hours), 500 (22 hours)  
-Training time online = maybe 250 (24 hours), 100 (9 hours)   
+Training time online = maybe 250 (24 hours), 100 (9 hours)
+
+64*64  
+Training time offline = maybe 300 (14 hours), 500 (22 hours)   
+Training time online = maybe 250 (24 hours), 100 (9 hours)  
+
 
 1. Collecting demo data with third computer    
 => OKAY  
@@ -102,8 +108,6 @@ Training time online = maybe 250 (24 hours), 100 (9 hours)
 3. Started training offline RL  
 => OKAY   
        
-4. Need to think of active-disadv task 
-    - Random Goal box as solution
 
 5. Offline RL framework implementation   
     
@@ -117,11 +121,12 @@ Training time online = maybe 250 (24 hours), 100 (9 hours)
     - Point3: Add robot state information        
       
      
-7. As additional process try images with lower-dimensional size (64x64 or 48x48 as lowest possibility = too much time consuming)   
+7. As additional process try images with lower-dimensional size (48x48 as lowest possibility)   
   
 8. Edited rollout functions and goal sampling part and diagnostics   
       -> Edited murm in codes + online tuning codes  
-      -> Now need to edit murm_env_m3 edit + Final goal image changing env     
+      -> Edited murm_env_m3 edit + Final goal image changing env    
+      -> Need to organize for 64 size images settings  
 
 --------------------------
 
