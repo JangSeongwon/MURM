@@ -95,8 +95,8 @@ Training time offline = maybe 300 (14 hours), 500 (22 hours)
 Training time online = maybe 250 (24 hours), 100 (9 hours)
 
 64*64  
-Training time offline = maybe 300 (14 hours), 500 (22 hours)   
-Training time online = maybe 250 (24 hours), 100 (9 hours)  
+Training time offline = maybe 300 ( hours), 500 ( hours)   
+Training time online = maybe 250 ( hours), 100 ( hours)  
 
 
 1. Collecting demo data with third computer    
