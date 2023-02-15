@@ -88,7 +88,7 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/14 Analysis   
+2/15 Analysis   
 
 128*128  
 Training time offline = maybe 300 (14 hours), 500 (22 hours)  
@@ -103,13 +103,13 @@ Training time online = maybe 250 (24 hours), 100 (9 hours)
 => OKAY  
    
 2. Pretrained VQVAE  
-=> OKAY -1500 epoches = 6.5days & 2VQVAE model / but 1000 looks enough 
+=> OKAY -1500 epoches = 6.5days & 2VQVAE model  
    
 3. Started training offline RL  
 => OKAY   
        
 
-5. Offline RL framework implementation   
+4. Offline RL framework implementation   
     
     *Primary Concern*  
     - How to use two latent vectors efficiently??  (5120 + 5120 latent space)      
@@ -121,12 +121,13 @@ Training time online = maybe 250 (24 hours), 100 (9 hours)
     - Point3: Add robot state information        
       
      
-7. As additional process try images with lower-dimensional size (48x48 as lowest possibility)   
+5. As additional process try images with lower-dimensional size (48x48 as lowest possibility)   
   
-8. Edited rollout functions and goal sampling part and diagnostics   
+6. Edited rollout functions and goal sampling part and diagnostics   
       -> Edited murm in codes + online tuning codes  
       -> Edited murm_env_m3 edit + Final goal image changing env    
-      -> Need to organize for 64 size images settings  
+      -> Edited for 64 size images settings  
+      -> Now try and check...   
 
 --------------------------
 
