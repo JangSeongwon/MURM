@@ -15,13 +15,13 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="1.5 1 1"/>
+        <box size="1.8 1 1"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="1.5 1 1"/>
+        <box size="1.8 1 1"/>
       </geometry>
     </collision>
   </link>
@@ -51,7 +51,7 @@
     </collision>
   </link>
   <joint name="fixed1" type="fixed">
-    <origin rpy="0 0 0" xyz="1 0 0"/>
+    <origin rpy="0 0 0" xyz="1.1 0 0"/>
     <parent link="center"/>
     <child link="top"/>
     <axis xyz="0 0 1"/>
@@ -82,7 +82,7 @@
     </collision>
   </link>
   <joint name="fixed2" type="fixed">
-    <origin rpy="0 0 0" xyz="-1 0 0"/>
+    <origin rpy="0 0 0" xyz="-1.1 0 0"/>
     <parent link="center"/>
     <child link="bottom"/>
     <axis xyz="0 0 1"/>
