@@ -94,10 +94,15 @@ Env2: Multi-view task
 Training time offline = maybe 300 (14 hours), 500 (22 hours)  
 Training time online = maybe 250 (24 hours), 100 (9 hours)
 
-64*64  
-Training time offline = maybe 300 ( hours), 500 ( hours)   
-Training time online = maybe 250 ( hours), 100 ( hours)  
-
+64*64
+Main computer  
+Training time offline = 50 e ( 1hour 20min)    
+Training time online = 50 e ( hours)   
+  
+computer3  
+Training time offline = 50 e ( 1hour )    
+Training time online = 50 e ( hours) 
+  
 
 1. Collecting demo data with third computer    
 => OKAY  
