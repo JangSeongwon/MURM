@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<robot name="tetris1.urdf">
+  <link name="center">
+    <contact>
+      <lateral_friction value="1.0"/>
+      <rolling_friction value="0.0"/>
+      <contact_cfm value="0.0"/>
+      <contact_erp value="1.0"/>
+    </contact>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.02 0.0"/>
+       <mass value="0.08"/>
+       <inertia ixx="1" ixy="0" ixz="0" iyy="2" iyz="0" izz="2"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="1.5 1 1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="1.5 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="top">
+    <contact>
+      <lateral_friction value="1.0"/>
+      <rolling_friction value="0.0"/>
+      <contact_cfm value="0.0"/>
+      <contact_erp value="1.0"/>
+    </contact>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+       <mass value="0.02"/>
+       <inertia ixx="1" ixy="0" ixz="0" iyy="2" iyz="0" izz="2"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.5 1.8 1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.5 1.8 1"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="fixed1" type="fixed">
+    <origin rpy="0 0 0" xyz="1 0 0"/>
+    <parent link="center"/>
+    <child link="top"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+</robot>
