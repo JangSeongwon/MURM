@@ -62,9 +62,9 @@ class MURMENV_m1(PandaBaseEnv):
         self.obj_index = 0
 
         # _obj POSITION wall
-        self._object_position_low = (0.35, -0.1, 1.03)
-        self._object_position_high = (0.45, 0.1, 1.03)
-        self._fixed_object_position = np.array([0.45, 0, 1.03])
+        self._object_position_low = (0.35, -0.1, 1.017)
+        self._object_position_high = (0.45, 0.1, 1.017)
+        self._fixed_object_position = np.array([0.45, 0, 1.017])
 
         self._fixed_object_position1 = np.array([0.45, 0, 1.048])
         self._object_position_low1 = (0.35, -0.1, 1.048)
@@ -103,25 +103,25 @@ class MURMENV_m1(PandaBaseEnv):
         chosen_box = random.choice(boxesgoals)
 
         if chosen_box == 1:
-            goal = np.array([-0.05, -0.4, 1.05])
+            goal = np.array([-0.05, -0.4, 1.037])
         elif chosen_box == 2:
-            goal = np.array([0.1, -0.4, 1.05])
+            goal = np.array([0.1, -0.4, 1.037])
         elif chosen_box == 3:
-            goal = np.array([0.25, -0.4, 1.05])
+            goal = np.array([0.25, -0.4, 1.037])
 
         elif chosen_box == 4:
-            goal = np.array([-0.05, -0.55, 1.05])
+            goal = np.array([-0.05, -0.55, 1.037])
         elif chosen_box == 5:
-            goal = np.array([0.1, -0.55, 1.05])
+            goal = np.array([0.1, -0.55, 1.037])
         elif chosen_box == 6:
-            goal = np.array([0.25, -0.55, 1.05])
+            goal = np.array([0.25, -0.55, 1.037])
 
         elif chosen_box == 7:
-            goal = np.array([-0.05, -0.7, 1.05])
+            goal = np.array([-0.05, -0.7, 1.037])
         elif chosen_box == 8:
-            goal = np.array([0.1, -0.7, 1.05])
+            goal = np.array([0.1, -0.7, 1.037])
         elif chosen_box == 9:
-            goal = np.array([0.25, -0.7, 1.05])
+            goal = np.array([0.25, -0.7, 1.037])
 
         return goal
 
@@ -180,6 +180,9 @@ class MURMENV_m1(PandaBaseEnv):
         self._obj = self.random_obj_generation()
         # print('cube 0 / prism1 1 / prism2 2 / ', self.obj_index)
         rgba = self.sample_object_color()
+        for i in range(-1, 5):
+            rgba = rgba
+            p.changeVisualShape(self._obj, i, rgbaColor=rgba)
         p.changeVisualShape(self._obj, -1, rgbaColor=rgba)
         self._format_state_query()
 
@@ -207,22 +210,35 @@ class MURMENV_m1(PandaBaseEnv):
         return a
 
     def random_obj_generation(self):
-        random_shape = ['cube', 'rectangularprism1', 'rectangularprism2']
-        chosen_shape = random.choice(random_shape)
+        random_shape = ['cube', 'rectangularprism', 'tetris1', 'tetris2']
+        # chosen_shape = random.choice(random_shape)
 
-        #chosen_shape = 'rectangularprism2' #Bottle
-        # chosen_shape='cube'
+        chosen_shape = 'cube'
+        # chosen_shape = 'rectangularprism1'
+        # chosen_shape = 'tetris1'
+        # chosen_shape = 'tetris2'
+
+        # chosen_shape = 'rectangularprism2' #Bottle
         if chosen_shape == 'cube':
             self.obj_index = 0
             obj = bullet.objects.cube(pos=self.sample_object_location())
 
-        elif chosen_shape == 'rectangularprism1':
+        elif chosen_shape == 'rectangularprism':
             self.obj_index = 1
-            obj = bullet.objects.rectangularprism1(pos=self.sample_object_location()) #[0.45, -0.1, 1.03])
+            obj = bullet.objects.rectangularprism(pos=self.sample_object_location())  # [0.5, 0.1, 1.03])
+
+        elif chosen_shape == 'tetris1':
+            self.obj_index = 1
+            obj = bullet.objects.tetris1(pos=self.sample_object_location())
+
+        elif chosen_shape == 'tetris2':
+            self.obj_index = 1
+            obj = bullet.objects.tetris2(pos=self.sample_object_location())
 
         elif chosen_shape == 'rectangularprism2':
             self.obj_index = 2
             obj = bullet.objects.rectangularprism2(pos=self.sample_object_location())
+
         else:
             exit()
 
@@ -635,7 +651,10 @@ class MURMENV_m1(PandaBaseEnv):
         elif gripper == 1 and self.obj_index == 2:
             self.grasp2(self._obj)
             p.stepSimulation()
-        elif gripper == 1 and (self.obj_index == 0 or self.obj_index == 1):
+        elif gripper == 1 and self.obj_index == 1:
+            self.grasp1(self._obj)
+            p.stepSimulation()
+        elif gripper == 1 and self.obj_index == 0:
             self.grasp(self._obj)
             p.stepSimulation()
 
