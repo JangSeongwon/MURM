@@ -659,7 +659,7 @@ class MURMENV(PandaBaseEnv):
             self.grasp1(self._obj)
             p.stepSimulation()
 
-        elif gripper == 1 and (self.obj_index == 0 or self.obj_index == 1):
+        elif gripper == 1 and self.obj_index == 0:
             self.grasp(self._obj)
             p.stepSimulation()
 
