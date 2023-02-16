@@ -186,7 +186,7 @@ class MURMENV_m2(PandaBaseEnv):
         chosen_shape = random.choice(random_shape)
 
         # chosen_shape = 'cube'
-        # chosen_shape = 'rectangularprism1'
+        # chosen_shape = 'rectangularprism'
         # chosen_shape = 'tetris1'
         # chosen_shape = 'tetris2'
 
