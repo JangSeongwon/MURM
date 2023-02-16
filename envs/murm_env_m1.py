@@ -183,7 +183,6 @@ class MURMENV_m1(PandaBaseEnv):
         for i in range(-1, 5):
             rgba = rgba
             p.changeVisualShape(self._obj, i, rgbaColor=rgba)
-        p.changeVisualShape(self._obj, -1, rgbaColor=rgba)
         self._format_state_query()
 
         #Goal Generation Process
@@ -214,7 +213,7 @@ class MURMENV_m1(PandaBaseEnv):
         # chosen_shape = random.choice(random_shape)
 
         chosen_shape = 'cube'
-        # chosen_shape = 'rectangularprism1'
+        # chosen_shape = 'rectangularprism'
         # chosen_shape = 'tetris1'
         # chosen_shape = 'tetris2'
 
