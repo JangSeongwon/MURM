@@ -193,7 +193,7 @@ class MURMENV(PandaBaseEnv):
         return self.get_observation()
 
     def sample_object_location(self):
-        if self.obj_index == 0 or self.obj_index == 1 or self.obj_index == 3:
+        if self.obj_index == 0 or self.obj_index == 1:
             initial_random_pos = np.random.uniform(low=self._object_position_low, high=self._object_position_high)
             # print('Initial pos', initial_random_pos)
         elif self.obj_index == 2:
@@ -209,14 +209,15 @@ class MURMENV(PandaBaseEnv):
         return a
 
     def random_obj_generation(self):
-        random_shape = ['cube', 'rectangularprism', 'tetris1']
-        chosen_shape = random.choice(random_shape)
+        random_shape = ['cube', 'rectangularprism', 'tetris1', 'tetris2']
+        # chosen_shape = random.choice(random_shape)
 
-        # chosen_shape = 'cube'
+        chosen_shape = 'cube'
         # chosen_shape = 'rectangularprism1'
         # chosen_shape = 'tetris1'
+        # chosen_shape = 'tetris2'
+        
         # chosen_shape = 'rectangularprism2' #Bottle
-
         if chosen_shape == 'cube':
             self.obj_index = 0
             obj = bullet.objects.cube(pos=self.sample_object_location())
@@ -228,6 +229,10 @@ class MURMENV(PandaBaseEnv):
         elif chosen_shape == 'tetris1':
             self.obj_index = 1
             obj = bullet.objects.tetris1(pos=self.sample_object_location())
+
+        elif chosen_shape == 'tetris2':
+            self.obj_index = 1
+            obj = bullet.objects.tetris2(pos=self.sample_object_location())
 
         elif chosen_shape == 'rectangularprism2':
             self.obj_index = 2
