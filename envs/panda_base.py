@@ -174,7 +174,10 @@ class PandaBaseEnv(gym.Env, Serializable):
 
     def grasp(self, obj_id=None):
         self.apply_action_fingers([0, 0], obj_id, force=5)
-
+        
+    def grasp1(self, obj_id=None):
+        self.apply_action_fingers([0, 0], obj_id, force=7.5)
+        
     def grasp2(self, obj_id=None):
         self.apply_action_fingers([0, 0], obj_id, force=10)
 
