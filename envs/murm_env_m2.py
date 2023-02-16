@@ -28,7 +28,7 @@ class MURMENV_m2(PandaBaseEnv):
                  randomize=True,
                  observation_mode='state',
 
-                 #TODO: Image Dimension
+                 # TODO: Image Dimension
                  obs_img_dim=64,
                  obs_img_dim_active=64,
                  success_threshold=0.03,
@@ -64,9 +64,9 @@ class MURMENV_m2(PandaBaseEnv):
         self.obj_index = 0
 
         # _obj POSITION
-        self._object_position_low = (0.35, -0.1, 1.03)
-        self._object_position_high = (0.45, 0.1, 1.03)
-        self._fixed_object_position = np.array([0.45, 0, 1.03])
+        self._object_position_low = (0.35, -0.1, 1.017)
+        self._object_position_high = (0.45, 0.1, 1.017)
+        self._fixed_object_position = np.array([0.45, 0, 1.017])
 
         self._fixed_object_position1 = np.array([0.45, 0, 1.048])
         self._object_position_low1 = (0.35, -0.1, 1.048)
@@ -93,8 +93,7 @@ class MURMENV_m2(PandaBaseEnv):
 
     def randombox_goal_generation(self):
         self._goal = np.array(bullet.get_body_info(self._rdbox)['pos'])
-        self._goal += np.array([0., 0., 0.02])
-        # print(self._goal)
+        print('Goal pos:', self._goal)
         return self._goal
 
     def reset(self, change_object=False):
@@ -154,23 +153,25 @@ class MURMENV_m2(PandaBaseEnv):
 
         # print('cube 0 / prism1 1 / prism2 2 / ', self.obj_index)
         rgba = self.sample_object_color()
-        p.changeVisualShape(self._obj, -1, rgbaColor=rgba)
+        for i in range(-1, 5):
+            rgba = rgba
+            p.changeVisualShape(self._obj, i, rgbaColor=rgba)
         self._format_state_query()
 
         # Goal Generation Process
         self.goal_pos = self.randombox_goal_generation()
         # self.goal_pos = np.array([0.25, -0.7, 1.05]) #Fixed goal for demo video
-        print('Printing Goal:', self.goal_pos)
+        # print('Printing Goal:', self.goal_pos)
 
         return self.get_observation()
 
     def sample_object_location(self):
         if self.obj_index == 0 or self.obj_index == 1:
             initial_random_pos = np.random.uniform(low=self._object_position_low, high=self._object_position_high)
-            print('Initial pos', initial_random_pos)
+            # print('Initial pos', initial_random_pos)
         elif self.obj_index == 2:
             initial_random_pos = np.random.uniform(low=self._object_position_low1, high=self._object_position_high1)
-            print('Initial pos', initial_random_pos)
+            # print('Initial pos', initial_random_pos)
         else:
             print('No Obj')
         return initial_random_pos
@@ -181,29 +182,42 @@ class MURMENV_m2(PandaBaseEnv):
         return a
 
     def random_obj_generation(self):
-        random_shape = ['cube', 'rectangularprism1', 'rectangularprism2']
-        # chosen_shape = random.choice(random_shape)
+        random_shape = ['cube', 'rectangularprism', 'tetris1', 'tetris2']
+        chosen_shape = random.choice(random_shape)
+
+        # chosen_shape = 'cube'
+        # chosen_shape = 'rectangularprism1'
+        # chosen_shape = 'tetris1'
+        # chosen_shape = 'tetris2'
 
         # chosen_shape = 'rectangularprism2' #Bottle
-        chosen_shape='cube'
         if chosen_shape == 'cube':
             self.obj_index = 0
             obj = bullet.objects.cube(pos=self.sample_object_location())
 
-        elif chosen_shape == 'rectangularprism1':
+        elif chosen_shape == 'rectangularprism':
             self.obj_index = 1
-            obj = bullet.objects.rectangularprism1(pos=self.sample_object_location())
+            obj = bullet.objects.rectangularprism(pos=self.sample_object_location())  # [0.5, 0.1, 1.03])
+
+        elif chosen_shape == 'tetris1':
+            self.obj_index = 1
+            obj = bullet.objects.tetris1(pos=self.sample_object_location())
+
+        elif chosen_shape == 'tetris2':
+            self.obj_index = 1
+            obj = bullet.objects.tetris2(pos=self.sample_object_location())
 
         elif chosen_shape == 'rectangularprism2':
             self.obj_index = 2
             obj = bullet.objects.rectangularprism2(pos=self.sample_object_location())
+
         else:
             exit()
-        # print(self.obj_index)
 
         return obj
+
     def run_for_goal(self):
-        image_check_save_path="/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
+        image_check_save_path = "/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
         a, q = p.getBasePositionAndOrientation(self._obj)
         p.resetBasePositionAndOrientation(self._obj, self.goal_pos, q)
 
@@ -255,82 +269,10 @@ class MURMENV_m2(PandaBaseEnv):
         reset_global = np.uint8(self.render_obs())
         reset_active = np.uint8(self.render_obs_active())
 
-        np.save(image_check_save_path+"m3_1.npy", goal_global)
-        np.save(image_check_save_path+"m3_2.npy", goal_active)
-        np.save(image_check_save_path+"m3_3.npy", reset_global)
-        np.save(image_check_save_path+"m3_4.npy", reset_active)
-
-        return goal_global, goal_active
-
-    def run_for_goal2(self):
-        image_check_save_path = "/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
-        a, q = p.getBasePositionAndOrientation(self._obj)
-        p.resetBasePositionAndOrientation(self._obj, self.goal_pos, q)
-
-        # self.goal_positions = {
-        #     'panda_joint1': -1.94, 'panda_joint2': 0.427, 'panda_joint3': 0.153,
-        #     'panda_joint4': -2.3415, 'panda_joint5': -0.1715, 'panda_joint6': 2.7593,
-        #     'panda_joint7': -0.8575, 'panda_finger_joint1': 0.02, 'panda_finger_joint2': 0.02,
-        # }
-        quaternion = p.getQuaternionFromEuler([m.pi, 0, 0])
-        # print('quaternion', quaternion)
-        final_pos = self.goal_pos + np.array([-0.1, 0, 0.1])
-        IK = p.calculateInverseKinematics(self._panda, 11, final_pos, targetOrientation=quaternion, maxNumIterations=500, residualThreshold=0.001)
-        # for i in range(15):
-        #     print('link', p.getLinkState(self._panda, i))
-
-        # print('IK', IK)
-        self.goal_positions = {
-             'panda_joint1': IK[0], 'panda_joint2': IK[1], 'panda_joint3': IK[2],
-             'panda_joint4': IK[3], 'panda_joint5': IK[4], 'panda_joint6': IK[5],
-             'panda_joint7': IK[6], 'panda_finger_joint1': 0.02, 'panda_finger_joint2': 0.02,}
-
-        num_joints = p.getNumJoints(self._panda)
-        # print('joints',num_joints)
-
-        for i in range(num_joints):
-            joint_info = p.getJointInfo(self._panda, i)
-            joint_name = joint_info[1].decode("UTF-8")
-            joint_type = joint_info[2]
-
-            if joint_type is p.JOINT_REVOLUTE or joint_type is p.JOINT_PRISMATIC:
-                assert joint_name in self.initial_positions.keys()
-
-                p.resetJointState(self._panda, i, self.goal_positions[joint_name])
-                p.setJointMotorControl2(self._panda, i, p.POSITION_CONTROL,
-                                        targetPosition=self.goal_positions[joint_name],
-                                        positionGain=0.2, velocityGain=1.0)
-
-        target_pos_check = np.array(bullet.get_body_info(self._obj)['pos'])
-        ee_pos_check = self.get_end_effector_pos()
-        # print('obj, ee pos for goal', target_pos_check, ee_pos_check)
-
-        goal_global = np.uint8(self.render_obs())
-        goal_active = np.uint8(self.render_obs_active())
-
-        num_joints = p.getNumJoints(self._panda)
-        for i in range(num_joints):
-            joint_info = p.getJointInfo(self._panda, i)
-            joint_name = joint_info[1].decode("UTF-8")
-            joint_type = joint_info[2]
-
-            if joint_type is p.JOINT_REVOLUTE or joint_type is p.JOINT_PRISMATIC:
-                assert joint_name in self.initial_positions.keys()
-
-                p.resetJointState(self._panda, i, self.initial_positions[joint_name])
-                p.setJointMotorControl2(self._panda, i, p.POSITION_CONTROL,
-                                        targetPosition=self.initial_positions[joint_name],
-                                        positionGain=0.2, velocityGain=1.0)
-
-        p.resetBasePositionAndOrientation(self._obj, a, q)
-
-        reset_global = np.uint8(self.render_obs())
-        reset_active = np.uint8(self.render_obs_active())
-
-        np.save(image_check_save_path+"v2_1.npy", goal_global)
-        np.save(image_check_save_path+"v2_2.npy", goal_active)
-        np.save(image_check_save_path+"v2_3.npy", reset_global)
-        np.save(image_check_save_path+"v2_4.npy", reset_active)
+        np.save(image_check_save_path + "m3_1.npy", goal_global)
+        np.save(image_check_save_path + "m3_2.npy", goal_active)
+        np.save(image_check_save_path + "m3_3.npy", reset_global)
+        np.save(image_check_save_path + "m3_4.npy", reset_active)
 
         return goal_global, goal_active
 
@@ -394,7 +336,7 @@ class MURMENV_m2(PandaBaseEnv):
         from multiworld.multiworld.envs.env_util import create_stats_ordered_dict
 
         diagnostics = OrderedDict()
-        state_key = "state_observation" # obj pos
+        state_key = "state_observation"  # obj pos
         goal_key = "state_desired_goal"
         values = []
         eps1, eps2 = [], []
@@ -430,7 +372,7 @@ class MURMENV_m2(PandaBaseEnv):
                 state_z_pos = paths[i]["observations"][j][state_key][2]
                 # print('checking z coordinates', state_z_pos)
                 initial_z_pos = np.array(1.03)
-                height = np.linalg.norm(state_z_pos-initial_z_pos)
+                height = np.linalg.norm(state_z_pos - initial_z_pos)
 
                 goal = paths[i]["observations"][-1][goal_key]
                 # print('goal state each', goal)
@@ -448,6 +390,7 @@ class MURMENV_m2(PandaBaseEnv):
 
         diagnostics.update(create_stats_ordered_dict(diagnostics_key, values))
         return diagnostics
+
     ######################################## "RENDERDING" ########################################
     ##############################################################################################
 
@@ -526,7 +469,6 @@ class MURMENV_m2(PandaBaseEnv):
 
     def get_info(self):
         object_pos = np.asarray(bullet.get_body_info(self._obj)['pos'])
-        # print('object_pos', object_pos)
         object_goal_distance = np.linalg.norm(object_pos - self.goal_pos)
         object_goal_success = int(object_goal_distance < self._success_threshold)
         # print('goal distance',object_goal_distance)
@@ -550,7 +492,13 @@ class MURMENV_m2(PandaBaseEnv):
             left_tip_pos - right_tip_pos)]
         end_effector_pos = self.get_end_effector_pos()
 
+        # Spawning random objects code
+        # object_info = bullet.get_body_info(self._objects['obj'],
+        #                                    quat_to_deg=False)
+
+        # Cube code
         object_info = bullet.get_body_info(self._obj, quat_to_deg=False)
+        # print(' cube',object_info)
         object_pos = object_info['pos']
         # object_theta = object_info['theta']
 
@@ -558,13 +506,13 @@ class MURMENV_m2(PandaBaseEnv):
             end_effector_pos, gripper_tips_distance))
         obj_observation = np.asarray(object_pos)
         goal_pos = np.asarray(self.goal_pos)
-        #print('DOF  @@  HERE')
+        # print('DOF  @@  HERE')
 
         obs_dict = dict(
             state_observation=obj_observation,
             robot_state_observation=observation,
             state_desired_goal=goal_pos,
-            )
+        )
 
         return obs_dict
 
@@ -599,7 +547,10 @@ class MURMENV_m2(PandaBaseEnv):
         elif gripper == 1 and self.obj_index == 2:
             self.grasp2(self._obj)
             p.stepSimulation()
-        elif gripper == 1 and (self.obj_index == 0 or self.obj_index == 1):
+        elif gripper == 1 and self.obj_index == 1:
+            self.grasp1(self._obj)
+            p.stepSimulation()
+        elif gripper == 1 and self.obj_index == 0:
             self.grasp(self._obj)
             p.stepSimulation()
 
@@ -660,6 +611,7 @@ class MURMENV_m2(PandaBaseEnv):
         ee_pos = self.get_end_effector_pos()
         # print(self._obj)
         target_pos = np.array(bullet.get_body_info(self._obj)['pos'])
+        print('target pos', target_pos)
         adjustment = np.array([0, 0, 0.014])  # height adj
         adjustment1 = np.array([0, 0, 0.1])
         adjustment2 = np.array([0, 0, 0.01])
@@ -716,7 +668,7 @@ class MURMENV_m2(PandaBaseEnv):
             self.time_add += 1
 
         if done and 15 > self.time_add > 7:
-            action = np.array([0, 0, 0.15])
+            action = np.array([0, 0, 0.35])
             self.grip = -1
             self.achieve_check += 0.15
 
