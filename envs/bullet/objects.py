@@ -161,6 +161,10 @@ tetris1 = loader(ASSET_PATH, os.path.join("obj", "tetris1.urdf"),
               quat=[0, 0, 0, 1],
               scale=0.045)
 
+tetris2 = loader(ASSET_PATH, os.path.join("obj", "tetris2.urdf"),
+              quat=[0, 0, 0, 1],
+              scale=0.045)
+
 rectangularprism2 = loader(ASSET_PATH, os.path.join("obj", "rectangularprism2.urdf"),
               quat=[0, 0, 0, 1],
               scale=0.06)
