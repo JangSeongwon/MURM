@@ -27,8 +27,8 @@ class MURMENV(PandaBaseEnv):
                  randomize=True,
                  observation_mode='state',
                  #TODO: Image Dimension
-                 obs_img_dim=128,
-                 obs_img_dim_active=128,
+                 obs_img_dim=64,
+                 obs_img_dim_active=64,
                  success_threshold=0.03,
                  transpose_image=False,
                  invisible_robot=False,
@@ -70,9 +70,9 @@ class MURMENV(PandaBaseEnv):
         # self._object_position_high1 = (0.45, 0.1, 1.048)
 
         # # _obj POSITION
-        self._object_position_low = (0.4, -0.1, 1.03)
-        self._object_position_high = (0.5, 0.1, 1.03)
-        self._fixed_object_position = np.array([0.45, 0, 1.03])
+        self._object_position_low = (0.4, -0.1, 1.017)
+        self._object_position_high = (0.5, 0.1, 1.017)
+        self._fixed_object_position = np.array([0.45, 0, 1.017])
 
         self._fixed_object_position1 = np.array([0.45, 0, 1.048])
         self._object_position_low1 = (0.4, -0.1, 1.048)
@@ -103,25 +103,25 @@ class MURMENV(PandaBaseEnv):
         # chosen_box = 6
 
         if chosen_box == 1:
-            goal = np.array([-0.05, -0.4, 1.05])
+            goal = np.array([-0.05, -0.4, 1.037])
         elif chosen_box == 2:
-            goal = np.array([0.1, -0.4, 1.05])
+            goal = np.array([0.1, -0.4, 1.037])
         elif chosen_box == 3:
-            goal = np.array([0.25, -0.4, 1.05])
+            goal = np.array([0.25, -0.4, 1.037])
 
         elif chosen_box == 4:
-            goal = np.array([-0.05, -0.55, 1.05])
+            goal = np.array([-0.05, -0.55, 1.037])
         elif chosen_box == 5:
-            goal = np.array([0.1, -0.55, 1.05])
+            goal = np.array([0.1, -0.55, 1.037])
         elif chosen_box == 6:
-            goal = np.array([0.25, -0.55, 1.05])
+            goal = np.array([0.25, -0.55, 1.037])
 
         elif chosen_box == 7:
-            goal = np.array([-0.05, -0.7, 1.05])
+            goal = np.array([-0.05, -0.7, 1.037])
         elif chosen_box == 8:
-            goal = np.array([0.1, -0.7, 1.05])
+            goal = np.array([0.1, -0.7, 1.037])
         elif chosen_box == 9:
-            goal = np.array([0.25, -0.7, 1.05])
+            goal = np.array([0.25, -0.7, 1.037])
 
         return goal
 
@@ -180,7 +180,9 @@ class MURMENV(PandaBaseEnv):
         self._obj = self.random_obj_generation()
         # print('cube 0 / prism1 1 / prism2 2 / ', self.obj_index)
         rgba = self.sample_object_color()
-        p.changeVisualShape(self._obj, -1, rgbaColor=rgba)
+        for i in range(-1, 5):
+            rgba = rgba
+            p.changeVisualShape(self._obj, i, rgbaColor=rgba)
         self._format_state_query()
 
         #Goal Generation Process
@@ -191,7 +193,7 @@ class MURMENV(PandaBaseEnv):
         return self.get_observation()
 
     def sample_object_location(self):
-        if self.obj_index == 0 or self.obj_index == 1:
+        if self.obj_index == 0 or self.obj_index == 1 or self.obj_index == 3:
             initial_random_pos = np.random.uniform(low=self._object_position_low, high=self._object_position_high)
             # print('Initial pos', initial_random_pos)
         elif self.obj_index == 2:
@@ -207,22 +209,30 @@ class MURMENV(PandaBaseEnv):
         return a
 
     def random_obj_generation(self):
-        random_shape = ['cube', 'rectangularprism1', 'rectangularprism2']
+        random_shape = ['cube', 'rectangularprism', 'tetris1']
         chosen_shape = random.choice(random_shape)
 
-        # chosen_shape = 'rectangularprism1' #Bottle
         # chosen_shape = 'cube'
+        # chosen_shape = 'rectangularprism1'
+        # chosen_shape = 'tetris1'
+        # chosen_shape = 'rectangularprism2' #Bottle
+
         if chosen_shape == 'cube':
             self.obj_index = 0
             obj = bullet.objects.cube(pos=self.sample_object_location())
 
-        elif chosen_shape == 'rectangularprism1':
+        elif chosen_shape == 'rectangularprism':
             self.obj_index = 1
-            obj = bullet.objects.rectangularprism1(pos=self.sample_object_location()) #[0.5, 0.1, 1.03])
+            obj = bullet.objects.rectangularprism(pos=self.sample_object_location()) #[0.5, 0.1, 1.03])
+
+        elif chosen_shape == 'tetris1':
+            self.obj_index = 1
+            obj = bullet.objects.tetris1(pos=self.sample_object_location())
 
         elif chosen_shape == 'rectangularprism2':
             self.obj_index = 2
             obj = bullet.objects.rectangularprism2(pos=self.sample_object_location())
+
         else:
             exit()
 
@@ -700,6 +710,7 @@ class MURMENV(PandaBaseEnv):
     def my_action(self, goal):
         ee_pos = self.get_end_effector_pos()
         target_pos = np.array(bullet.get_body_info(self._obj)['pos'])
+        # print('target pos', target_pos)
         adjustment = np.array([0, 0, 0.014])
         adjustment1 = np.array([0, 0, 0.1])
         adjustment2 = np.array([0, 0, 0.01])
@@ -772,13 +783,13 @@ class MURMENV(PandaBaseEnv):
                 self.grip = -1
 
             elif aligned and not on_top:
-                #print('Stage 2: Not on top')
+                # print('Stage 2: Not on top')
                 action = np.array([0., 0., -0.3])
                 # action = np.append(action, ori_angle)
                 self.grip = -1
 
             elif not aligned and on_top:
-                #print('Stage 2: Aligning')
+                # print('Stage 2: Aligning')
                 action = target_pos - ee_pos
                 action[2] = 0
                 action *= 0.5
@@ -786,7 +797,7 @@ class MURMENV(PandaBaseEnv):
                 self.grip = -1
 
             elif aligned and on_top:
-                #print('Stage 4: Grasping')
+                # print('Stage 4: Grasping')
                 action = np.array([0., 0., 0])
                 # action = np.append(action, ori_angle)
                 self.grip = 1
