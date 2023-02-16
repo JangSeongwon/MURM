@@ -14,12 +14,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--name", type=str, default='singleview')
 # parser.add_argument("--name", type=str, default='multiview1')
 # parser.add_argument("--name", type=str, default='multiview2')
-parser.add_argument("--num_episodes", type=int, default=200)
-parser.add_argument("--num_timesteps", type=int, default=275)
-parser.add_argument("--video_save", type=int, default=1, help="Set to zero for no video saving")
+parser.add_argument("--num_episodes", type=int, default=500)
+parser.add_argument("--num_timesteps", type=int, default=250)
+parser.add_argument("--video_save", type=int, default=0, help="Set to zero for no video saving")
 args = parser.parse_args()
 
-path = "/media/jang/jang/0ubuntu/demos_dataset/SingleView/"
+path = "/media/jang/jang/0ubuntu/demos_dataset/64/SingleView/demo_singleview_final/"
 demo_data_save_path = path + args.name + "_demos"
 gImage_save_path = path + args.name + "_global_images.npy"
 aImage_save_path = path + args.name + "_active_images.npy"
@@ -73,15 +73,16 @@ for j in tqdm(range(args.num_episodes)):
         #print('Saving Action', action)
         next_observation, reward, done, info = env.step(action)
 
-        if i == 1:
-            print(observation.keys())
-            print(next_observation.keys())
-            for a in observation.values():
-                print('observation / must be 3 4 3 49152 49152', a.shape)
-            for a in next_observation.values():
-                print('next_observation', a.shape)
+        # if i == 1:
+        #     print('3 4 3 12288 12288', observation.keys())
+        #     print(next_observation.keys())
+        #     for a in observation.values():
+        #         print('observation', a.shape)
+        #     # print(observation)
+            # for a in next_observation.values():
+            #     print('next_observation', a.shape)
 
-        # print('observation = 128*128*3 49152', observation['image_global_observation'])
+        # print('observation = 64*64*3 12288', observation['image_global_observation'])
         # print('observation', observation['image_active_observation'])
 
         # Obs before action
@@ -93,12 +94,12 @@ for j in tqdm(range(args.num_episodes)):
         trajectory['rewards'][i] = reward
 
         #Checking with videos (Global & Active)
-        # if args.video_save:
-        #     img = env.render_obs()
-        #     images.append(img)
-        # if args.video_save:
-        #     img_active = env.render_obs_active()
-        #     images_active.append(img_active)
+        if args.video_save:
+            img = env.render_obs()
+            images.append(img)
+        if args.video_save:
+            img_active = env.render_obs_active()
+            images_active.append(img_active)
 
     if reward == -1:
         print('checking final reward', reward)
@@ -106,16 +107,18 @@ for j in tqdm(range(args.num_episodes)):
     demo_dataset.append(trajectory)
     avg_tasks_done += env.done
 
-    if ((j + 1) % 200) == 0:
+    if ((j + 1) % 500) == 0:
         curr_name = demo_data_save_path + '_{0}.pkl'.format(num_datasets)
         file = open(curr_name, 'wb')
         pkl.dump(demo_dataset, file)
         file.close()
         demo_dataset = []
 
-    # if args.video_save:
-    # #     if j % 30 == 0:
-    # roboverse.utils.save_video('{}/{}_global.avi'.format(path, j), images)
-    # roboverse.utils.save_video('{}/{}_active.avi'.format(path, j), images_active)
+        num_datasets += 1
+
+    if args.video_save:
+        # if j % 30 == 0:
+        roboverse.utils.save_video('{}/{}_global.avi'.format(path, j), images)
+        roboverse.utils.save_video('{}/{}_active.avi'.format(path, j), images_active)
 
 print('Demo Success Rate: {}'.format(avg_tasks_done / args.num_episodes))
