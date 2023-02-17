@@ -77,19 +77,41 @@ class EncoderWrappedEnv(ProxyEnv):
 
     def step(self, action):
         self.model.eval()
+        if self.MURM_view == 'murm':
+            self.model_active_murm.eval()
         obs, reward, done, info = self.wrapped_env.step(action)
         new_obs = self._update_obs(obs)
         return new_obs, reward, done, info
 
     def _update_obs(self, obs):
-        self.model.eval()
-        for key in self.step_keys_map:
-            value = self.step_keys_map[key]
-            # print('keys in step keys', value, key)
-            obs[value] = self.model.encode_one_np(obs[key])
-        del obs['image_active_observation'] #Global Needed for video
+        if self.MURM_view == 'murm':
+            self.model.eval()
+            self.model_active_murm.eval()
+            for key in self.step_keys_map:
+                if key == 'image_global_observation':
+                    value = self.step_keys_map[key]
+                    # print('value', value)
+                    obs[value] = self.model.encode_one_np(obs[key])
+                elif key == 'image_active_observation':
+                    value = self.step_keys_map[key]
+                    # print('value', value)
+                    obs[value] = self.model_active_murm.encode_one_np(obs[key])
+                else:
+                    print('Encoder Wrapper Encoding error')
+                    exit()
+            del obs['image_active_observation']  # Global Needed for video
 
-        obs = {**obs}
+            obs = {**obs}
+            # print('obs form final', obs)
+        else:
+            self.model.eval()
+            for key in self.step_keys_map:
+                value = self.step_keys_map[key]
+                # print('keys in step keys', value, key)
+                obs[value] = self.model.encode_one_np(obs[key])
+            del obs['image_active_observation'] #Global Needed for video
+
+            obs = {**obs}
         # obs = {**obs, **self.reset_obs} #original with initial
         # print('obs in steps', obs)
         # print('lets check step key left', self.step_keys_map)
