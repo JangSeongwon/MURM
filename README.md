@@ -88,7 +88,7 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/17 Analysis   
+2/18 Analysis   
 
 128*128  
 Training time offline = maybe 300 (14 hours), 500 (22 hours)  
