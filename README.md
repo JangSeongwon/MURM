@@ -96,7 +96,7 @@ Training time online = maybe 250 (24 hours), 100 (9 hours)
 
 64*64
 Main computer  
-Training time offline = 50 e ( 4.5hour / MURM version)    
+Training time offline = 100 e ( 2.5hour / MURM version)    
 Training time online = 50 e ( hours)   
   
 computer3  
