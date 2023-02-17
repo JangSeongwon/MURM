@@ -88,7 +88,7 @@ class ContextualEnv(gym.Wrapper):
     def __init__(
             self,
             env: gym.Env,
-            context_distribution: DictDistribution, #TODO: Defined
+            context_distribution: DictDistribution,
             reward_fn: ContextualRewardFn,
             observation_key=None,  # for backwards compatibility
             observation_keys=None,
@@ -141,8 +141,10 @@ class ContextualEnv(gym.Wrapper):
             if len(self._curr_context) == 1:
                 self.goal_latent_produced[key] = self._curr_context[0]
                 # print('goal keys check for sampling', self.goal_latent_produced)
+                # print('Conetextual env goal')
             elif len(self._curr_context) == 2:
                 self.goal_latent_produced[key] = self._curr_context[key][0]
+                # print('Contextual env MURM goal')
             else:
                 exit()
         # print('goal latent produced checking in contextial env', self.goal_latent_produced)
