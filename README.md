@@ -89,6 +89,7 @@ Env2: Multi-view task
 -------------------------- 
 
 2/19 Analysis   
+*Running with fixed position, focusing on placing with simplified pickup process*  
 
 128*128  
 Training time offline = maybe 300 (14 hours), 500 (22 hours)  
