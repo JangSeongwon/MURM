@@ -93,10 +93,6 @@ Env2: Multi-view task
 
 + Need to change .csv file format   
 
-128*128  
-Training time offline = maybe 300 (14 hours), 500 (22 hours)  
-Training time online = maybe 250 (24 hours), 100 (9 hours)
-
 64*64
 Main computer  
 Training time offline = 100 e ( 2.5hour / MURM version)    
@@ -159,3 +155,7 @@ Possible implementation of VQVAE2:
       weight decay = 0  
       latent_loss_weight = 0.25  
       batch = 128  
+
+128*128  
+Training time offline = maybe 300 (14 hours), 500 (22 hours)  
+Training time online = maybe 250 (24 hours), 100 (9 hours)  
