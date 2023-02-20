@@ -88,8 +88,10 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/19 Analysis   
+2/20 Analysis   
 *Running with fixed position, focusing on placing with simplified pickup process*  
+
++ Need to change .csv file format   
 
 128*128  
 Training time offline = maybe 300 (14 hours), 500 (22 hours)  
