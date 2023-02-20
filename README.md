@@ -101,10 +101,14 @@ Training time online = maybe 250 (24 hours), 100 (9 hours)
 Main computer  
 Training time offline = 100 e ( 2.5hour / MURM version)    
 Training time online = 50 e ( hours)   
-  
+    
+computer2  
+Training time offline = 100 e ( 6hours )    
+Training time online = 50 e ( 6hours) 
+
 computer3  
-Training time offline = 100 e ( 4hours )    
-Training time online = 50 e ( hours) 
+Training time offline = 100 e ( 4.5hours )    
+Training time online = 50 e ( 5hours) 
   
 
 1. Collecting demo data with third computer    
