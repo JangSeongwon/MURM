@@ -93,7 +93,7 @@ Env2: Multi-view task
 
 + Need to change .csv file format   
 
-64*64
+48*48 version...  
 Main computer  
 Training time offline = 100 e ( 2.5hour / MURM version)    
 Training time online = 50 e ( hours)   
