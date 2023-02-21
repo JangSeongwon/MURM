@@ -1,0 +1,2 @@
+n = random.uniform(0, 0.1)
+n = round(n, 2)
