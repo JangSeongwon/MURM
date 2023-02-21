@@ -88,7 +88,7 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/21 Analysis   
+2/22 Analysis   
 *Running with fixed position, focusing on placing with simplified pickup process*  
 
 + Need to change .csv file format   
