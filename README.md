@@ -95,11 +95,11 @@ Env2: Multi-view task
 
 48*48 version...  
 Main computer  
-Training time offline = 100 e ( 2.5hour / MURM version)    
+Training time offline = 100 e ( 1.5hour / MURM version)    
 Training time online = 50 e ( hours)   
     
 computer2  
-Training time offline = 100 e ( 6hours )    
+Training time offline = 100 e ( 3hours / MURM version)    
 Training time online = 50 e ( 6hours) 
 
 computer3  
