@@ -103,7 +103,7 @@ Training time offline = 100 e ( 6hours )
 Training time online = 50 e ( 6hours) 
 
 computer3  
-Training time offline = 100 e ( 4.5hours )    
+Training time offline = 50 e ( 4.5hours ) 5177    
 Training time online = 50 e ( 5hours) 
   
 
