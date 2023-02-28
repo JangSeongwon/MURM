@@ -88,7 +88,7 @@ Env2: Multi-view task
             
 -------------------------- 
 
-2/27 Analysis   
+2/28 Analysis   
 *Running with fixed position, focusing on placing with simplified pickup process*  
 *Need to More simplify the task...*    
   
