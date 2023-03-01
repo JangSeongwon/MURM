@@ -13,7 +13,7 @@ class PandaBaseEnv(gym.Env, Serializable):
     initial_positions = {
         'panda_joint1': 0.026496795467637068, 'panda_joint2': 0.40275097033593005, 'panda_joint3': -0.014368403486519035,
         'panda_joint4': -2.542796712924263, 'panda_joint5': 0.0289571100113925, 'panda_joint6': 2.945444188383354,
-        'panda_joint7': 0.7702736492186028, 'panda_finger_joint1': 0.03, 'panda_finger_joint2': 0.03,
+        'panda_joint7': 0.7702736492186028, 'panda_finger_joint1': 0.015, 'panda_finger_joint2': 0.015,
     }
 
     def __init__(self,
