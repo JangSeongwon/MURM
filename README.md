@@ -100,7 +100,7 @@ Training time offline = 100 e ( 1hour / MURM version)
 Training time online = 50 e ( hours)   
     
 computer2  
-Training time offline = 100 e ( 3hours / MURM version)    
+Training time offline = 100 e ( 1hours / Global version)    
 Training time online = 50 e ( 6hours) 
 
 computer3  
