@@ -89,10 +89,7 @@ Env2: Multi-view task
 -------------------------- 
 
 3/3 Analysis   
-*Running with fixed position, focusing on placing with simplified pickup process*  
-*Need to More simplify the task by picking up straight ahead...*    
-  
-+ Need to change .csv file format   
+Okay - Use Moving average graphs      
 
 48*48 version...  
 Main computer  
