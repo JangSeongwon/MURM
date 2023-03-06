@@ -70,8 +70,8 @@ class RewardFn:
                  env,
                  obs_type='latent',
                  reward_type='dense',
-                 epsilon=1.0,
-                 epsilon_murm=1.0,
+                 epsilon=3.0,
+                 epsilon_murm=2.5,
                  ):
 
         if obs_type == 'latent':
@@ -97,15 +97,18 @@ class RewardFn:
 
     def __call__(self, states, actions, next_states, contexts):
         s = self.process(next_states[self.obs_key])
-
         '''len = 5120 in demo buffer'''
 
         if self.MURM_view == 'murm':
             # print('Getting MURM goals')
             s2 = self.process(next_states[self.obs_key_murm])
+            # print('s2', s2, s2.shape)
             c = self.process(contexts[self.goal_key])
+            # print('c', c, c.shape)
             c2 = self.process(contexts[self.goal_key_murm])
+            # print('c2', c2, c2.shape)
         else:
+            # print('self goal key', self.goal_key)
             c = self.process(contexts[self.goal_key])
 
         terminal = np.zeros((s.shape[0], ), dtype=np.uint8)
@@ -114,20 +117,57 @@ class RewardFn:
         if self.reward_type == 'dense':
             reward = -np.linalg.norm(s - c, axis=1)
 
-        elif self.reward_type == 'sparse' and self.MURM_view == ('g' or 'a'):
+        elif self.reward_type == 'sparse' and self.MURM_view == 'g':
+            # print('epsilon', self.epsilon)
+            success = np.linalg.norm(s - c, axis=1) < self.epsilon
+            reward = success - 1
+
+        elif self.reward_type == 'sparse' and self.MURM_view == 'a':
             # print('epsilon', self.epsilon)
             success = np.linalg.norm(s - c, axis=1) < self.epsilon
             reward = success - 1
 
         elif self.reward_type == 'sparse' and self.MURM_view == 'murm':
-            success = np.linalg.norm(s - c, axis=1) < self.epsilon
-            success1 = np.linalg.norm(s2 - c2, axis=1) < self.epsilon_murm
-            reward = success/2 + success1/2 - 1
+            x = np.linalg.norm(s - c, axis=1) < self.epsilon
+            y = np.linalg.norm(s2 - c2, axis=1) < self.epsilon_murm
+
+            if 0 == x.size:
+                success = 0
+            elif x.size == 256:
+                success = []
+                for i in range(256):
+                    p = [int(x[i])]
+                    # print('p', p)
+                    success = np.append(success, p, axis=0)
+                # print(success.size, success)
+            else:
+                success = int(x)
+
+            if y.size == 0:
+                success1 = 0
+            elif y.size == 256:
+                success1 = []
+                for i in range(256):
+                    q = [int(y[i])]
+                    # print('q', q)
+                    success1 = np.append(success1, q, axis=0)
+                # print(success1.size, success1)
+            else:
+                success1 = int(y)
+
+            # print(success, success1, success+success1)
+            if x.size == 256:
+                reward = success + success1 - 1
+                # print(reward.size)
+            elif x.size == 0:
+                reward = np.empty(0)
+            else:
+                reward = np.array([success + success1 - 2])
+            # print(self.epsilon, self.epsilon_murm)
             # print('MURM reward', reward)
 
         else:
             raise ValueError(self.reward_type)
-
         return reward, terminal
 
 
@@ -155,27 +195,27 @@ def process_args(variant):
         if len(demo_paths) > 1:
             variant['path_loader_kwargs']['demo_paths'] = [demo_paths[0]]
 
-
-def add_gripper_state_obs(
-    rollout
-):
-    def wrapper(*args, **kwargs):
-        paths = rollout(*args, **kwargs)
-        for i in range(paths['observations'].shape[0]):
-            d = paths['observations'][i]
-            d['gripper_state_observation'] = process_gripper_state(
-                d['state_observation'])
-            d['gripper_state_desired_goal'] = process_gripper_state(
-                d['state_desired_goal'])
-
-        for i in range(paths['next_observations'].shape[0]):
-            d = paths['next_observations'][i]
-            d['gripper_state_observation'] = process_gripper_state(
-                d['state_observation'])
-            d['gripper_state_desired_goal'] = process_gripper_state(
-                d['state_desired_goal'])
-        return paths
-    return wrapper
+#
+# def add_gripper_state_obs(
+#     rollout
+# ):
+#     def wrapper(*args, **kwargs):
+#         paths = rollout(*args, **kwargs)
+#         for i in range(paths['observations'].shape[0]):
+#             d = paths['observations'][i]
+#             d['gripper_state_observation'] = process_gripper_state(
+#                 d['state_observation'])
+#             d['gripper_state_desired_goal'] = process_gripper_state(
+#                 d['state_desired_goal'])
+#
+#         for i in range(paths['next_observations'].shape[0]):
+#             d = paths['next_observations'][i]
+#             d['gripper_state_observation'] = process_gripper_state(
+#                 d['state_observation'])
+#             d['gripper_state_desired_goal'] = process_gripper_state(
+#                 d['state_desired_goal'])
+#         return paths
+#     return wrapper
 
 
 def murm_experiment(
@@ -280,6 +320,21 @@ def murm_experiment(
     if not renderer_kwargs:
         renderer_kwargs = {}
 
+    if env_type == 'trial2':
+        reward_kwargs['epsilon_murm'] = 1.0
+
+    elif env_type == 'trial3':
+        algo_kwargs['start_epoch'] = -200
+        algo_kwargs['num_epoch'] = 151
+        a = online_offline_split_replay_buffer_kwargs['offline_replay_buffer_kwargs']
+        a['fraction_next_context'] = 0.1
+        a['fraction_future_context'] = 0.5
+
+    elif env_type == 'trial4':
+        algo_kwargs['start_epoch'] = -200
+        algo_kwargs['num_epoch'] = 201
+
+
     # Enviorment Wrapping
     logging.info('Creating the environment...')
     torch.cuda.current_device()
@@ -363,6 +418,7 @@ def murm_experiment(
         elif goal_sampling_mode == 'given_latent':
             latent_goal_distribution = murmlatentgoalspace(
                 model=vqvae,
+                model_active_murm=vqvae_add_murm,
                 env=state_env,
                 key=distrib_goal_key,
                 rep=vqvae.representation_size,
@@ -371,7 +427,7 @@ def murm_experiment(
             diagnostics = state_env.get_contextual_diagnostics
         else:
             raise ValueError
-        
+
         reward_fn = RewardFn(
             MURM_view,
             state_env,
@@ -409,7 +465,7 @@ def murm_experiment(
         model_murm = call_model_active
         path_loader_kwargs['model'] = model  # ['vqvae']
         path_loader_kwargs['model_murm'] = model_murm  # ['vqvae']
-        print('MURM VQVAE Two Model', model, model_murm)
+        # print('MURM VQVAE Two Model', model, model_murm)
 
     elif MURM_view == 'g':
         model = call_model_global
@@ -491,8 +547,8 @@ def murm_experiment(
     if MURM_view == 'murm':
         obs_dim = (
                 eval_env.observation_space.spaces[observation_key].low.size
-                + eval_env.observation_space.spaces[murm_observation_key].low.size
                 + eval_env.observation_space.spaces[context_key].low.size
+                + eval_env.observation_space.spaces[murm_observation_key].low.size
                 + eval_env.observation_space.spaces[murm_context_key].low.size
         )
         print('obs_dim', obs_dim)
@@ -544,18 +600,32 @@ def murm_experiment(
                               next_obs_dict,
                               new_contexts):
         obs = batch['observations']
-        if type(obs) is tuple:
-            obs = np.concatenate(obs, axis=1)
+        # print('tuple?', obs, '//', obs[0], '//', obs[1])
         next_obs = batch['next_observations']
-        if type(next_obs) is tuple:
-            next_obs = np.concatenate(next_obs, axis=1)
-        if len(new_contexts.keys()) > 1:
-            context = np.concatenate(tuple(new_contexts.values()), axis=1)
+
+        if MURM_view == 'murm':
+            batch['observations'] = np.concatenate([obs[0],
+                                                    new_contexts['latent_desired_goal'],
+                                                    obs[1],
+                                                    new_contexts['latent_desired_goal_murm']], axis=1)
+            batch['next_observations'] = np.concatenate([next_obs[0],
+                                                         new_contexts['latent_desired_goal'],
+                                                         next_obs[1],
+                                                         new_contexts['latent_desired_goal_murm']], axis=1)
         else:
-            context = batch[context_key]
-        batch['observations'] = np.concatenate([obs, context], axis=1)
-        batch['next_observations'] = np.concatenate(
-            [next_obs, context], axis=1)
+            if type(obs) is tuple:
+                obs = np.concatenate(obs, axis=1)
+            if type(next_obs) is tuple:
+                next_obs = np.concatenate(next_obs, axis=1)
+            if len(new_contexts.keys()) > 1:
+                #     print('check', len(new_contexts.keys()))
+                #     print('check 2', new_contexts['latent_desired_goal'])
+                context = np.concatenate(tuple(new_contexts.values()), axis=1)
+            else:
+                context = batch[context_key]
+            batch['observations'] = np.concatenate([obs, context], axis=1)
+            batch['next_observations'] = np.concatenate([next_obs, context], axis=1)
+        # print('batch see',batch)
         return batch
 
     online_replay_buffer_kwargs = online_offline_split_replay_buffer_kwargs[
@@ -563,21 +633,21 @@ def murm_experiment(
     offline_replay_buffer_kwargs = online_offline_split_replay_buffer_kwargs[
         'offline_replay_buffer_kwargs']
 
-    for rb_kwargs in [
-            online_replay_buffer_kwargs,
-            offline_replay_buffer_kwargs]:
-        rb_kwargs['fraction_next_context'] = (
-            replay_buffer_kwargs['fraction_next_context'])
-        rb_kwargs['fraction_future_context'] = (
-            replay_buffer_kwargs['fraction_future_context'])
-        rb_kwargs['fraction_foresight_context'] = (
-            replay_buffer_kwargs['fraction_foresight_context'])
-        rb_kwargs['fraction_perturbed_context'] = (
-            replay_buffer_kwargs['fraction_perturbed_context'])
-        rb_kwargs['fraction_distribution_context'] = (
-            replay_buffer_kwargs['fraction_distribution_context'])
-        rb_kwargs['max_future_dt'] = (
-            replay_buffer_kwargs['max_future_dt'])
+    # for rb_kwargs in [
+    #         online_replay_buffer_kwargs,
+    #         offline_replay_buffer_kwargs]:
+    #     rb_kwargs['fraction_next_context'] = (
+    #         replay_buffer_kwargs['fraction_next_context'])
+    #     rb_kwargs['fraction_future_context'] = (
+    #         replay_buffer_kwargs['fraction_future_context'])
+    #     rb_kwargs['fraction_foresight_context'] = (
+    #         replay_buffer_kwargs['fraction_foresight_context'])
+    #     rb_kwargs['fraction_perturbed_context'] = (
+    #         replay_buffer_kwargs['fraction_perturbed_context'])
+    #     rb_kwargs['fraction_distribution_context'] = (
+    #         replay_buffer_kwargs['fraction_distribution_context'])
+    #     rb_kwargs['max_future_dt'] = (
+    #         replay_buffer_kwargs['max_future_dt'])
 
     if online_offline_split:
         online_replay_buffer = ContextualRelabelingReplayBuffer(
@@ -716,7 +786,7 @@ def murm_experiment(
     eval_policy = policy
 
     eval_path_collector = ContextualPathCollector(
-        eval_env, # This env is Contextual env which is called to collect data in RL batch first
+        eval_env,
         eval_policy,
         observation_keys=path_collector_observation_keys,
         context_keys_for_policy=path_collector_context_keys_for_policy,
@@ -750,6 +820,7 @@ def murm_experiment(
     model['vf'] = vf
     model['qf1'] = qf1
     model['qf2'] = qf2
+    print('Model Check', model)
 
     # Algorithm
     trainer = IQLTrainer(
