@@ -5,11 +5,12 @@ print in murm.py
 obs_processor check in murm version  
 
 action = np.clip(action[0], a_min=-1, a_max=1)
-
+        
+        IN ROLLOUT FUNCTION
+gripper = a[-1]
 if gripper >= 0:
-gripper = 1
+    gripper = 1
 else:
-gripper = -1
-print('gripper', gripper)
-        
-        
+    gripper = -1
+a[-1] = gripper
+# print('action', a)        
