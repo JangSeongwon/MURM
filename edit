@@ -4,3 +4,6 @@ n = round(n, 2)
 print in murm.py  
 obs_processor check in murm version  
 
+action = np.clip(action[0], a_min=-1, a_max=1)
+            action[0] = np.clip(action[0], a_min=-1, a_max=1)
+            action[1] = np.clip(action[1], a_min=-1, a_max=1)
