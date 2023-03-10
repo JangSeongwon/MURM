@@ -25,15 +25,23 @@ class PandaBaseEnv_t3(gym.Env, Serializable):
                  solver_iterations=150,
                  gripper_bounds=[-1,1],
                  pos_init=[0, 0.0, 1.0],
-                 pos_low=[-0.6,-0.7, 1],
-                 pos_high=[0.6,0.7, 2.2],
+
+                 # task1
+                 # pos_low=[0.225, -0.55, 1.0],
+                 # pos_high=[0.575, 0.05, 1.2],
+                 # task2
+                 # pos_low=[0.25, -0.45, 1.0],
+                 # pos_high=[0.55, 0.05, 1.25],
+                 # task3
+                 pos_low=[0.25, -0.15, 1.0],
+                 pos_high=[0.55, 0.25, 1.25],
+
                  max_force=1000.,
                  visualize=True,
-
-                 use_IK = 1,
-                 control_orientation = 0,
-                 control_eu_or_quat = 0,
-                 joint_action_space = 9
+                 use_IK=1,
+                 control_orientation=0,
+                 control_eu_or_quat=0,
+                 joint_action_space=9
                  ):
 
         self._use_IK = use_IK
