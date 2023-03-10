@@ -33,4 +33,21 @@ a[-1] = gripper
  # pos_high=[0.55, 0.25, 1.25],
  
  
- 
+     elif x.size == 153 or x.size == 103 or y.size == 153 or y.size == 103:
+        success = []
+        if x.size == 153:
+            num = 153
+        else:
+            num = 103
+        for i in range(num):
+            p = [int(x[i])]
+            # print('p', p)
+            success = np.append(success, p, axis=0)
+        # print(success.size, success)
+        success1 = []
+        for i in range(num):
+            q = [int(y[i])]
+            # print('q', q)
+            success1 = np.append(success1, q, axis=0)
+        # print(success1.size, success1)
+        reward = success + success1 - 1
