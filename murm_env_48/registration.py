@@ -13,7 +13,7 @@ BULLET_ENVIRONMENT_SPECS = (
 
 {
         'id': 'MURMENV-v3',
-        'entry_point': ('roboverse.envs.murm_env_v3:MURMENV_v3'),
+        'entry_point': ('roboverse.envs.murm_env_v4:MURMENV_v3'),
     },
 
 
