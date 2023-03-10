@@ -77,12 +77,8 @@ class MURMENV(PandaBaseEnv):
         self._fixed_object_position = np.array([0.445, 0.0035, 1.017])
         # self._fixed_object_position = np.array([0.275, -0.285, 1.017])
 
-
         self.default_theta = bullet.deg_to_quat([180, 0, 0])
         self._success_threshold = success_threshold
-
-        self._pos_low = [0.225, -0.55, 1.0]
-        self._pos_high = [0.575, 0.05, 1.2]
 
         #Global Camera
         self.obs_img_dim = obs_img_dim #+.15
@@ -127,7 +123,6 @@ class MURMENV(PandaBaseEnv):
         return goal
 
     def reset(self, change_object=False):
-
         # Load Environment
         bullet.reset()
         bullet.setup_headless(self._timestep, solver_iterations=self._solver_iterations)
@@ -259,7 +254,7 @@ class MURMENV(PandaBaseEnv):
 
         quaternion = p.getQuaternionFromEuler([m.pi, 0, 0])
         # print('quaternion', quaternion)
-        final_pos = self.goal_pos + np.array([0, 0.014, 0.016])
+        final_pos = self.goal_pos + np.array([-0.01, 0, 0.016])
         IK = p.calculateInverseKinematics(self._panda, 11, final_pos, targetOrientation=quaternion, maxNumIterations=500, residualThreshold=0.001)
         # for i in range(15):
         #     print('link', p.getLinkState(self._panda, i))
@@ -362,8 +357,8 @@ class MURMENV(PandaBaseEnv):
         ee_pos_check = self.get_end_effector_pos()
         # print('obj, ee pos for goal', target_pos_check, ee_pos_check)
 
-        goal_global = np.uint8(self.render_obs())
-        goal_active = np.uint8(self.render_obs_active())
+        goal_global = np.float32(self.render_obs())
+        goal_active = np.float32(self.render_obs_active())
 
         num_joints = p.getNumJoints(self._panda)
         for i in range(num_joints):
@@ -381,8 +376,8 @@ class MURMENV(PandaBaseEnv):
 
         p.resetBasePositionAndOrientation(self._obj, a, q)
 
-        reset_global = np.uint8(self.render_obs())
-        reset_active = np.uint8(self.render_obs_active())
+        reset_global = np.float32(self.render_obs())
+        reset_active = np.float32(self.render_obs_active())
 
         np.save(image_check_save_path+"v2_1.npy", goal_global)
         np.save(image_check_save_path+"v2_2.npy", goal_active)
@@ -411,7 +406,9 @@ class MURMENV(PandaBaseEnv):
     def _format_action(self, *action):
         if self.DoF == 3:
             if len(action) == 1:
-                delta_pos, gripper = action[0][:-1], action[0][-1]
+                action = np.clip(action[0], a_min=-1, a_max=1)
+                # print('action', action)
+                delta_pos, gripper = action[:-1], action[-1]
             elif len(action) == 2:
                 delta_pos, gripper = action[0], action[1]
             else:
@@ -543,7 +540,7 @@ class MURMENV(PandaBaseEnv):
                 eps3.append(height > 0.1)
 
         # diagnostics_key = goal_key + "/distance"
-        diagnostics.update(create_stats_ordered_dict(goal_key + "/success", eps1))
+        # diagnostics.update(create_stats_ordered_dict(goal_key + "/success", eps1))
         # diagnostics.update(create_stats_ordered_dict(goal_key + "/success_close", eps2))
         # diagnostics.update(create_stats_ordered_dict(goal_key + "/checking_whether_picked_up", eps3))
 
@@ -648,7 +645,6 @@ class MURMENV(PandaBaseEnv):
         # delta_pos, delta_angle, gripper = self._format_action(*action)
         delta_pos, gripper = self._format_action(*action)
 
-        #print('gripper',gripper)
         if gripper == -1:
             self.pre_grasp()
             p.stepSimulation()
@@ -764,7 +760,6 @@ class MURMENV(PandaBaseEnv):
             # print('Reached')
             action = np.array([0, 0, 0])
             self.grip = -1
-            self.time_add += 1
 
         if not grasp and self.goal_near == 0:
             if not aligned:
