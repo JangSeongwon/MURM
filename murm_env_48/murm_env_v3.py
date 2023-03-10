@@ -79,9 +79,6 @@ class MURMENV_v3(PandaBaseEnv_t3):
         self.default_theta = bullet.deg_to_quat([180, 0, 0])
         self._success_threshold = success_threshold
 
-        self._pos_low = [0.225, -0.55, 1.0]
-        self._pos_high = [0.575, 0.05, 1.2]
-
         #Global Camera
         self.obs_img_dim = obs_img_dim #+.15
         #Active Camera
@@ -339,7 +336,8 @@ class MURMENV_v3(PandaBaseEnv_t3):
     def _format_action(self, *action):
         if self.DoF == 3:
             if len(action) == 1:
-                delta_pos, gripper = action[0][:-1], action[0][-1]
+                action = np.clip(action[0], a_min=-1, a_max=1)
+                delta_pos, gripper = action[:-1], action[-1]
             elif len(action) == 2:
                 delta_pos, gripper = action[0], action[1]
             else:
@@ -457,7 +455,7 @@ class MURMENV_v3(PandaBaseEnv_t3):
                 eps1.append(distance > self._success_threshold)
 
         # diagnostics_key = goal_key + "/distance"
-        diagnostics.update(create_stats_ordered_dict(goal_key + "/success", eps1))
+        # diagnostics.update(create_stats_ordered_dict(goal_key + "/success", eps1))
         # diagnostics.update(create_stats_ordered_dict(goal_key + "/success_close", eps2))
         # diagnostics.update(create_stats_ordered_dict(goal_key + "/checking_whether_picked_up", eps3))
 
@@ -563,7 +561,7 @@ class MURMENV_v3(PandaBaseEnv_t3):
         # delta_pos, delta_angle, gripper = self._format_action(*action)
         delta_pos, gripper = self._format_action(*action)
 
-        #print('gripper',gripper)
+
         if gripper == -1:
             self.pre_grasp()
             p.stepSimulation()
@@ -599,7 +597,7 @@ class MURMENV_v3(PandaBaseEnv_t3):
         info = self.get_info()
         reward = self.get_reward(info)
         done = False
-        self.timeStep += 1
+        # self.timeStep += 1
 
         return observation, reward, done, info
 
@@ -658,7 +656,7 @@ class MURMENV_v3(PandaBaseEnv_t3):
         #print('Check Grasp',grasp)
 
         # if self.timeStep > 200:
-        print('time', self.timeStep)
+        # print('time', self.timeStep)
 
         action = np.array([0, 0, 0])
         self.grip = 1
