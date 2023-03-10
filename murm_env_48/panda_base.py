@@ -13,7 +13,7 @@ class PandaBaseEnv(gym.Env, Serializable):
     initial_positions = {
         'panda_joint1': 0.026496795467637068, 'panda_joint2': 0.40275097033593005, 'panda_joint3': -0.014368403486519035,
         'panda_joint4': -2.542796712924263, 'panda_joint5': 0.0289571100113925, 'panda_joint6': 2.945444188383354,
-        'panda_joint7': 0.7702736492186028, 'panda_finger_joint1': 0.02, 'panda_finger_joint2': 0.02,
+        'panda_joint7': 0.7702736492186028, 'panda_finger_joint1': 0.015, 'panda_finger_joint2': 0.015,
     }
 
     def __init__(self,
@@ -23,17 +23,25 @@ class PandaBaseEnv(gym.Env, Serializable):
                  action_repeat=10,
                  timestep=1./240, #1./240 (1./360 is more realistic, but harder)
                  solver_iterations=150,
-                 gripper_bounds=[-1,1],
+                 gripper_bounds=[-1, 1],
                  pos_init=[0, 0.0, 1.0],
-                 pos_low=[-0.6,-0.7, 1],
-                 pos_high=[0.6,0.7, 2.2],
+
+                 # task1
+                 pos_low=[0.225, -0.55, 1.0],
+                 pos_high=[0.575, 0.05, 1.2],
+                 # task2
+                 # pos_low=[0.25, -0.45, 1.0],
+                 # pos_high=[0.55, 0.05, 1.25],
+                 # task3
+                 # pos_low=[0.25, -0.15, 1.0],
+                 # pos_high=[0.55, 0.25, 1.25],
+
                  max_force=1000.,
                  visualize=True,
-
-                 use_IK = 1,
-                 control_orientation = 0,
-                 control_eu_or_quat = 0,
-                 joint_action_space = 9
+                 use_IK=1,
+                 control_orientation=0,
+                 control_eu_or_quat=0,
+                 joint_action_space=9
                  ):
 
         self._use_IK = use_IK
@@ -173,7 +181,7 @@ class PandaBaseEnv(gym.Env, Serializable):
         self.apply_action_fingers([0.04, 0.04], force=5)
 
     def grasp(self, obj_id=None):
-        self.apply_action_fingers([0.015, 0.015], obj_id, force=20)
+        self.apply_action_fingers([0.01, 0.01], obj_id, force=20)
 
     def grasp1(self, obj_id=None):
         self.apply_action_fingers([0, 0], obj_id, force=5)
