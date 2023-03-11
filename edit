@@ -51,3 +51,9 @@ a[-1] = gripper
             success1 = np.append(success1, q, axis=0)
         # print(success1.size, success1)
         reward = success + success1 - 1
+
+
+state_env = ClipAction(state_env)
+
+
+
