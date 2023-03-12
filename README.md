@@ -88,7 +88,7 @@ Env2: Multi-view task
             
 -------------------------- 
 
-3/5 Analysis   
+3/12 Analysis   
 Okay - Use Moving average graphs      
 
 48*48 version...  
