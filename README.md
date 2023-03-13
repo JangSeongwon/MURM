@@ -58,13 +58,10 @@ Panda Robot env settings
 -Gripper Control with Distance and Robot finger's Contact  
 -RL: Give action with POS  
 
-Env1: Single-view task 
-      MURMENV- 9 Boxes as goals, Random initially placed objects + 3 types of shapes + Random color(rgb)  
-             - Added Diagnostics + Running for goal part  
-    
-Env2: Multi-view task  
-      MURMENV_m1- Similar to Env1 but global-view is hindered with a wall to goal-boxes (Global camera disadvantage)   
-      MURMENV_m2- Randomly positioned goal-box (Active camera disadvantage)   
+Envs: 
+      MURMENV- 9 Boxes as goals, Holding the object at start + cube + Random color(rgb)   
+      MURMENV_v2- Randomly positioned goal-box (Active camera disadvantage)  
+      MURMENV_v3- Picking up random shaped and randomly positioned object   
 
 --------------------------
 # Key Points Considered  
@@ -93,16 +90,15 @@ Okay - Use Moving average graphs
 
 48*48 version...  
 Main computer  
-Training time offline = 100 e ( 1.5hour / MURM version)    
-Training time online = 50 e ( hours)   
+Training time offline = 100 e ( 1 hour / MURM version)    
+Training time online = 50 e ( ? hours)   
     
 computer2  
-Training time offline = 100 e ( 1hours / Global version)    
-Training time online = 50 e ( 6hours) 
+Currently out of memory happens
 
 computer3  
-Training time offline = 100 e ( 3hours )     
-Training time online = 50 e ( 5hours) 
+Training time offline = 100 e ( 2.5 hours )     
+Training time online = 50 e ( ? hours) 
   
 
 1. Collecting demo data with third computer    
@@ -126,8 +122,6 @@ Training time online = 50 e ( 5hours)
     - Point2: How much offline demo data = 1000 as standard     
     - Point3: Add robot state information        
       
-     
-5. As additional process try images with lower-dimensional size (48x48 as lowest possibility)   
   
 6. Edited rollout functions and goal sampling part and diagnostics   
       -> Edited murm in codes + online tuning codes  
