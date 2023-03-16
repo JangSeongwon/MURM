@@ -1,5 +1,38 @@
 MURMENV-V1
+    def render_obs_active(self):
+        # eef_pos_for_active_camera = self.get_end_effector_pos()
+        eef_pos_for_active_camera = np.array([0.4, -0.5, 1.35])
+        # eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.085),float(eef_pos_for_active_camera[1]),float(eef_pos_for_active_camera[2])]
+        # eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.125),float(eef_pos_for_active_camera[1]),float(eef_pos_for_active_camera[2])]
+        # eef_theta_for_active_camera = self.get_end_effector_theta()
+        eef_theta_for_active_camera = np.array([0, 30, 0])
+        #print(eef_pos_for_active_camera)
+        #print('Total',eef_theta_for_active_camera)
+        # print('x',eef_theta_for_active_camera[0])
+        # print('y',eef_theta_for_active_camera[1])
+        # print('z',eef_theta_for_active_camera[2])
 
+        view_matrix_obs_active = bullet.get_view_matrix(
+            target_pos=eef_pos_for_active_camera, distance=0.25,
+            yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
+        projection_matrix_obs_active = bullet.get_projection_matrix(
+            self.obs_img_dim_active, self.obs_img_dim_active)
+        # img_tuple2 = p.getCameraImage(width=self.obs_img_dim_active,
+        #                  height=self.obs_img_dim_active,
+        #                  viewMatrix=view_matrix_obs_active,
+        #                  projectionMatrix=projection_matrix_obs_active,
+        #                  shadow=1,
+        #                  lightDirection=[1,1,1],
+        #                  renderer=p.ER_TINY_RENDERER)
+        # _, _, img2, depth2, segmentation2 = img_tuple2
+        #
+        # img_active = img2[:, :, :-1]
+        img_active, depth, segmentation = bullet.render(
+            self.obs_img_dim_active, self.obs_img_dim_active, view_matrix_obs_active,
+            projection_matrix_obs_active, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
+        if self._transpose_image:
+            img_active = np.transpose(img_active, (2, 0, 1))
+        return img_active
 
 
 
