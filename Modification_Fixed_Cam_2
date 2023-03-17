@@ -39,6 +39,7 @@ MURMENV-V1
 
 
 MURMENV-V2
+
     def render_obs_active(self):
         # eef_pos_for_active_camera = self.get_end_effector_pos()
         eef_pos_for_active_camera = np.array([0.4, -0.3, 1.65])
