@@ -2,7 +2,8 @@ task3 limits
  # task3
  pos_low=[0.25, -0.25, 1.0],
  pos_high=[0.55, 0.25, 1.35],
-
+task3 side view camera
+ eef_pos_for_active_camera = np.array([0.4, -0.8, 1.4])
 
 
 n = random.uniform(0, 0.1)  
