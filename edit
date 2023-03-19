@@ -1,3 +1,10 @@
+task3 limits
+ # task3
+ pos_low=[0.25, -0.25, 1.0],
+ pos_high=[0.55, 0.25, 1.35],
+
+
+
 n = random.uniform(0, 0.1)  
 n = round(n, 2)  
 
