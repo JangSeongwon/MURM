@@ -60,7 +60,7 @@ Panda Robot env settings
 
 Envs: 
       MURMENV- 9 Boxes as goals, Holding the object at start + cube + Random color(rgb)   
-      MURMENV_v2- Randomly positioned goal-box (Active camera disadvantage)  
+      MURMENV_v2- Randomly positioned goal-box   
       MURMENV_v3- Picking up random shaped and randomly positioned object   
 
 --------------------------
@@ -68,25 +68,20 @@ Envs:
 
 ***Our prime goal is to compare prior methods(Only single views) with MURM in solving GCRL.***  
 ***Plus, Multi-views can tackle more complicated tasks that prior methods cannot solve.***  
-***Consider Hierarchical Reinforcement Learning for initial state of active-camera and more broader cases as Next Paper***  
 
 1. GCRL components:  
-   * Diversity in shapes(cube, rectangular prism1, 2) and colors(Full random) of objects  
+   * Diversity in shapes(cube, rectangular prism, tetris shapes) and colors of objects  
    * Fixed 9 goal boxes VS Random 1 goal box   
-   * Random initial position(In range) of the object
    * Random Action POS in demos
   
 2. Method:  
-    *With Demo and VQVAE, train in offline RL   
-    *Design reward function computed with global-view first and active-view next   
-    *Check whether increading demos have meaningful effect as further work   
+    *With Demo and VQVAE, train in offline RL     
+    *Check whether increading demos, noisy demos have meaningful effect as further work   
     *Use Robot state information as further work   
-    *Compare percentage of what not to do + expert dataset size   
             
 -------------------------- 
 
-3/17 Analysis   
-Okay - Use Moving average graphs      
+3/20 Analysis       
 
 48*48 version...  
 Main computer  
@@ -94,40 +89,14 @@ Training time offline = 100 e ( 1 hour / MURM version)
 Training time online = 50 e ( ? hours)   
     
 computer2  
-Currently out of memory happens
-
-computer3  
 Training time offline = 100 e ( 2.5 hours )     
 Training time online = 50 e ( ? hours) 
-  
 
-1. Collecting demo data with third computer    
-=> OKAY  
-   
-2. Pretrained VQVAE  
-=> OKAY -1500 epoches = 6.5days & 2VQVAE model  
-   
-3. Started training offline RL  
-=> OKAY   
-       
-
-4. Offline RL framework implementation   
-    
-    *Primary Concern*  
-    - How to use two latent vectors efficiently??  (5120 + 5120 latent space)      
-           Images: Simply Concatenate features as in Lookcloser   
-           Reward:  
-             
-    - Point1: Do I have to add noisy dataset??  
-    - Point2: How much offline demo data = 1000 as standard     
-    - Point3: Add robot state information        
-      
-  
-6. Edited rollout functions and goal sampling part and diagnostics   
-      -> Edited murm in codes + online tuning codes  
-      -> Edited murm_env_m3 edit + Final goal image changing env    
-      -> Edited for 64 size images settings  
-      -> Now try and check...   
+computer3  
+Get images and demos
+          
+*GCRL implementation complete      
+* Added Q-functions modification and Dropout modification  
 
 --------------------------
 
