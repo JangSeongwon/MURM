@@ -571,11 +571,11 @@ class MURMENV_v2(PandaBaseEnv):
         return img_active
 
     def render_obs_top(self):
-        eef_pos_for_active_camera = np.array([0.4, -0.2, 1.6])
+        eef_pos_for_active_camera = np.array([0.4, -0.15, 1.8])
         eef_theta_for_active_camera = np.array([0, 0, 0])
 
         view_matrix_obs_active = bullet.get_view_matrix(
-            target_pos=eef_pos_for_active_camera, distance=0.15,
+            target_pos=eef_pos_for_active_camera, distance=0.2,
             yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
         projection_matrix_obs_active = bullet.get_projection_matrix(
             self.obs_img_dim_active, self.obs_img_dim_active)
