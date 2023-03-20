@@ -74,7 +74,7 @@ class MURMENV_v3(PandaBaseEnv_t3):
         # # _obj POSITION
         self._object_position_low = (0.3, -0.2, 1.017)
         self._object_position_high = (0.5, 0.2, 1.017)
-        self._fixed_object_position = np.array([0.3, -0.2, 1.017])
+        self._fixed_object_position = np.array([0.3, 0.2, 1.017])
 
         self.default_theta = bullet.deg_to_quat([180, 0, 0])
         self._success_threshold = success_threshold
@@ -167,7 +167,7 @@ class MURMENV_v3(PandaBaseEnv_t3):
     def sample_object_location(self):
         if self.obj_index == 0 or self.obj_index == 1:
             initial_random_pos = np.random.uniform(low=self._object_position_low, high=self._object_position_high)
-            #initial_random_pos = self._fixed_object_position
+            # initial_random_pos = self._fixed_object_position
             # print('Initial pos', initial_random_pos)
         elif self.obj_index == 2:
             initial_random_pos = np.random.uniform(low=self._object_position_low, high=self._object_position_high)
@@ -216,11 +216,11 @@ class MURMENV_v3(PandaBaseEnv_t3):
 
         return obj
 
-    def checking_final_pos_obj(self):
-        object_info = bullet.get_body_info(self._obj, quat_to_deg=False)
-        object_pos = object_info['pos']
-        obj_observation = np.asarray(object_pos)
-        return obj_observation
+    # def checking_final_pos_obj(self):
+    #     object_info = bullet.get_body_info(self._obj, quat_to_deg=False)
+    #     object_pos = object_info['pos']
+    #     obj_observation = np.asarray(object_pos)
+    #     return obj_observation
 
     def run_for_goal(self):
         image_check_save_path = "/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
@@ -264,6 +264,8 @@ class MURMENV_v3(PandaBaseEnv_t3):
 
         goal_global = np.uint8(self.render_obs())
         goal_active = np.uint8(self.render_obs_active())
+        goal_side = np.uint8(self.render_obs_side())
+        goal_top = np.uint8(self.render_obs_top())
 
         num_joints = p.getNumJoints(self._panda)
         for i in range(num_joints):
@@ -286,10 +288,12 @@ class MURMENV_v3(PandaBaseEnv_t3):
 
         np.save(image_check_save_path+"v2_1.npy", goal_global)
         np.save(image_check_save_path+"v2_2.npy", goal_active)
-        np.save(image_check_save_path+"v2_3.npy", reset_global)
-        np.save(image_check_save_path+"v2_4.npy", reset_active)
+        np.save(image_check_save_path+"v2_3.npy", goal_side)
+        np.save(image_check_save_path+"v2_4.npy", goal_top)
+        np.save(image_check_save_path+"v2_5.npy", reset_global)
+        np.save(image_check_save_path+"v2_6.npy", reset_active)
 
-        return goal_global, goal_active
+        return goal_global, goal_active, goal_side, goal_top
 
     def checkIK(self):
         image_check_save_path = "/media/jang/jang/0ubuntu/image_dataset/Images_produced_for_goals/"
@@ -409,7 +413,7 @@ class MURMENV_v3(PandaBaseEnv_t3):
             state_observation=obj_observation,
             # state_observation=observation,
             robot_state_observation=observation,
-            state_desired_goal=goal_pos,
+            # state_desired_goal=goal_pos,
             )
 
         return obs_dict
@@ -470,49 +474,24 @@ class MURMENV_v3(PandaBaseEnv_t3):
             target_pos=[0.9, 0, 1.4], distance=0.01, # [0.8, 0, 1.5], distance=0.8,
             yaw=90, pitch=-20, roll=0, up_axis_index=2)
 
-        # img_tuple1 = p.getCameraImage(width=self.obs_img_dim,
-        #                  height=self.obs_img_dim,
-        #                  viewMatrix=self._view_matrix_obs,
-        #                  projectionMatrix=self._projection_matrix_obs,
-        #                  shadow=1,
-        #                  lightDirection=[1,1,1],
-        #                  renderer=p.ER_TINY_RENDERER)
-        # _, _, img1, depth, segmentation = img_tuple1
-        #
-        # img = img1[:, :, :-1]
         img, depth, segmentation = bullet.render(
             self.obs_img_dim, self.obs_img_dim, view_matrix_obs,
             self._projection_matrix_obs, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
-
         if self._transpose_image:
             img = np.transpose(img, (2, 0, 1))
         return img
 
     def render_obs_active(self):
         eef_pos_for_active_camera = self.get_end_effector_pos()
-        eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.085),float(eef_pos_for_active_camera[1]),float(eef_pos_for_active_camera[2])]
+        eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.085), float(eef_pos_for_active_camera[1]), float(eef_pos_for_active_camera[2])]
         eef_theta_for_active_camera = self.get_end_effector_theta()
-        #print(eef_pos_for_active_camera)
-        #print('Total',eef_theta_for_active_camera)
-        # print('x',eef_theta_for_active_camera[0])
-        # print('y',eef_theta_for_active_camera[1])
-        # print('z',eef_theta_for_active_camera[2])
 
         view_matrix_obs_active = bullet.get_view_matrix(
             target_pos=eef_pos_for_active_camera, distance=0.2,
             yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
         projection_matrix_obs_active = bullet.get_projection_matrix(
             self.obs_img_dim_active, self.obs_img_dim_active)
-        # img_tuple2 = p.getCameraImage(width=self.obs_img_dim_active,
-        #                  height=self.obs_img_dim_active,
-        #                  viewMatrix=view_matrix_obs_active,
-        #                  projectionMatrix=projection_matrix_obs_active,
-        #                  shadow=1,
-        #                  lightDirection=[1,1,1],
-        #                  renderer=p.ER_TINY_RENDERER)
-        # _, _, img2, depth2, segmentation2 = img_tuple2
-        #
-        # img_active = img2[:, :, :-1]
+
         img_active, depth, segmentation = bullet.render(
             self.obs_img_dim_active, self.obs_img_dim_active, view_matrix_obs_active,
             projection_matrix_obs_active, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
@@ -520,13 +499,49 @@ class MURMENV_v3(PandaBaseEnv_t3):
             img_active = np.transpose(img_active, (2, 0, 1))
         return img_active
 
+    def render_obs_side(self):
+        eef_pos_for_active_camera = np.array([0.4, -0.8, 1.4])
+        eef_theta_for_active_camera = np.array([0, 75, 0])
+
+        view_matrix_obs_active = bullet.get_view_matrix(
+            target_pos=eef_pos_for_active_camera, distance=0.15,
+            yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
+        projection_matrix_obs_active = bullet.get_projection_matrix(
+            self.obs_img_dim_active, self.obs_img_dim_active)
+
+        img_active, depth, segmentation = bullet.render(
+            self.obs_img_dim_active, self.obs_img_dim_active, view_matrix_obs_active,
+            projection_matrix_obs_active, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
+        if self._transpose_image:
+            img_active = np.transpose(img_active, (2, 0, 1))
+        return img_active
+
+    def render_obs_top(self):
+        eef_pos_for_active_camera = np.array([0.4, 0.0, 1.75])
+        eef_theta_for_active_camera = np.array([0, 0, 0])
+
+        view_matrix_obs_active = bullet.get_view_matrix(
+            target_pos=eef_pos_for_active_camera, distance=0.15,
+            yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
+        projection_matrix_obs_active = bullet.get_projection_matrix(
+            self.obs_img_dim_active, self.obs_img_dim_active)
+
+        img_active, depth, segmentation = bullet.render(
+            self.obs_img_dim_active, self.obs_img_dim_active, view_matrix_obs_active,
+            projection_matrix_obs_active, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
+        if self._transpose_image:
+            img_active = np.transpose(img_active, (2, 0, 1))
+        return img_active
 
     def get_image(self, width, height, camera):
         if camera == 'global':
             image = np.float32(self.render_obs())
         elif camera == 'active':
             image = np.float32(self.render_obs_active())
-            # image = np.float32(self.render_obs())
+        elif camera == 'side':
+            image = np.float32(self.render_obs_side())
+        elif camera == 'top':
+            image = np.float32(self.render_obs_top())
         return image
 
     def get_info(self):
@@ -561,7 +576,7 @@ class MURMENV_v3(PandaBaseEnv_t3):
         # delta_pos, delta_angle, gripper = self._format_action(*action)
         delta_pos, gripper = self._format_action(*action)
 
-
+        #print('gripper',gripper)
         if gripper == -1:
             self.pre_grasp()
             p.stepSimulation()
