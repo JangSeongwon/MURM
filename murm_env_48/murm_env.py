@@ -571,6 +571,9 @@ class MURMENV(PandaBaseEnv):
         eef_pos_for_active_camera = [float(eef_pos_for_active_camera[0]+0.085), float(eef_pos_for_active_camera[1]), float(eef_pos_for_active_camera[2])]
         eef_theta_for_active_camera = self.get_end_effector_theta()
 
+        # eef_pos_for_active_camera = np.array([0.15, -0.375, 1.3])
+        # eef_theta_for_active_camera = np.array([-90, 45, 0])
+
         view_matrix_obs_active = bullet.get_view_matrix(
             target_pos=eef_pos_for_active_camera, distance=0.2,
             yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1]-90, roll=eef_theta_for_active_camera[2]-270, up_axis_index=2)
@@ -602,11 +605,29 @@ class MURMENV(PandaBaseEnv):
         return img_active
 
     def render_obs_top(self):
-        eef_pos_for_active_camera = np.array([0.4, -0.17, 1.6])
+        eef_pos_for_active_camera = np.array([0.4, -0.2, 1.6])
         eef_theta_for_active_camera = np.array([0, 0, 0])
 
         view_matrix_obs_active = bullet.get_view_matrix(
             target_pos=eef_pos_for_active_camera, distance=0.15,
+            yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1] - 90,
+            roll=eef_theta_for_active_camera[2] - 270, up_axis_index=2)
+        projection_matrix_obs_active = bullet.get_projection_matrix(
+            self.obs_img_dim_active, self.obs_img_dim_active)
+
+        img_active, depth, segmentation = bullet.render(
+            self.obs_img_dim_active, self.obs_img_dim_active, view_matrix_obs_active,
+            projection_matrix_obs_active, lightdistance=0.1, shadow=0, light_direction=[1, 1, 1], gaussian_width=5)
+        if self._transpose_image:
+            img_active = np.transpose(img_active, (2, 0, 1))
+        return img_active
+
+    def render_obs_back(self):
+        eef_pos_for_active_camera = np.array([0.15, -0.375, 1.3])
+        eef_theta_for_active_camera = np.array([-90, 45, 0])
+
+        view_matrix_obs_active = bullet.get_view_matrix(
+            target_pos=eef_pos_for_active_camera, distance=0.2,
             yaw=eef_theta_for_active_camera[0], pitch=eef_theta_for_active_camera[1] - 90,
             roll=eef_theta_for_active_camera[2] - 270, up_axis_index=2)
         projection_matrix_obs_active = bullet.get_projection_matrix(
@@ -627,6 +648,8 @@ class MURMENV(PandaBaseEnv):
         elif camera == 'side':
             image = np.float32(self.render_obs_side())
         elif camera == 'top':
+            image = np.float32(self.render_obs_top())
+        elif camera == 'back':
             image = np.float32(self.render_obs_top())
         return image
 
