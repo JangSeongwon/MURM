@@ -27,11 +27,11 @@ class PandaBaseEnv(gym.Env, Serializable):
                  pos_init=[0, 0.0, 1.0],
 
                  # task1
-                 pos_low=[0.225, -0.55, 1.0],
-                 pos_high=[0.575, 0.05, 1.2],
+                 # pos_low=[0.225, -0.55, 1.0],
+                 # pos_high=[0.575, 0.05, 1.2],
                  # task2
-                 # pos_low=[0.25, -0.5, 1.0],
-                 # pos_high=[0.55, 0.05, 1.3],
+                 pos_low=[0.25, -0.5, 1.0],
+                 pos_high=[0.55, 0.05, 1.3],
 
                  max_force=1000.,
                  visualize=True,
