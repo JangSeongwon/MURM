@@ -27,8 +27,8 @@ class PandaBaseEnv_t3(gym.Env, Serializable):
                  pos_init=[0, 0.0, 1.0],
 
                  # task3
-                 pos_low=[0.25, -0.25, 1.0],
-                 pos_high=[0.55, 0.25, 1.35],
+                 pos_low=[0.2, -0.55, 1.0],
+                 pos_high=[0.55, 0.05, 1.35],
 
                  max_force=1000.,
                  visualize=True,
@@ -172,10 +172,10 @@ class PandaBaseEnv_t3(gym.Env, Serializable):
                                         positionGain=0.5, velocityGain=1.0)
 
     def pre_grasp(self):
-        self.apply_action_fingers([0.04, 0.04], force=5)
+        self.apply_action_fingers([0.04, 0.04], force=25)
 
     def grasp(self, obj_id=None):
-        self.apply_action_fingers([0.015, 0.015], obj_id, force=20)
+        self.apply_action_fingers([0.015, 0.015], obj_id, force=25)
 
     def grasp1(self, obj_id=None):
         self.apply_action_fingers([0, 0], obj_id, force=5)
