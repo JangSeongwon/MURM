@@ -1,0 +1,29 @@
+            if batch['observations'].size == 0:
+                # print('pass')
+                pass
+            else:
+                # print('BEFORE', batch['observations'])
+
+                dropout1 = bernoulli.rvs(size=1, p=0.5)
+                dropout2 = bernoulli.rvs(size=1, p=0.5)
+                dropout1 = int(dropout1)
+                dropout2 = int(dropout2)
+                # print('dropout', dropout1, dropout2)
+                if dropout1 == 0 and dropout2 == 0:
+                    pass
+                elif dropout1 == 0 and dropout2 == 1:
+                    for i in range(256):
+                        # if i % 2 == 0:
+                        batch['observations'][i][1440:] = batch['observations'][i][1440:] * 0
+                        batch['next_observations'][i][1440:] = batch['next_observations'][i][1440:] * 0
+                        # print('NOW', batch['observations'][i])
+
+                elif dropout1 == 1 and dropout2 == 0:
+                    for i in range(256):
+                        # if i % 2 == 0:
+                        batch['observations'][i][:1440] = batch['observations'][i][:1440] * 0
+                        batch['next_observations'][i][:1440] = batch['next_observations'][i][:1440] * 0
+                        # print('NOW', batch['observations'][i])
+                else:
+                    pass
+                # print('final', batch['observations'])
