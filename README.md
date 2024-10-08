@@ -99,14 +99,12 @@ Get images and demos
 
 --------------------------
 
-# Next Process for Paper 2  
-
 *More updated model with HRL  
   
 In Low-level policy: Active-view and Global-view can be considered more suitably and efficiently      
 -Finding and detection of the object: Considering a more variety of initial state in terms of active-view camera    
 -Pick & Placing in Multi-view task: More organized reward function and structure of MURM  
-***Furthermore, Hierarchical multi-scale latent maps can deal with high-resolution images needed necessarily for complicated tasks.***  
+Furthermore, Hierarchical multi-scale latent maps can deal with high-resolution images needed necessarily for complicated tasks.
 
 --------------------------
 Possible implementation of VQVAE2:  
